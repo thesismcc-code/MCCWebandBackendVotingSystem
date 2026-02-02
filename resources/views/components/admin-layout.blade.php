@@ -28,13 +28,13 @@
         <nav class="flex-1 px-4 space-y-1 mt-4">
             <hr class="border-blue-800 mb-6 mx-2">
 
-            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('dashboard*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
-                <svg class="w-5 h-5 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+            <a href="{{ route('view.dashboard') }}" class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('dashboard*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
+                <img src="{{ asset('icons/dashboard_icon.png')}}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Dashboard
             </a>
-
-            <!-- Other Links -->
-            <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-blue-200 hover:bg-blue-800/30">Quick Access</a>
+            <a href="{{ route('view.quick-access') }}" class="flex items-center px-4 py-3 text-sm font-medium text-blue-200 hover:bg-blue-800/30">
+                <img src="{{ asset('icons/quick_access_icon.png')}}" alt="icon" class="w-5 h-5 mr-3 object-contain">
+                Quick Access
             <hr class="border-blue-800 my-4 mx-2">
             <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-blue-200 hover:bg-blue-800/30">Manage Accounts</a>
             <a href="#" class="flex items-center px-4 py-3 text-sm font-medium text-blue-200 hover:bg-blue-800/30">System Activity</a>
