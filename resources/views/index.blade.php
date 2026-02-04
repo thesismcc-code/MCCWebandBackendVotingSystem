@@ -28,7 +28,7 @@
         </h1>
 
         <!-- Login Form -->
-        <form method="POST" action="#" class="space-y-4">
+        <form method="POST" action="{{route('login')}}" class="space-y-4">
             @csrf
 
             <!-- Email Input -->
@@ -37,7 +37,6 @@
                     type="email"
                     name="email"
                     placeholder="Email"
-                    required
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400"
                 >
             </div>
@@ -48,7 +47,6 @@
                     :type="show ? 'text' : 'password'"
                     name="password"
                     placeholder="Password"
-                    required
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-blue-500 placeholder-gray-400"
                 >
                 <!-- Toggle Visibility Icon -->

@@ -11,4 +11,8 @@ class AuthController extends Controller
     {
         return view('index');
     }
+
+    public function login(){
+        return redirect()->route('view.dashboard');
+    }
 }
