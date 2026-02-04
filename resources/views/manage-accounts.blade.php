@@ -27,6 +27,8 @@
 </head>
 <body x-data="{ openModal: false }" class="p-4 md:p-8 min-h-screen text-white relative">
 
+    @include('components.notification')
+
     <!-- ADD NEW ACCOUNT MODAL -->
     <div x-show="openModal"
          x-cloak
@@ -42,24 +44,25 @@
         <div @click.away="openModal = false" class="bg-white rounded-[2.5rem] p-10 w-full max-w-md shadow-2xl text-gray-800">
             <h2 class="text-2xl font-bold mb-8 text-gray-900">Add New Account</h2>
 
-            <form action="#" class="space-y-5">
+            <form action="{{route('store.new-accounts')}}" class="space-y-5" method="POST">
+                @csrf
                 <!-- Full Name Input -->
                 <div>
                     <label class="block text-[11px] font-bold text-gray-600 uppercase mb-2 ml-1">Full Name</label>
-                    <input type="text" placeholder="Enter Full Name" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-400">
+                    <input type="text" name="fullname" value="{{ old('fullname') }}"  placeholder="Enter Full Name" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-400">
                 </div>
 
                 <!-- Email Input -->
                 <div>
                     <label class="block text-[11px] font-bold text-gray-600 uppercase mb-2 ml-1">Email Address</label>
-                    <input type="email" placeholder="example@gmail.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-400">
+                    <input type="email" name="email" value="{{ old('email') }}"  placeholder="example@gmail.com" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-400">
                 </div>
 
                 <!-- Role Dropdown -->
                 <div>
                     <label class="block text-[11px] font-bold text-gray-600 uppercase mb-2 ml-1">Role</label>
                     <div class="relative">
-                        <select class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white text-gray-400">
+                        <select name="role" value="{{ old('role') }} "class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm appearance-none bg-white text-gray-400">
                             <option value="">Select Role</option>
                             <option value="comelec">Comelec</option>
                             <option value="sao">SAO Head</option>
@@ -73,7 +76,7 @@
                 <!-- Password Input -->
                 <div>
                     <label class="block text-[11px] font-bold text-gray-600 uppercase mb-2 ml-1">Password</label>
-                    <input type="password" placeholder="Enter Password" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-400">
+                    <input type="password" name="password" placeholder="Enter Password" class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm placeholder-gray-400">
                 </div>
 
                 <!-- Action Buttons -->
