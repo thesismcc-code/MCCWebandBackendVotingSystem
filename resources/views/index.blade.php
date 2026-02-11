@@ -12,13 +12,26 @@
         .text-navy-main { color: #102251; }
     </style>
 </head>
-<body class="bg-navy-main min-h-screen flex items-center justify-center p-4">
+<body class="bg-navy-main min-h-screen flex items-center justify-center p-4 relative overflow-hidden">
 
-    <div class="bg-white rounded-[2rem] shadow-2xl p-8 w-full max-w-sm text-center">
+    <!-- BACKGROUND LOGO WATERMARK -->
+    <!-- This div sits behind the content -->
+    <div class="absolute inset-0 flex items-center justify-center z-0 pointer-events-none">
+        <!--
+            We use opacity-10 to make it faint.
+            w-[150%] makes it larger than the screen (zoomed in effect).
+        -->
+        <img src="{{ asset('icons/logo_white_bg.png') }}"
+             alt="Background Watermark"
+             class="w-[180%] md:w-[120%] lg:w-[80%] max-w-none opacity-5 object-contain">
+    </div>
+
+    <!-- MAIN LOGIN CARD -->
+    <!-- Added 'relative' and 'z-10' to ensure this floats above the background logo -->
+    <div class="bg-white rounded-[2rem] shadow-2xl p-8 w-full max-w-sm text-center relative z-10">
 
         <!-- Logo -->
         <div class="flex justify-center mb-4">
-            <!-- Replace 'logo.png' with your actual image path -->
             <img src="{{ asset('icons/logo_white_bg.png') }}" alt="Mandaue City College Logo" class="w-24 h-24 object-contain">
         </div>
 
@@ -84,7 +97,7 @@
 
     </div>
 
-    <!-- Alpine.js (Optional, for the password toggle functionality) -->
+    <!-- Alpine.js -->
     <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </body>
 </html>
