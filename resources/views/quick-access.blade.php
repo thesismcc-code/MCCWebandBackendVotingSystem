@@ -22,7 +22,7 @@
             'title' => 'Fingerprint Enrollment',
             'desc' => 'Register student biometric data',
             'icon_bg' => 'bg-green-500',
-            'route' => '#',
+            'route' => route('view.finger-print'),
             'icon_path' => 'M12 11c0 3.517-1.009 6.799-2.753 9.571m-3.44-2.04l.054-.09A10.003 10.003 0 015.02 10.334m12.118-.813c2.012 2.344 3.137 5.396 3.082 8.592m-4.708-7.376a15.998 15.998 0 00-4.032-6.109m-.61 4.905a6.005 6.005 0 013.478 2.404'
         ])
 
