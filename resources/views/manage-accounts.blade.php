@@ -163,7 +163,12 @@
             <!-- Cards code (unchanged) -->
             <div class="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-md">
                 <div class="bg-blue-600 w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0">
-                    <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path></svg>
+                    <img
+                                    src="/icons/person.png"
+                                    alt="person"
+                                    class="w-27 h-27 object-contain"
+                                    :class="isScanning ? 'opacity-100' : 'opacity-80'"
+                                >
                 </div>
                 <div>
                     <div class="text-3xl font-bold text-gray-900 leading-none">3</div>
@@ -172,7 +177,12 @@
             </div>
             <div class="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-md">
                 <div class="bg-green-500 w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                    <img
+                                    src="/icons/person.png"
+                                    alt="person"
+                                    class="w-27 h-27 object-contain"
+                                    :class="isScanning ? 'opacity-100' : 'opacity-80'"
+                                >
                 </div>
                 <div>
                     <div class="text-3xl font-bold text-gray-900 leading-none">2</div>
@@ -181,7 +191,12 @@
             </div>
             <div class="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-md">
                 <div class="bg-yellow-400 w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path></svg>
+                 <img
+                                    src="/icons/person.png"
+                                    alt="person"
+                                    class="w-27 h-27 object-contain"
+                                    :class="isScanning ? 'opacity-100' : 'opacity-80'"
+                                >
                 </div>
                 <div>
                     <div class="text-3xl font-bold text-gray-900 leading-none">1</div>
@@ -190,7 +205,12 @@
             </div>
             <div class="bg-white rounded-2xl p-4 flex items-center gap-4 shadow-md">
                 <div class="bg-[#c81e1e] w-12 h-12 rounded-xl flex items-center justify-center text-white shrink-0">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                <img
+                                    src="/icons/delete.png"
+                                    alt="delete"
+                                    class="w-27 h-27 object-contain"
+                                    :class="isScanning ? 'opacity-100' : 'opacity-80'"
+                                >
                 </div>
                 <div>
                     <div class="text-3xl font-bold text-gray-900 leading-none">1</div>
@@ -219,7 +239,12 @@
                             <td class="pl-8 pr-6 py-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm shrink-0">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
+                                        <img
+                                            src="/icons/person.png"
+                                            alt="person"
+                                            class="w-4 h-4 object-contain"
+                                            :class="isScanning ? 'opacity-100' : 'opacity-80'"
+                                        >
                                     </div>
                                     <span class="text-sm font-semibold text-gray-800">Jose Perolino</span>
                                 </div>
@@ -230,55 +255,13 @@
                             </td>
                             <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">12-05-2025</td>
                             <td class="pl-6 pr-8 py-4 text-right">
-                                <!-- Trigger Button -->
                                 <button @click="showDeleteModal = true" class="inline-flex items-center justify-center w-8 h-8 bg-[#c81e1e] rounded-md text-white shadow-sm hover:bg-red-800 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 2 -->
-                        <tr class="hover:bg-blue-50/50 transition-colors group">
-                            <td class="pl-8 pr-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm shrink-0">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    </div>
-                                    <span class="text-sm font-semibold text-gray-800">James Cortes</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">cortes@gmail.com</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="bg-blue-200 text-blue-800 text-[10px] font-bold px-3 py-1 rounded-full">Comelec</span>
-                            </td>
-                            <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">12-05-2025</td>
-                            <td class="pl-6 pr-8 py-4 text-right">
-                                <!-- Trigger Button -->
-                                <button @click="showDeleteModal = true" class="inline-flex items-center justify-center w-8 h-8 bg-[#c81e1e] rounded-md text-white shadow-sm hover:bg-red-800 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
-                                </button>
-                            </td>
-                        </tr>
-
-                        <!-- Row 3 -->
-                        <tr class="hover:bg-blue-50/50 transition-colors group">
-                            <td class="pl-8 pr-6 py-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 rounded-full bg-blue-600 flex items-center justify-center text-white shadow-sm shrink-0">
-                                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"></path></svg>
-                                    </div>
-                                    <span class="text-sm font-semibold text-gray-800">Sir Baunsit</span>
-                                </div>
-                            </td>
-                            <td class="px-6 py-4 text-sm text-gray-600">baunsit@gmail.com</td>
-                            <td class="px-6 py-4 text-center">
-                                <span class="bg-yellow-200 text-yellow-800 text-[10px] font-bold px-3 py-1 rounded-full">SAO Head</span>
-                            </td>
-                            <td class="px-6 py-4 text-center text-sm font-medium text-gray-600">12-05-2025</td>
-                            <td class="pl-6 pr-8 py-4 text-right">
-                                <!-- Trigger Button -->
-                                <button @click="showDeleteModal = true" class="inline-flex items-center justify-center w-8 h-8 bg-[#c81e1e] rounded-md text-white shadow-sm hover:bg-red-800 transition-colors">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                    <img
+                                    src="/icons/delete.png"
+                                    alt="delete"
+                                    class="w-4 h-4 object-contain"
+                                    :class="isScanning ? 'opacity-100' : 'opacity-80'"
+                                >
                                 </button>
                             </td>
                         </tr>
