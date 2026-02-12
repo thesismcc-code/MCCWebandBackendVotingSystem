@@ -2,9 +2,11 @@
     <div>
         <!-- Icon Container -->
         <div class="{{ $icon_bg }} w-12 h-12 rounded-lg flex items-center justify-center text-white mb-4">
-            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ $icon_path }}"></path>
-            </svg>
+            <img
+                src="{{ $icon_path }}"
+                alt="Fingerprint Scanner"
+                class="w-8 h-8 object-contain"
+            >
         </div>
 
         <!-- Text content -->
