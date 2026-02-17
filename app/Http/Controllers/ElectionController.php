@@ -14,5 +14,9 @@ class ElectionController extends Controller
     public function indexPosistionSetup():View{
         return view('posistionsetup');
     }
+
+    public function indexCandidateList():View{
+        return view('candidatelist');
+    }
 }
 

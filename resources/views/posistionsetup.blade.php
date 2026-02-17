@@ -25,7 +25,7 @@
     <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2">
         <div class="flex items-center gap-4">
             <!-- Back Button -->
-            <a href="{{ route('view.quick-access') }}" class="bg-white text-[#113285] rounded-full w-10 h-10 flex items-center justify-center hover:scale-110 transition-transform shadow-md">
+            <a href="{{ route('view.election-control') }}" class="bg-white text-[#113285] rounded-full w-10 h-10 flex items-center justify-center hover:scale-110 transition-transform shadow-md">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
             </a>
             <div>
@@ -62,7 +62,7 @@
                         <p class="text-xs text-gray-500 font-medium mt-1">Total Candidates</p>
                     </div>
                 </div>
-                <a href="#" class="text-[#102864] hover:scale-110 transition-transform">
+                <a href="{{route('view.election-control-candidate-list')}}" class="text-[#102864] hover:scale-110 transition-transform">
                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"></path></svg>
                 </a>
             </div>

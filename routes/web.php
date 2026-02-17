@@ -19,3 +19,4 @@ Route::get('/finger-print', [FingerPrintController::class, 'index'])->name('view
 Route::get('/voting-logs', [VotingLogsController::class, 'index'])->name('view.voting-logs');
 Route::get('/election-control', [ElectionController::class, 'index'])->name('view.election-control');
 Route::get('/election-control-posistion-setup', [ElectionController::class, 'indexPosistionSetup'])->name('view.election-control-posistion-setup');
+Route::get('/election-control-candidate-list', [ElectionController::class, 'indexCandidateList'])->name('view.election-control-candidate-list');
