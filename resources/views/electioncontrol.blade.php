@@ -87,7 +87,7 @@
             </div>
 
             <!-- Position Setup Card (Trigger) -->
-            <div @click="activeModal = 'position'" class="bg-white rounded-2xl p-5 flex items-center justify-between shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group cursor-pointer h-28">
+            <a href="{{route('view.election-control-posistion-setup')}}" class="bg-white rounded-2xl p-5 flex items-center justify-between shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all group cursor-pointer h-28">
                 <div class="flex items-center gap-4">
                     <div class="bg-[#FCD34D] w-12 h-12 rounded-xl flex items-center justify-center text-white shadow-sm">
                         <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"></path></svg>
@@ -97,7 +97,7 @@
                 <div class="text-[#113285] group-hover:translate-x-1 transition-transform">
                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"></path></svg>
                 </div>
-            </div>
+            </a>
 
         </div>
 

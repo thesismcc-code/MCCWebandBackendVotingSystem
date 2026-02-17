@@ -17,4 +17,5 @@ Route::get('/manage-accounts', [ManageAccountController::class, 'index'])->name(
 Route::post('/store-new-accounts', [ManageAccountController::class, 'storeNewAcction'])->name('store.new-accounts');
 Route::get('/finger-print', [FingerPrintController::class, 'index'])->name('view.finger-print');
 Route::get('/voting-logs', [VotingLogsController::class, 'index'])->name('view.voting-logs');
-Route::get('/election-control', [ElectionController::class, 'index'])->name('view.election-controll');
+Route::get('/election-control', [ElectionController::class, 'index'])->name('view.election-control');
+Route::get('/election-control-posistion-setup', [ElectionController::class, 'indexPosistionSetup'])->name('view.election-control-posistion-setup');

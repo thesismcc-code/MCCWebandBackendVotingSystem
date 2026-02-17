@@ -40,7 +40,7 @@
             'title' => 'Election Control',
             'desc' => 'Configure election settings',
             'icon_bg' => 'bg-rose-500',
-            'route' => '#',
+            'route' => route('view.election-control'),
             'icon_path'=>'/icons/settings.png'
         ])
 
