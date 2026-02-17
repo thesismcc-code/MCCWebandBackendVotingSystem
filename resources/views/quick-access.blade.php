@@ -31,7 +31,7 @@
             'title' => 'Voting Logs',
             'desc' => 'View voting records',
             'icon_bg' => 'bg-yellow-400',
-            'route' => '#',
+            'route' => route('view.voting-logs'),
             'icon_path' => '/icons/how_to_vote.png',
         ])
 
@@ -40,7 +40,7 @@
             'title' => 'Election Control',
             'desc' => 'Configure election settings',
             'icon_bg' => 'bg-rose-500',
-            'route' => '#',
+            'route' => route('view.election-control'),
             'icon_path'=>'/icons/settings.png'
         ])
 

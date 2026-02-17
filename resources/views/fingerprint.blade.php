@@ -211,6 +211,56 @@
             </div>
         </div>
 
+        <!-- Search & Filter Row -->
+        <div class="flex flex-col md:flex-row gap-4 mb-6">
+            <!-- Search Bar (40% width) -->
+            <div class="relative w-full md:w-[40%]">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <input type="text"
+                    class="block w-full pl-12 pr-4 py-3.5 bg-[#1c449c] border border-[#4a72c8] rounded-xl text-white placeholder-blue-200/70 focus:outline-none focus:border-white transition shadow-sm"
+                    placeholder="Search by Student ID or Name">
+            </div>
+
+            <!-- Course Filter (30% width) -->
+            <div class="relative w-full md:w-[30%]">
+                <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                    <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path d="M12 14l9-5-9-5-9 5 9 5z" />
+                        <path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
+                    </svg>
+                </div>
+                <select class="block w-full pl-12 pr-10 py-3.5 bg-[#1c449c] border border-[#4a72c8] rounded-xl text-white appearance-none focus:outline-none focus:border-white transition shadow-sm cursor-pointer">
+                    <option>All Courses</option>
+                    <option>Computer Science</option>
+                    <option>Information Technology</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+
+            <!-- Year Level Filter (30% width) -->
+            <div class="relative w-full md:w-[30%]">
+                 <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                     <svg class="h-6 w-6 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                </div>
+                <select class="block w-full pl-12 pr-10 py-3.5 bg-[#1c449c] border border-[#4a72c8] rounded-xl text-white appearance-none focus:outline-none focus:border-white transition shadow-sm cursor-pointer">
+                    <option>Year Level</option>
+                    <option>1st Year</option>
+                    <option>2nd Year</option>
+                </select>
+                <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                </div>
+            </div>
+        </div>
+
         <!-- Table Section -->
         <div class="bg-white rounded-2xl shadow-lg overflow-hidden min-h-[400px]">
             <div class="overflow-x-auto">

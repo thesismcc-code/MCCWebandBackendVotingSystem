@@ -64,7 +64,7 @@
                 Quick Access
             </a>
             <hr class="border-blue-800 my-4 mx-1">
-            <a href="#"
+            <a href="{{ route('view.manage-accounts')}}"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('manage-accounts*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/person.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Manage
@@ -76,7 +76,7 @@
                 System
                 Activity
             </a>
-            <a href="#"
+            <a href="{{route('view.voting-logs')}}"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('voting-logs*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/earthquake.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Voting
