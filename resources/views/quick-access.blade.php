@@ -58,7 +58,7 @@
             'title' => 'Reports & Analytics',
             'desc' => 'Generate system reports',
             'icon_bg' => 'bg-blue-600',
-            'route' => '#',
+            'route' => route('view.reports-and-analytics'),
             'icon_path'=>'/icons/chart_data.png'
         ])
 
