@@ -49,7 +49,7 @@
             'title' => 'System Activity',
             'desc' => 'Monitor real-time system logs',
             'icon_bg' => 'bg-green-500',
-            'route' => '#',
+            'route' => route('view.system-activity'),
             'icon_path' => '/icons/earthquake.png'
         ])
 
@@ -58,7 +58,7 @@
             'title' => 'Reports & Analytics',
             'desc' => 'Generate system reports',
             'icon_bg' => 'bg-blue-600',
-            'route' => '#',
+            'route' => route('view.reports-and-analytics'),
             'icon_path'=>'/icons/chart_data.png'
         ])
 
