@@ -49,7 +49,7 @@
             'title' => 'System Activity',
             'desc' => 'Monitor real-time system logs',
             'icon_bg' => 'bg-green-500',
-            'route' => '#',
+            'route' => route('view.system-activity'),
             'icon_path' => '/icons/earthquake.png'
         ])
 
