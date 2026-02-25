@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAO Final Results - Confirm Publish</title>
+    <title>SAO Final Results - Published</title>
 
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -15,7 +15,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- General Page Styling (Keep existing) --- */
+        /* --- General Page Styling --- */
         body {
             font-family: 'Inter', sans-serif;
             background-color: #0b2361;
@@ -48,10 +48,9 @@
             min-height: 80vh;
             margin-top: 10px;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-            /* To make the panel look "behind" the modal, we rely on Bootstrap's modal-backdrop */
         }
 
-        /* --- Existing Result Styles --- */
+        /* --- Result Card Styles --- */
         .btn-publish {
             background-color: #2ada0b;
             color: white;
@@ -122,107 +121,66 @@
             font-weight: 500;
         }
 
-        .candidate-list-wrapper {
-            max-height: 600px;
-            overflow-y: auto;
-        }
-
-        /* --- CUSTOM MODAL STYLES (Based on Image) --- */
+        /* --- MODAL STYLES --- */
         .custom-modal-content {
             border-radius: 20px;
             border: none;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
-            padding: 30px 20px;
+            padding: 40px 30px;
+            position: relative; /* For absolute close button */
         }
 
-        /* Red Warning Icon Circle */
-        .icon-box {
-            width: 70px;
-            height: 70px;
-            background-color: #fde8ea;
-            /* Very light pink/red */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px auto;
+        /* Custom absolute Close Button (Top Right) */
+        .btn-close-absolute {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            opacity: 0.5;
+            font-size: 1.2rem;
         }
+        .btn-close-absolute:hover { opacity: 1; }
 
-        .icon-circle-inner {
-            width: 50px;
-            height: 50px;
-            background-color: #f8caced4;
-            /* Slightly darker pink */
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .bi-exclamation-circle-fill {
-            color: #dc2626;
-            /* Deep Red */
-            font-size: 2.5rem;
-            /* Using Bootstrap Icon's circle-fill directly or mimicking image circle */
-        }
-
-        /* Modal Typography */
+        /* Typography */
         .modal-title-custom {
             font-weight: 800;
-            font-size: 1.5rem;
+            font-size: 1.8rem;
             color: #000;
-            margin-bottom: 10px;
+            margin-bottom: 15px;
         }
 
         .modal-text-custom {
-            color: #555;
-            font-size: 0.95rem;
-            margin-bottom: 25px;
+            color: #333;
+            font-size: 1rem;
+            line-height: 1.5;
+            margin-bottom: 0;
+            font-weight: 500;
         }
 
-        /* Modal Buttons */
+        /* Modal Actions */
         .modal-actions {
             display: flex;
             justify-content: center;
             gap: 15px;
+            margin-top: 25px;
         }
 
         .btn-modal-cancel {
             background-color: #dc2626;
-            /* Red */
             color: white;
             border: none;
             padding: 10px 30px;
             border-radius: 6px;
             font-weight: 600;
-        }
-
-        .btn-modal-cancel:hover {
-            background-color: #b91c1c;
-            color: white;
         }
 
         .btn-modal-submit {
             background-color: #2ada0b;
-            /* Bright Green */
             color: white;
             border: none;
             padding: 10px 30px;
             border-radius: 6px;
             font-weight: 600;
-        }
-
-        .btn-modal-submit:hover {
-            background-color: #24bd08;
-            color: white;
-        }
-
-        /* The Custom "Icon" to match image exactly:
-           Outer Red Circle + Exclamation mark */
-        .alert-icon-svg {
-            width: 70px;
-            height: 70px;
         }
     </style>
 </head>
@@ -242,15 +200,15 @@
     <!-- Main Content Panel -->
     <div class="main-panel">
 
-        <!-- Action Button (Triggers Modal) -->
+        <!-- Action Button (Starts Flow) -->
         <div class="d-flex justify-content-end mb-4">
-            <button class="btn-publish" data-bs-toggle="modal" data-bs-target="#confirmPublishModal">
+            <button class="btn-publish" id="triggerConfirmBtn">
                 Publish Official Results
             </button>
         </div>
 
         <div class="row g-4">
-            <!-- Left Card: Overview -->
+            <!-- Left Card -->
             <div class="col-lg-6">
                 <div class="result-card">
                     <table class="table-results">
@@ -262,53 +220,22 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <!-- Data Matches Image Background for context -->
                             <tr>
                                 <td class="fw-heavy pt-4">PRESIDENT</td>
                                 <td class="pt-4">Honey Malang</td>
                                 <td class="vote-count pt-4">115</td>
                             </tr>
-                            <tr>
-                                <td></td>
-                                <td>Myles Macrohon</td>
-                                <td class="vote-count">109</td>
-                            </tr>
-                            <tr class="mb-4">
-                                <td class="winner-label">WINNER:</td>
-                                <td class="fw-heavy">Honey Malang</td>
-                                <td></td>
-                            </tr>
-                            <tr class="section-separator">
-                                <td class="fw-heavy">VICE PRESIDENT</td>
-                                <td>Jose Perolino</td>
-                                <td class="vote-count">115</td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>Jahaira Ampaso</td>
-                                <td class="vote-count">109</td>
-                            </tr>
-                            <tr>
-                                <td class="winner-label">WINNER:</td>
-                                <td class="fw-heavy">Jose Perolino</td>
-                                <td></td>
-                            </tr>
-                            <tr class="section-separator">
-                                <td class="fw-heavy">SENATORS</td>
-                                <td>James Cortes</td>
-                                <td class="vote-count">115</td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td>Carley Serato</td>
-                                <td class="vote-count">109</td>
-                            </tr>
+                            <tr><td></td><td>Myles Macrohon</td><td class="vote-count">109</td></tr>
+                            <tr class="mb-4"><td class="winner-label">WINNER:</td><td class="fw-heavy">Honey Malang</td><td></td></tr>
+
+                            <tr class="section-separator"><td class="fw-heavy">VICE PRESIDENT</td><td>Jose Perolino</td><td class="vote-count">115</td></tr>
+                            <tr><td></td><td>Jahaira Ampaso</td><td class="vote-count">109</td></tr>
                         </tbody>
                     </table>
                 </div>
             </div>
 
-            <!-- Right Card: Winners -->
+            <!-- Right Card -->
             <div class="col-lg-6">
                 <div class="result-card">
                     <table class="table-results">
@@ -320,16 +247,8 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td class="winner-label text-center pt-5">WINNERS:</td>
-                                <td class="fw-heavy pt-5">Jose Perolino</td>
-                                <td class="vote-count pt-5">115</td>
-                            </tr>
-                            <tr>
-                                <td></td>
-                                <td class="fw-heavy">Myles Macrohon</td>
-                                <td class="vote-count">109</td>
-                            </tr>
+                            <tr><td class="winner-label text-center pt-5">WINNERS:</td><td class="fw-heavy pt-5">Jose Perolino</td><td class="vote-count pt-5">115</td></tr>
+                            <tr><td></td><td class="fw-heavy">Myles Macrohon</td><td class="vote-count">109</td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -338,41 +257,60 @@
     </div>
 
     <!-- ========================== -->
-    <!--     THE CONFIRM MODAL      -->
+    <!--  1. CONFIRMATION MODAL     -->
     <!-- ========================== -->
-    <div class="modal fade" id="confirmPublishModal" tabindex="-1" aria-labelledby="modalLabel" aria-hidden="true">
+    <div class="modal fade" id="confirmPublishModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content custom-modal-content">
+                <div class="d-flex justify-content-center mb-3">
+                   <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="40" cy="40" r="38" fill="#FEE2E2"/>
+                        <circle cx="40" cy="40" r="30" stroke="#DC2626" stroke-width="2.5" fill="#FEF2F2"/>
+                        <rect x="37" y="25" width="6" height="20" rx="3" fill="#DC2626"/>
+                        <circle cx="40" cy="53" r="3.5" fill="#DC2626"/>
+                    </svg>
+                </div>
+                <h3 class="modal-title-custom">Are you sure?</h3>
+                <p class="modal-text-custom mb-3">You want to publish the official results?</p>
+                <div class="modal-actions">
+                    <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
+                    <!-- Clicking Submit Triggers the Success Modal -->
+                    <button type="button" class="btn btn-modal-submit" id="confirmSubmitBtn">Submit</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========================== -->
+    <!--  2. SUCCESS MODAL          -->
+    <!-- ========================== -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content custom-modal-content">
 
-                <!-- Icon Area (Custom SVG to match red exclamation circle) -->
+                <!-- Close Button X -->
+                <button type="button" class="btn-close btn-close-absolute" data-bs-dismiss="modal" aria-label="Close"></button>
+
+                <!-- Green Check Icon -->
                 <div class="d-flex justify-content-center mb-3">
-                    <!-- Building the icon: Light Red Bg -> Red Circle Border -> Exclamation -->
-                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none"
-                        xmlns="http://www.w3.org/2000/svg">
-                        <!-- Outer very light pink circle -->
-                        <circle cx="40" cy="40" r="38" fill="#FEE2E2" />
-                        <!-- Inner Red Circle stroke -->
-                        <circle cx="40" cy="40" r="30" stroke="#DC2626" stroke-width="2.5"
-                            fill="#FEF2F2" />
-                        <!-- Exclamation Mark -->
-                        <rect x="37" y="25" width="6" height="20" rx="3" fill="#DC2626" />
-                        <circle cx="40" cy="53" r="3.5" fill="#DC2626" />
+                   <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <!-- Outer faint ring -->
+                        <circle cx="40" cy="40" r="38" fill="#dcfce7"/>
+                        <!-- Inner stroke -->
+                        <circle cx="40" cy="40" r="30" stroke="#00D12E" stroke-width="3" fill="white"/>
+                        <!-- Checkmark -->
+                        <path d="M28 42L36 50L52 30" stroke="#00D12E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
                     </svg>
                 </div>
 
                 <!-- Text Content -->
-                <h3 class="modal-title-custom">Are you sure?</h3>
+                <h3 class="modal-title-custom">Success!</h3>
                 <p class="modal-text-custom">
-                    You want to publish the official results?
+                    Official results have been published.<br>
+                    The election results are now visible on<br>
+                    all student dashboards.
                 </p>
-
-                <!-- Actions -->
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <!-- Form Submission usually goes here -->
-                    <button type="submit" class="btn btn-modal-submit">Submit</button>
-                </div>
-
+                <!-- No buttons at bottom for success modal, just close X -->
             </div>
         </div>
     </div>
@@ -380,14 +318,33 @@
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Optional: Script to automatically show modal on load for demo purposes
-         (Remove this script in production to only show on button click) -->
+    <!-- Script to simulate the flow: Publish -> Confirm -> Success -->
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            var myModal = new bootstrap.Modal(document.getElementById('confirmPublishModal'));
-            myModal.show();
+            // Get Elements
+            var triggerBtn = document.getElementById('triggerConfirmBtn');
+            var submitBtn = document.getElementById('confirmSubmitBtn');
+
+            // Initialize Modals
+            var confirmModal = new bootstrap.Modal(document.getElementById('confirmPublishModal'));
+            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+
+            // Open Confirmation on Publish Click
+            triggerBtn.addEventListener('click', function() {
+                confirmModal.show();
+            });
+
+            // Open Success on Submit Click (and hide confirmation)
+            submitBtn.addEventListener('click', function() {
+                confirmModal.hide();
+                // Short timeout to allow previous modal animation to clear nicely (optional but smoother)
+                setTimeout(function(){
+                    successModal.show();
+                }, 150);
+            });
         });
     </script>
+
 </body>
 
 </html>
