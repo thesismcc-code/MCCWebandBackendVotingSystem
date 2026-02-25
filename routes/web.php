@@ -12,6 +12,7 @@ use App\Http\Controllers\SystemActivityController;
 use App\Http\Controllers\ReportAndAnalyticsController;
 use App\Http\Controllers\SAODashboardController;
 use App\Http\Controllers\SAOCandidateList;
+use App\Http\Controllers\SAOVoterParticipationController;
 
 Route::get('/', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -31,3 +32,4 @@ Route::get('/reports-and-analytics-end-of-election', [ReportAndAnalyticsControll
 // Sao Dashboard
 Route::get('/sao-dashboard', [SAODashboardController::class, 'index'])->name('view.sao-dashboard');
 Route::get('/sao-candidate-list', [SAOCandidateList::class, 'index'])->name('view.sao-candidate-list');
+Route::get('/sao-voter-participation', [SAOVoterParticipationController::class, 'index'])->name('view.sao-voter-participation');
