@@ -103,7 +103,7 @@
     <!-- Header Section -->
     <div class="container-fluid mb-3">
         <div class="d-flex align-items-center gap-3">
-            <a href="#" class="btn-back">
+            <a href="{{ route('view.sao-dashboard')}}" class="btn-back">
                 <i class="bi bi-arrow-left stroke-width-2"></i>
             </a>
             <h4 class="mb-0 fw-bold">Candidates List</h4>

@@ -53,23 +53,23 @@
         <nav class="flex-1 px-4 space-y-1 mt-4">
             <hr class="border-blue-800 mb-6 mx-1">
             <a href="{{ route('view.sao-dashboard') }}"
-                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('dashboard*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('sao-dashboard*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/dashboard_icon.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Dashboard
             </a>
-            <a href="#"
-                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('quick-access*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
+            <a href="{{ route('view.sao-candidate-list') }}"
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('sao-candidate-list*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/person.png') }}" alt="icon"
                     class="w-5 h-5 mr-3 object-contain">
                 Candidate List
             </a>
-            <a href="#"
-                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('manage-accounts*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
+            <a href="{{ route('view.sao-voter-participation') }}"
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('sao-voter-participation*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/how_to_vote.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Voter Participation
             </a>
-            <a href="#"
-                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('system-activity*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
+            <a href="{{ route('view.sao-final-results') }}"
+                class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('sao-final-results*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/lab_profile.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Final Results
             </a>

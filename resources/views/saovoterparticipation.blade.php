@@ -174,7 +174,7 @@
     <!-- Header Section with Back Button -->
     <div class="container-fluid mb-3 px-0">
         <div class="d-flex align-items-center gap-3">
-            <a href="#" class="btn-back">
+            <a href="{{ route('view.sao-dashboard') }}" class="btn-back">
                 <i class="bi bi-arrow-left fs-5"></i>
             </a>
             <h4 class="mb-0 fw-bold">Voter Participation</h4>

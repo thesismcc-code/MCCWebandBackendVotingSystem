@@ -190,7 +190,7 @@
     <!-- Header Section -->
     <div class="container-fluid mb-2 px-0">
         <div class="d-flex align-items-center gap-3">
-            <a href="#" class="btn-back">
+            <a href="{{ route('view.sao-dashboard') }}" class="btn-back">
                 <i class="bi bi-arrow-left fs-5"></i>
             </a>
             <h4 class="mb-0 fw-bold">Final Results</h4>
