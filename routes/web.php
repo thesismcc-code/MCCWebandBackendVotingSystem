@@ -14,6 +14,8 @@ use App\Http\Controllers\SAODashboardController;
 use App\Http\Controllers\SAOCandidateList;
 use App\Http\Controllers\SAOVoterParticipationController;
 use App\Http\Controllers\SAOFinalResult;
+use App\Http\Controllers\ComelecDashboarController;
+use App\Http\Controllers\ComelectManageCandidate;
 
 Route::get('/', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -35,3 +37,7 @@ Route::get('/sao-dashboard', [SAODashboardController::class, 'index'])->name('vi
 Route::get('/sao-candidate-list', [SAOCandidateList::class, 'index'])->name('view.sao-candidate-list');
 Route::get('/sao-voter-participation', [SAOVoterParticipationController::class, 'index'])->name('view.sao-voter-participation');
 Route::get('/sao-final-results', [SAOFinalResult::class, 'index'])->name('view.sao-final-results');
+
+// Comelec Dashboard
+Route::get('/comelec-dashboard', [ComelecDashboarController::class, 'index'])->name('view.comelec-dashboard');
+Route::get('/comelec-manage-candidates', [ComelectManageCandidate::class, 'index'])->name('view.comelec-manage-candidates');
