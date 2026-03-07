@@ -363,7 +363,6 @@
                 }
             });
 
-            // Adjust end boundaries (using visibility instead of display none ensures structure doesn't shift unexpectedly on users changing state contexts limits mappings )
             const prevButton = document.getElementById('btn-prev');
             const nextButton = document.getElementById('btn-next');
 
