@@ -19,6 +19,10 @@ use App\Http\Controllers\ComelectManageCandidate;
 use App\Http\Controllers\StudentEligibilityController;
 use App\Http\Controllers\StudentLoginController;
 use App\Http\Controllers\StudentDashboardController;
+use App\Http\Controllers\StudentProfileController;
+use App\Http\Controllers\StudentVerificationController;
+use App\Http\Controllers\StudentTutorialController;
+use App\Http\Controllers\StudentVoteTutorialController;
 
 Route::get('/', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -49,4 +53,7 @@ Route::get('/student-eligibility', [StudentEligibilityController::class, 'index'
 // Student Portal.
 Route::get('/students', [StudentLoginController::class, 'index'])->name('view.student');
 Route::get('/students-dashboard', [StudentDashboardController::class, 'index'])->name('view.student-dashboard');
-
+Route::get('/students-profile', [StudentProfileController::class, 'index'])->name('view.student-profile');
+Route::get('/students-verification', [StudentVerificationController::class, 'index'])->name('view.student-verification');
+Route::get('/students-tutorials', [StudentTutorialController::class, 'index'])->name('view.student-tutorials');
+Route::get('/students-how-to-vote', [StudentVoteTutorialController::class, 'index'])->name('view.students-how-to-vote');
