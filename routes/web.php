@@ -17,6 +17,8 @@ use App\Http\Controllers\SAOFinalResult;
 use App\Http\Controllers\ComelecDashboarController;
 use App\Http\Controllers\ComelectManageCandidate;
 use App\Http\Controllers\StudentEligibilityController;
+use App\Http\Controllers\StudentLoginController;
+use App\Http\Controllers\StudentDashboardController;
 
 Route::get('/', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -43,3 +45,8 @@ Route::get('/sao-final-results', [SAOFinalResult::class, 'index'])->name('view.s
 Route::get('/comelec-dashboard', [ComelecDashboarController::class, 'index'])->name('view.comelec-dashboard');
 Route::get('/comelec-manage-candidates', [ComelectManageCandidate::class, 'index'])->name('view.comelec-manage-candidates');
 Route::get('/student-eligibility', [StudentEligibilityController::class, 'index'])->name('view.student-eligibility');
+
+// Student Portal.
+Route::get('/students', [StudentLoginController::class, 'index'])->name('view.student');
+Route::get('/students-dashboard', [StudentDashboardController::class, 'index'])->name('view.student-dashboard');
+
