@@ -20,6 +20,7 @@ use App\Http\Controllers\StudentEligibilityController;
 use App\Http\Controllers\StudentLoginController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentProfileController;
+use App\Http\Controllers\StudentVerificationController;
 
 Route::get('/', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -51,3 +52,4 @@ Route::get('/student-eligibility', [StudentEligibilityController::class, 'index'
 Route::get('/students', [StudentLoginController::class, 'index'])->name('view.student');
 Route::get('/students-dashboard', [StudentDashboardController::class, 'index'])->name('view.student-dashboard');
 Route::get('/students-profile', [StudentProfileController::class, 'index'])->name('view.student-profile');
+Route::get('/students-verification', [StudentVerificationController::class, 'index'])->name('view.student-verification');
