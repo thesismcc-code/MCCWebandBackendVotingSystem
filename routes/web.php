@@ -21,6 +21,7 @@ use App\Http\Controllers\StudentLoginController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\StudentVerificationController;
+use App\Http\Controllers\StudentTutorialController;
 
 Route::get('/', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -53,3 +54,4 @@ Route::get('/students', [StudentLoginController::class, 'index'])->name('view.st
 Route::get('/students-dashboard', [StudentDashboardController::class, 'index'])->name('view.student-dashboard');
 Route::get('/students-profile', [StudentProfileController::class, 'index'])->name('view.student-profile');
 Route::get('/students-verification', [StudentVerificationController::class, 'index'])->name('view.student-verification');
+Route::get('/students-tutorials', [StudentTutorialController::class, 'index'])->name('view.student-tutorials');
