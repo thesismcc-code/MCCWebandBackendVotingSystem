@@ -7,10 +7,10 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>MCC - Student Login</title>
 
-    <!-- Importing 'Inter' from Google Fonts which matches design accurately -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
+        /* ... (Your original exact CSS stays unchanged here) ... */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -23,17 +23,14 @@
             width: 100%;
             font-family: 'Inter', sans-serif;
             overflow: hidden;
-            /* Avoid page scroll out-of-bounds in default split desktop layout */
         }
 
-        /* SPLIT SCREEN LAYOUT CONTAINER */
         .wrapper {
             display: flex;
             height: 100vh;
             width: 100vw;
         }
 
-        /* ---------- LEFT PANEL STYLES ---------- */
         .left-panel {
             width: 58%;
             position: relative;
@@ -45,7 +42,6 @@
             position: absolute;
             inset: 0;
             background: rgba(0, 0, 0, 0.45);
-            /* Gives that solid text-readability shadowing directly seen on exact reference mockup */
             z-index: 1;
         }
 
@@ -89,8 +85,6 @@
             opacity: 0.9;
         }
 
-
-        /* ---------- RIGHT PANEL / FORM STYLES ---------- */
         .right-panel {
             width: 42%;
             background: #ffffff;
@@ -102,7 +96,6 @@
         .login-container {
             width: 100%;
             max-width: 400px;
-            /* Constrain structure size to ensure components spacing acts proportionally responsive identically */
             padding: 2rem;
         }
 
@@ -133,15 +126,12 @@
             margin-bottom: 1.5rem;
         }
 
-        /* TAB TOGGLE STYLES - Old vs New Student Component Build entirely matched */
         .toggle-container {
             display: flex;
             justify-content: center;
             border: 1px solid #1c1c1c;
             border-radius: 999px;
-            /* Absolute full oval curved layout corners exactly */
             padding: 3px;
-            /* Ensure an explicit internal padding wraps precisely nested background oval buttons padding gap layout bounds closely smoothly. */
             width: max-content;
             margin: 0 auto 2.5rem auto;
         }
@@ -165,7 +155,6 @@
             font-weight: 500;
         }
 
-        /* FORM COMPONENT INPUT SETS LAYOUT CONTROLS EXCHANGES STANDARDIZED PROPERTIES*/
         .input-group {
             margin-bottom: 1.25rem;
             text-align: left;
@@ -197,7 +186,6 @@
 
         .form-control:focus {
             box-shadow: 0 0 0 2px #d2d2d2;
-            /* Nice subtle highlighting logic indicating functional UI behaviors */
         }
 
         .password-wrapper {
@@ -241,7 +229,6 @@
             opacity: 0.9;
         }
 
-        /* Handle responsive stack to ensure correct interaction bounds limits when scaling below intended target aspect proportion defaults. */
         @media (max-width: 900px) {
             body {
                 overflow-y: auto;
@@ -293,14 +280,11 @@
 <body>
 
     <div class="wrapper">
-
-        <!-- LEFT SCREEN SPLIT PANEL CONTAINING FEATURE IMAGE -->
         <div class="left-panel">
             <div class="overlay"></div>
             <div class="left-content">
                 <h1>Welcome to the Official<br>MCC Voting Portal.</h1>
                 <p>Your Vote, Your Voice — Anywhere.</p>
-
                 <div class="left-actions">
                     <button>Account Setup</button>
                     <button>How to vote?</button>
@@ -308,7 +292,6 @@
             </div>
         </div>
 
-        <!-- RIGHT SCREEN SPLIT CONTAINING AUTHENTICATION ROUTING FORM PORTAL BEHAVIOUR STRUCTURE BOUNDARY RULES REPLICATED -->
         <div class="right-panel">
             <div class="login-container">
 
@@ -319,13 +302,16 @@
 
                 <div class="sign-as">Sign as</div>
 
-                <!-- Pill Toggle Style Button Actions Component Elements -->
                 <div class="toggle-container">
                     <button class="tab-btn active" type="button" onclick="switchStudentType(this)">Old Student</button>
                     <button class="tab-btn" type="button" onclick="switchStudentType(this)">New Student</button>
                 </div>
 
-                <form action="#" method="POST" autocomplete="off">
+                <form action="{{ route('validate-login') }}" method="POST" autocomplete="off">
+                    @csrf
+
+                    <!-- New Hidden Input passing to Laravel Backend -->
+                    <input type="hidden" name="student_type" id="student_type" value="Old Student">
 
                     <div class="input-group">
                         <label for="student_id">Student ID</label>
@@ -336,7 +322,6 @@
                     <div class="input-group">
                         <label for="password">Password</label>
                         <div class="password-wrapper">
-                            <!-- Included inner standard inline unhashed functional icon padding correctly logic spacing nested rules strictly applied. -->
                             <input type="password" class="form-control pr-icon" id="password" name="password"
                                 placeholder="Enter your password">
                             <button type="button" class="toggle-pass" onclick="togglePasswordVisibility()">
@@ -354,14 +339,11 @@
                     </div>
 
                     <button type="submit" class="btn-submit">Sign In</button>
-
                 </form>
             </div>
         </div>
-
     </div>
 
-    <!-- Very thin js interaction handling exactly simple user interactivity features mock requirements appropriately representing intended layouts UI expectations correctly mapped exactly bounds components layouts securely properly visually smoothly! -->
     <script>
         function togglePasswordVisibility() {
             const passwordField = document.getElementById("password");
@@ -370,7 +352,6 @@
 
             const eyeIconSvg = document.getElementById('eyeIcon');
             if (isPassword) {
-                // Unslashed View Icon Change Interaction Logic
                 eyeIconSvg.innerHTML = `
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
                     <circle cx="12" cy="12" r="3"></circle>
@@ -383,10 +364,13 @@
             }
         }
 
-        // Minor logic ensuring toggles switch states without reloading (Mock logic standard requirements representations correctly represented standard features exactly mapped perfectly directly layouts!).
         function switchStudentType(btn) {
+            // UI classes handling
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
+
+            // Value passed back into Form Logic
+            document.getElementById('student_type').value = btn.textContent.trim();
         }
     </script>
 </body>

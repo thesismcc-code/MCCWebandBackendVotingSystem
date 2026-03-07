@@ -23,7 +23,8 @@
             padding: 0;
         }
 
-        body, html {
+        body,
+        html {
             font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
             height: 100vh;
             width: 100%;
@@ -166,18 +167,22 @@
             .wrapper {
                 flex-direction: column;
             }
+
             .panel-brand {
                 flex: unset;
                 height: auto;
                 padding: 40px 20px;
             }
+
             .panel-brand img {
                 max-width: 220px;
                 margin-bottom: 15px;
             }
+
             .panel-brand h1 {
                 font-size: 24px;
             }
+
             .panel-form {
                 align-items: flex-start;
                 padding-top: 50px;
@@ -197,7 +202,8 @@
         </div>
 
         <!-- Right Panel / Primary verification process component block  -->
-        <div class="panel-form">
+        <form action="{{ route('student-validateß-verification') }}" method="POST" class="panel-form">
+            @csrf
             <div class="form-container">
                 <h2>Email Verification</h2>
 
@@ -208,20 +214,24 @@
 
                 <!-- Logic groups setup directly supporting single char typing arrays naturally seen heavily alongside codes  -->
                 <div class="input-group">
-                    <input type="text" class="code-input" maxlength="1" autofocus autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                    <input type="text" class="code-input" maxlength="1" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                    <input type="text" class="code-input" maxlength="1" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
-                    <input type="text" class="code-input" maxlength="1" autocomplete="off" oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    <input type="text" class="code-input" maxlength="1" autofocus autocomplete="off"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    <input type="text" class="code-input" maxlength="1" autocomplete="off"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    <input type="text" class="code-input" maxlength="1" autocomplete="off"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
+                    <input type="text" class="code-input" maxlength="1" autocomplete="off"
+                        oninput="this.value = this.value.replace(/[^0-9]/g, '');">
                 </div>
 
-                <button class="btn-verify" type="button">Verify</button>
+                <button class="btn-verify" type="submit">Verify</button>
 
                 <div class="support-links">
                     <span>Didn't receive code?</span>
                     <a href="#">Resend</a>
                 </div>
             </div>
-        </div>
+    </div>
     </div>
 
     <!-- Automatic code input moving logic built seamlessly over elements avoiding cumbersome explicit external libraries  -->
