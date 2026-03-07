@@ -110,7 +110,7 @@
     <!-- HEADER SECTION -->
     <div class="w-full max-w-[1240px] mx-auto flex items-center justify-between mt-2 mb-6 px-1">
         <div class="flex items-center gap-[18px]">
-            <a href="{{route("view.quick-access ")}}" class="bg-white text-blue-800 rounded-full w-[38px] h-[38px] flex items-center justify-center hover:scale-105 transition-transform shadow hover:bg-gray-100 flex-shrink-0">
+            <a href="{{route("view.quick-access")}}" class="bg-white text-blue-800 rounded-full w-[38px] h-[38px] flex items-center justify-center hover:scale-105 transition-transform shadow hover:bg-gray-100 flex-shrink-0">
                 <svg class="w-[20px] h-[20px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
                 </svg>
