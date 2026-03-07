@@ -19,6 +19,7 @@ use App\Http\Controllers\ComelectManageCandidate;
 use App\Http\Controllers\StudentEligibilityController;
 use App\Http\Controllers\StudentLoginController;
 use App\Http\Controllers\StudentDashboardController;
+use App\Http\Controllers\StudentProfileController;
 
 Route::get('/', [AuthController::class, 'index']);
 Route::post('/login', [AuthController::class, 'login'])->name('login');
@@ -49,4 +50,4 @@ Route::get('/student-eligibility', [StudentEligibilityController::class, 'index'
 // Student Portal.
 Route::get('/students', [StudentLoginController::class, 'index'])->name('view.student');
 Route::get('/students-dashboard', [StudentDashboardController::class, 'index'])->name('view.student-dashboard');
-
+Route::get('/students-profile', [StudentProfileController::class, 'index'])->name('view.student-profile');
