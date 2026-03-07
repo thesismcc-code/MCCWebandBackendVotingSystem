@@ -62,5 +62,14 @@
             'icon_path'=>'/icons/chart_data.png'
         ])
 
+        <!-- Student Eligibility -->
+        @include('components.quick-access-card', [
+            'title' => 'Student Eligibility',
+            'desc' => 'Track email verification status',
+            'icon_bg' => 'bg-rose-500',
+            'route' => route('view.student-eligibility'),
+            'icon_path'=>'/icons/beenhere.png'
+        ])
+
     </div>
 @endsection

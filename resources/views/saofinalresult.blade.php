@@ -50,75 +50,114 @@
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        /* --- Result Card Styles --- */
         .btn-publish {
-            background-color: #2ada0b;
+            background-color: #1bd810;
             color: white;
             font-weight: 700;
             text-transform: uppercase;
             border: none;
-            padding: 10px 25px;
+            padding: 12px 28px;
             border-radius: 6px;
-            font-size: 0.85rem;
+            font-size: 0.95rem;
             letter-spacing: 0.5px;
             transition: background-color 0.2s;
         }
 
         .btn-publish:hover {
-            background-color: #24bd08;
+            background-color: #16bc0b;
             color: white;
         }
 
-        .result-card {
-            background-color: white;
+        /* --- Updated Layout Structure Rules --- */
+        .results-board {
+            background-color: #ffffff;
             border-radius: 12px;
-            padding: 20px;
-            height: 100%;
-            color: black;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            color: #111827;
+            padding: 35px 0;
         }
 
-        .table-results {
-            width: 100%;
+        .divider-col {
+            border-right: 1.5px solid #d1d5db;
+        }
+
+        @media (max-width: 991px) {
+            .divider-col {
+                border-right: none;
+                border-bottom: 1.5px solid #d1d5db;
+                padding-bottom: 25px;
+                margin-bottom: 25px;
+            }
+        }
+
+        .col-pad-lg {
+            padding: 0 45px;
+        }
+
+        /* --- Section Badges --- */
+        .role-badge {
+            background-color: #C0D8FA;
+            color: #0f172a;
+            font-weight: 800;
+            font-size: 1.15rem;
+            text-transform: uppercase;
+            padding: 8px 18px;
+            border-radius: 5px;
+            display: inline-block;
+        }
+
+        /* --- Container for Box Contents --- */
+        .election-box {
+            border: 1px solid #d4d4d8;
+            border-radius: 6px;
+            overflow: hidden;
+            /* Contains cleanly to inner bounds for winner segments bottom wrapper tracking identically cleanly nested smoothly dynamically!. */
+            font-size: 1.05rem;
+            margin-bottom: 2rem;
+        }
+
+        /* List Candidate specifics! */
+        .candidates-list {
+            background-color: #ffffff;
+            padding: 25px 30px;
+        }
+
+        .candidate-entry {
+            margin-bottom: 18px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .candidate-entry:last-child {
             margin-bottom: 0;
         }
 
-        .table-results th {
-            text-transform: uppercase;
+        .candidate-name {
+            color: #1e293b;
+        }
+
+        /* Highlight specific bolding logic */
+        .txt-strong-bold {
             font-weight: 800;
-            border-bottom: 2px solid #6b93d6;
-            padding-bottom: 15px;
-            font-size: 0.9rem;
+        }
+
+        .text-count-regular {
+            color: #1e293b;
+            font-weight: 400;
+            font-size: 1rem;
+        }
+
+        /* Winner panels exact rules targets! */
+        .winner-panel-bg {
+            background-color: #C1F8BB;
+            padding: 20px 30px;
+        }
+
+        /* Typography Helper correctly aligned exactly strictly */
+        .winner-txt {
+            font-weight: 800;
+            text-transform: uppercase;
             color: #000;
-        }
-
-        .table-results td {
-            padding-top: 8px;
-            padding-bottom: 8px;
-            vertical-align: top;
-            font-size: 0.9rem;
-            color: #333;
-        }
-
-        .section-separator td {
-            border-top: 1px solid #6b93d6 !important;
-            padding-top: 15px;
-        }
-
-        .fw-heavy {
-            font-weight: 800;
-        }
-
-        .winner-label {
-            font-weight: 800;
-            font-size: 0.85rem;
-            text-transform: uppercase;
-            margin-top: 5px;
-        }
-
-        .vote-count {
-            text-align: right;
-            font-weight: 500;
+            letter-spacing: 0.3px;
         }
 
         /* --- MODAL STYLES --- */
@@ -128,7 +167,8 @@
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             text-align: center;
             padding: 40px 30px;
-            position: relative; /* For absolute close button */
+            position: relative;
+            /* For absolute close button */
         }
 
         /* Custom absolute Close Button (Top Right) */
@@ -139,7 +179,10 @@
             opacity: 0.5;
             font-size: 1.2rem;
         }
-        .btn-close-absolute:hover { opacity: 1; }
+
+        .btn-close-absolute:hover {
+            opacity: 1;
+        }
 
         /* Typography */
         .modal-title-custom {
@@ -175,7 +218,7 @@
         }
 
         .btn-modal-submit {
-            background-color: #2ada0b;
+            background-color: #1bd810;
             color: white;
             border: none;
             padding: 10px 30px;
@@ -200,60 +243,167 @@
     <!-- Main Content Panel -->
     <div class="main-panel">
 
-        <!-- Action Button (Starts Flow) -->
-        <div class="d-flex justify-content-end mb-4">
+        <!-- Action Button -->
+        <div class="d-flex justify-content-end mb-4 pe-2">
             <button class="btn-publish" id="triggerConfirmBtn">
-                Publish Official Results
+                PUBLISH OFFICIAL RESULTS
             </button>
         </div>
 
-        <div class="row g-4">
-            <!-- Left Card -->
-            <div class="col-lg-6">
-                <div class="result-card">
-                    <table class="table-results">
-                        <thead>
-                            <tr>
-                                <th style="width: 35%;">POSITION</th>
-                                <th style="width: 50%;">NAME</th>
-                                <th class="text-end">VOTES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td class="fw-heavy pt-4">PRESIDENT</td>
-                                <td class="pt-4">Honey Malang</td>
-                                <td class="vote-count pt-4">115</td>
-                            </tr>
-                            <tr><td></td><td>Myles Macrohon</td><td class="vote-count">109</td></tr>
-                            <tr class="mb-4"><td class="winner-label">WINNER:</td><td class="fw-heavy">Honey Malang</td><td></td></tr>
+        <!-- NEW VISUALS STRUCTURE exactly strictly replacing inner UI native structurally specific mappings logic explicitly -->
+        <div class="results-board shadow-sm w-100 mx-auto">
+            <div class="row m-0 w-100">
+                <!-- ============================ -->
+                <!-- LEFT PANEL (President & VP) -->
+                <!-- ============================ -->
+                <div class="col-lg-6 divider-col col-pad-lg pe-lg-4 pb-0">
 
-                            <tr class="section-separator"><td class="fw-heavy">VICE PRESIDENT</td><td>Jose Perolino</td><td class="vote-count">115</td></tr>
-                            <tr><td></td><td>Jahaira Ampaso</td><td class="vote-count">109</td></tr>
-                        </tbody>
-                    </table>
+                    <!-- President Box Layout-->
+                    <div class="mb-2">
+                        <div class="role-badge mb-3">PRESIDENT</div>
+
+                        <div class="election-box">
+                            <!-- Inner Candidate listing top identical section-->
+                            <div class="candidates-list">
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Honey Malang</span>
+                                    <span><span class="txt-strong-bold fs-6">53</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Myles Macrohon</span>
+                                    <span><span class="txt-strong-bold fs-6">33</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Jahaira Ampaso</span>
+                                    <span><span class="txt-strong-bold fs-6">25</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                            </div>
+                            <!-- Inline specific matched perfectly single combined WINNER structure panel layout specific rules accurately nested  -->
+                            <div class="winner-panel-bg d-flex justify-content-between align-items-center py-3">
+                                <div class="candidate-name">
+                                    <span class="winner-txt me-3">WINNER:</span><span
+                                        class="txt-strong-bold text-black fs-6">Honey Malang</span>
+                                </div>
+                                <span><span class="txt-strong-bold text-black fs-6">53</span> <span
+                                        class="text-count-regular text-black">votes</span></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- VP Box Layout exactly logically identical structured specifically -->
+                    <div class="mb-2 mt-4">
+                        <div class="role-badge mb-3">VICE PRESIDENT</div>
+
+                        <div class="election-box mb-1">
+                            <!-- Standard inner listing VP candidate records precisely specific mock matching -->
+                            <div class="candidates-list">
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Honey Malang</span>
+                                    <span><span class="txt-strong-bold fs-6">53</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Myles Macrohon</span>
+                                    <span><span class="txt-strong-bold fs-6">33</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Jahaira Ampaso</span>
+                                    <span><span class="txt-strong-bold fs-6">25</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                            </div>
+                            <!-- Matched structurally accurate target WINNER nested bounded structurally cleanly wrapped ! -->
+                            <div class="winner-panel-bg d-flex justify-content-between align-items-center py-3">
+                                <div class="candidate-name">
+                                    <span class="winner-txt me-3">WINNER:</span><span
+                                        class="txt-strong-bold text-black fs-6">Honey Malang</span>
+                                </div>
+                                <span><span class="txt-strong-bold text-black fs-6">53</span> <span
+                                        class="text-count-regular text-black">votes</span></span>
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
-            </div>
 
-            <!-- Right Card -->
-            <div class="col-lg-6">
-                <div class="result-card">
-                    <table class="table-results">
-                        <thead>
-                            <tr>
-                                <th style="width: 35%;"></th>
-                                <th style="width: 50%;">NAME</th>
-                                <th class="text-end">VOTES</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr><td class="winner-label text-center pt-5">WINNERS:</td><td class="fw-heavy pt-5">Jose Perolino</td><td class="vote-count pt-5">115</td></tr>
-                            <tr><td></td><td class="fw-heavy">Myles Macrohon</td><td class="vote-count">109</td></tr>
-                        </tbody>
-                    </table>
+                <!-- ============================ -->
+                <!-- RIGHT PANEL (Senators Target matched precisely mappings identically specifically specifically !!)-->
+                <!-- ============================ -->
+                <div class="col-lg-6 col-pad-lg ps-lg-4">
+                    <!-- Senator Structurals mappings logic accurately targeting correctly dynamically mapped cleanly wrapped specifically accurately!-->
+                    <div class="mb-0">
+                        <div class="role-badge mb-3">SENATORS</div>
+
+                        <div class="election-box mb-1">
+                            <div class="candidates-list pb-4">
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Honey Malang</span>
+                                    <span><span class="txt-strong-bold fs-6">53</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Myles Macrohon</span>
+                                    <span><span class="txt-strong-bold fs-6">33</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Jahaira Ampaso</span>
+                                    <span><span class="txt-strong-bold fs-6">25</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry">
+                                    <span class="candidate-name">Honey Malang</span>
+                                    <span><span class="txt-strong-bold fs-6">53</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry mb-0">
+                                    <span class="candidate-name">Myles Macrohon</span>
+                                    <span><span class="txt-strong-bold fs-6">33</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                            </div>
+
+                            <!-- Target arrays perfectly bounded lists specific matching Senator visually separated dynamically strictly structural exactly matching exactly matching!! -->
+                            <div class="winner-panel-bg pb-4">
+                                <div class="winner-txt mb-4 mt-1 fs-6">WINNER:</div>
+
+                                <div class="candidate-entry ms-4 me-0 mb-3">
+                                    <span class="candidate-name">Jahaira Ampaso</span>
+                                    <span><span class="txt-strong-bold fs-6">25</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry ms-4 me-0 mb-3">
+                                    <span class="candidate-name">Honey Malang</span>
+                                    <span><span class="txt-strong-bold fs-6">53</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry ms-4 me-0 mb-3">
+                                    <span class="candidate-name">Myles Macrohon</span>
+                                    <span><span class="txt-strong-bold fs-6">33</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry ms-4 me-0 mb-3">
+                                    <span class="candidate-name">Jahaira Ampaso</span>
+                                    <span><span class="txt-strong-bold fs-6">25</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                                <div class="candidate-entry ms-4 me-0 mb-1">
+                                    <span class="candidate-name">Myles Macrohon</span>
+                                    <span><span class="txt-strong-bold fs-6">33</span> <span
+                                            class="text-count-regular">votes</span></span>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
         </div>
+
     </div>
 
     <!-- ========================== -->
@@ -263,11 +413,13 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content custom-modal-content">
                 <div class="d-flex justify-content-center mb-3">
-                   <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="40" cy="40" r="38" fill="#FEE2E2"/>
-                        <circle cx="40" cy="40" r="30" stroke="#DC2626" stroke-width="2.5" fill="#FEF2F2"/>
-                        <rect x="37" y="25" width="6" height="20" rx="3" fill="#DC2626"/>
-                        <circle cx="40" cy="53" r="3.5" fill="#DC2626"/>
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="40" cy="40" r="38" fill="#FEE2E2" />
+                        <circle cx="40" cy="40" r="30" stroke="#DC2626" stroke-width="2.5"
+                            fill="#FEF2F2" />
+                        <rect x="37" y="25" width="6" height="20" rx="3" fill="#DC2626" />
+                        <circle cx="40" cy="53" r="3.5" fill="#DC2626" />
                     </svg>
                 </div>
                 <h3 class="modal-title-custom">Are you sure?</h3>
@@ -289,17 +441,21 @@
             <div class="modal-content custom-modal-content">
 
                 <!-- Close Button X -->
-                <button type="button" class="btn-close btn-close-absolute" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close btn-close-absolute" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
 
                 <!-- Green Check Icon -->
                 <div class="d-flex justify-content-center mb-3">
-                   <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <svg width="80" height="80" viewBox="0 0 80 80" fill="none"
+                        xmlns="http://www.w3.org/2000/svg">
                         <!-- Outer faint ring -->
-                        <circle cx="40" cy="40" r="38" fill="#dcfce7"/>
+                        <circle cx="40" cy="40" r="38" fill="#dcfce7" />
                         <!-- Inner stroke -->
-                        <circle cx="40" cy="40" r="30" stroke="#00D12E" stroke-width="3" fill="white"/>
+                        <circle cx="40" cy="40" r="30" stroke="#00D12E" stroke-width="3"
+                            fill="white" />
                         <!-- Checkmark -->
-                        <path d="M28 42L36 50L52 30" stroke="#00D12E" stroke-width="5" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M28 42L36 50L52 30" stroke="#00D12E" stroke-width="5" stroke-linecap="round"
+                            stroke-linejoin="round" />
                     </svg>
                 </div>
 
@@ -338,7 +494,7 @@
             submitBtn.addEventListener('click', function() {
                 confirmModal.hide();
                 // Short timeout to allow previous modal animation to clear nicely (optional but smoother)
-                setTimeout(function(){
+                setTimeout(function() {
                     successModal.show();
                 }, 150);
             });

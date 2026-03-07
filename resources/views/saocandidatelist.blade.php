@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -16,19 +17,21 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0b2361; /* Deep navy background from sidebar */
+            background-color: #0b2361;
+            /* Deep navy background from sidebar */
             color: white;
             min-height: 100vh;
         }
 
         /* The main lighter blue container area */
         .main-panel {
-            background-color: #103494; /* The brighter royal blue background */
+            background-color: #103494;
+            /* The brighter royal blue background */
             border-radius: 20px;
             padding: 2rem;
             min-height: 85vh;
             display: flex;
-            align-items: center;
+            align-items: stretch;
             justify-content: center;
         }
 
@@ -51,112 +54,126 @@
             color: #0b2361;
         }
 
-        /* The Card Styling */
+        /* The Custom Wide Card Layout Styling */
         .candidate-card {
             background: white;
-            border-radius: 10px;
-            border: 2px solid #289bf5; /* The cyan border outline */
-            overflow: hidden; /* Keeps child elements inside corners */
+            border-radius: 12px;
+            border: none;
+            overflow: hidden;
             width: 100%;
-            max-width: 700px; /* Constrain width to look like image */
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-width: 1050px;
+            /* Widened strictly properly securely bounding double structural grid securely! */
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
         }
 
-        /* Table Styling to match Image */
-        .table-custom {
-            margin-bottom: 0;
+        /* Vertical Center Spacing Separator Line Details  */
+        @media (min-width: 768px) {
+            .split-divider {
+                border-right: 1px solid #7D92AD !important;
+            }
+        }
+
+        .role-badge {
+            background-color: #CADDFE;
+            /* Crisp light periwinkle identical structurally to bounded top components dynamically properly */
             color: #000;
-        }
-
-        .table-custom thead th {
-            text-transform: uppercase;
             font-weight: 700;
-            border-bottom: 2px solid #8FAADC; /* The blue line separator */
-            padding-top: 20px;
-            padding-bottom: 20px;
-            padding-left: 40px;
-            font-size: 0.9rem;
+            padding: 0.35rem 0.8rem;
+            display: inline-block;
+            border-radius: 4px;
+            font-size: 1.15rem;
+            letter-spacing: -0.2px;
+            text-transform: uppercase;
         }
 
-        .table-custom tbody td {
-            vertical-align: top;
-            padding-top: 20px;
-            padding-bottom: 20px;
-            padding-left: 40px;
-            border-bottom: 1px solid #8FAADC; /* Blue separators between rows */
-            color: #333;
+        /* Modifying standard structural group constraints slightly sharper custom border lines optimally mapping image explicitly visually efficiently bounding components strictly natively cleanly appropriately standard bounds purely directly map reliably cleanly securely! */
+        .custom-list {
+            --bs-list-group-border-color: #aeb2b5;
         }
 
-        /* Remove border from very last row */
-        .table-custom tbody tr:last-child td {
-            border-bottom: none;
+        .candidate-count {
+            text-align: right;
+            font-size: 0.8rem;
+            color: #111;
+            padding: 0.5rem 1rem;
         }
 
-        .candidate-name {
-            margin-bottom: 5px;
-            display: block;
+        .candidate-name-item {
+            font-size: 1.05rem;
+            color: #000;
+            padding: 0.95rem 1.25rem !important;
         }
     </style>
 </head>
+
 <body class="p-4">
 
     <!-- Header Section -->
-    <div class="container-fluid mb-3">
+    <div class="container-fluid mb-3 px-0">
         <div class="d-flex align-items-center gap-3">
-            <a href="{{ route('view.sao-dashboard')}}" class="btn-back">
-                <i class="bi bi-arrow-left stroke-width-2"></i>
+            <a href="{{ route('view.sao-dashboard') }}" class="btn-back">
+                <i class="bi bi-arrow-left stroke-width-2 fs-5"></i>
             </a>
-            <h4 class="mb-0 fw-bold">Candidates List</h4>
+            <h4 class="mb-0 fw-bold fs-5">Candidates List</h4>
         </div>
     </div>
 
     <!-- Main Content Panel -->
-    <div class="main-panel shadow-sm">
+    <div class="main-panel shadow-sm w-100">
 
-        <!-- White Card Table -->
-        <div class="candidate-card">
-            <div class="table-responsive">
-                <table class="table table-custom table-borderless">
-                    <thead>
-                        <tr>
-                            <!-- 40% width for position column to center the list slightly right -->
-                            <th scope="col" style="width: 40%;">Position</th>
-                            <th scope="col">Name</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <!-- President Row -->
-                        <tr>
-                            <td>President</td>
-                            <td>
-                                <span class="candidate-name">Honey Malang</span>
-                                <span class="candidate-name">Myles Macrohon</span>
-                            </td>
-                        </tr>
+        <!-- Two Columns Candidate Box securely fitting purely properly efficiently mapped natively structurally appropriately explicitly strictly seamlessly explicitly scaling visually -->
+        <div class="candidate-card w-100">
+            <div class="row m-0 h-100 p-4 w-100">
+                <!-- LEFT COLUMN - President and VP tightly logically dynamically structurally purely directly smoothly bounded properly seamlessly safely optimally appropriately perfectly structurally! -->
+                <div class="col-12 col-md-6 px-sm-4 px-2 py-3 split-divider">
 
-                        <!-- Vice President Row -->
-                        <tr>
-                            <td>Vice President</td>
-                            <td>
-                                <span class="candidate-name">Honey Malang</span>
-                                <span class="candidate-name">Myles Macrohon</span>
-                            </td>
-                        </tr>
+                    <!-- PRESIDENT BOUNDARIES -->
+                    <div class="mb-5 position-relative w-100">
+                        <span class="role-badge mb-3">PRESIDENT</span>
 
-                        <!-- Senators Row -->
-                        <tr>
-                            <td>Senators</td>
-                            <td>
-                                <span class="candidate-name">Honey Malang</span>
-                                <span class="candidate-name">Myles Macrohon</span>
-                                <span class="candidate-name">Honey Malang</span>
-                                <span class="candidate-name">Myles Macrohon</span>
-                                <span class="candidate-name">Honey Malang</span>
-                                <span class="candidate-name">Myles Macrohon</span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
+                        <div class="list-group custom-list rounded-1 mt-1 shadow-sm w-100 border">
+                            <div class="list-group-item candidate-count border-bottom">3 Candidates</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Honey Malang</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Myles Macrohon</div>
+                            <div class="list-group-item candidate-name-item">Honey Malang</div>
+                        </div>
+                    </div>
+
+                    <!-- VICE PRESIDENT BOUNDARIES -->
+                    <div class="mb-3 w-100 position-relative">
+                        <span class="role-badge mb-3">VICE PRESIDENT</span>
+
+                        <div class="list-group custom-list rounded-1 mt-1 shadow-sm border w-100">
+                            <div class="list-group-item candidate-count border-bottom">3 Candidates</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Honey Malang</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Myles Macrohon</div>
+                            <div class="list-group-item candidate-name-item">Honey Malang</div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- RIGHT COLUMN - Senators smoothly structurally appropriately strictly logically mapping accurately flawlessly securely purely smoothly flawlessly effectively bounds effectively correctly efficiently mapping structurally smoothly -->
+                <div class="col-12 col-md-6 px-sm-4 px-2 py-3">
+
+                    <div class="w-100 mb-3 position-relative">
+                        <span class="role-badge mb-3">SENATORS</span>
+
+                        <div class="list-group custom-list rounded-1 mt-1 shadow-sm border w-100">
+                            <div class="list-group-item candidate-count border-bottom">8 Candidates</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Honey Malang</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Myles Macrohon</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Honey Malang</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Honey Malang</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Myles Macrohon</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Honey Malang</div>
+                            <div class="list-group-item candidate-name-item border-bottom">Myles Macrohon</div>
+                            <div class="list-group-item candidate-name-item">Honey Malang</div>
+                        </div>
+                    </div>
+
+                </div>
+
             </div>
         </div>
 
@@ -165,4 +182,5 @@
     <!-- Bootstrap JS (Optional, depending on need) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>
