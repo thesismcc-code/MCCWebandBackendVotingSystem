@@ -344,12 +344,15 @@
                 </div>
             </div>
 
-            <button type="button" class="btn-pill btn-pill-update">Update Profile</button>
-
+            <button type="submit" form="profile-form" class="btn-pill btn-pill-update">Update Profile</button>
         </section>
 
 
-        <form action="#" method="POST">
+
+        <form id="profile-form" action="{{ route('update-profile') }}" method="POST">
+            @csrf
+
+
 
             <div class="form-grid">
 
@@ -380,6 +383,7 @@
                 </div>
 
             </div>
+
         </form>
 
     </main>

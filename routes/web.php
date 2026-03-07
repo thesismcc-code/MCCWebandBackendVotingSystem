@@ -52,8 +52,11 @@ Route::get('/student-eligibility', [StudentEligibilityController::class, 'index'
 
 // Student Portal.
 Route::get('/students', [StudentLoginController::class, 'index'])->name('view.student');
+Route::post('/validate-login', [StudentLoginController::class, 'validateLogin'])->name('validate-login');
 Route::get('/students-dashboard', [StudentDashboardController::class, 'index'])->name('view.student-dashboard');
 Route::get('/students-profile', [StudentProfileController::class, 'index'])->name('view.student-profile');
+Route::post('/students-update-profile', [StudentProfileController::class, 'updateProfile'])->name('update-profile');
 Route::get('/students-verification', [StudentVerificationController::class, 'index'])->name('view.student-verification');
+Route::post('/students-validate-verification', [StudentVerificationController::class, 'validateVerify'])->name('student-validateß-verification');
 Route::get('/students-tutorials', [StudentTutorialController::class, 'index'])->name('view.student-tutorials');
 Route::get('/students-how-to-vote', [StudentVoteTutorialController::class, 'index'])->name('view.students-how-to-vote');
