@@ -24,9 +24,9 @@ use App\Http\Controllers\StudentVerificationController;
 use App\Http\Controllers\StudentTutorialController;
 use App\Http\Controllers\StudentVoteTutorialController;
 
-Route::get('/login',  [AuthController::class, 'index'])->name('login');
+Route::get('/',  [AuthController::class, 'index'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.post');
-Route::post('/logout',[AuthController::class, 'logout'])->name('logout')->middleware('auth.session');
+// Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth.session');
 
 Route::get('/students',          [StudentLoginController::class, 'index'])->name('view.student');
 Route::post('/validate-login',   [StudentLoginController::class, 'validateLogin'])->name('validate-login');
@@ -44,16 +44,17 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/system-activity',                       [SystemActivityController::class, 'index'])->name('view.system-activity');
     Route::get('/reports-and-analytics',                 [ReportAndAnalyticsController::class, 'index'])->name('view.reports-and-analytics');
     Route::get('/reports-and-analytics-end-of-election', [ReportAndAnalyticsController::class, 'indexEndOfElection'])->name('view.reports-and-analytics-end-of-election');
+    Route::post('/logout',                               [AuthController::class, 'logout'])->name('logout');
 });
 
 Route::middleware('auth.session')->group(function () {
-    Route::get('/sao-dashboard',          [SAODashboardController::class, 'index'])->name('view.sao-dashboard');
-    Route::get('/sao-candidate-list',     [SAOCandidateList::class, 'index'])->name('view.sao-candidate-list');
-    Route::get('/sao-voter-participation',[SAOVoterParticipationController::class, 'index'])->name('view.sao-voter-participation');
-    Route::get('/sao-final-results',      [SAOFinalResult::class, 'index'])->name('view.sao-final-results');
-    Route::get('/comelec-dashboard',      [ComelecDashboarController::class, 'index'])->name('view.comelec-dashboard');
-    Route::get('/comelec-manage-candidates', [ComelectManageCandidate::class, 'index'])->name('view.comelec-manage-candidates');
-    Route::get('/student-eligibility',    [StudentEligibilityController::class, 'index'])->name('view.student-eligibility');
+    Route::get('/sao-dashboard',                         [SAODashboardController::class, 'index'])->name('view.sao-dashboard');
+    Route::get('/sao-candidate-list',                    [SAOCandidateList::class, 'index'])->name('view.sao-candidate-list');
+    Route::get('/sao-voter-participation',               [SAOVoterParticipationController::class, 'index'])->name('view.sao-voter-participation');
+    Route::get('/sao-final-results',                     [SAOFinalResult::class, 'index'])->name('view.sao-final-results');
+    Route::get('/comelec-dashboard',                     [ComelecDashboarController::class, 'index'])->name('view.comelec-dashboard');
+    Route::get('/comelec-manage-candidates',             [ComelectManageCandidate::class, 'index'])->name('view.comelec-manage-candidates');
+    Route::get('/student-eligibility',                   [StudentEligibilityController::class, 'index'])->name('view.student-eligibility');
 });
 
 Route::middleware('auth.session')->group(function () {

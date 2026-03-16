@@ -39,6 +39,10 @@ class RegisterUser
             $teacherId = $this->generateID('teacher');
         }
 
+        if ($data['role'] === 'sao') {
+            $teacherId = $this->generateID('teacher');
+        }
+
         $user = new User(
             id: null,
             first_name: $data['first_name'],
@@ -64,6 +68,7 @@ class RegisterUser
             'admin' => 'ADM',
             'student' => 'STU',
             'teacher' => 'THR',
+            'sao' => 'SAO',
             default => throw new \InvalidArgumentException('Invalid role')
         };
 

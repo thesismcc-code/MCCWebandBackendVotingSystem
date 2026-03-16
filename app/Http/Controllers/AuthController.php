@@ -27,7 +27,7 @@ class AuthController extends Controller
             return $this->redirectByRole(Session::get('auth_user.role'));
         }
 
-        return view('login');
+        return view('index');
     }
 
     public function login(Request $request)
@@ -63,7 +63,7 @@ class AuthController extends Controller
         }
     }
 
-    public function logout(Request $request)
+    public function logout()
     {
         $userId = Session::get('auth_user.id', '');
         $this->registerAuth->logout($userId);

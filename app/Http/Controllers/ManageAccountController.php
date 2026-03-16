@@ -7,6 +7,7 @@ use Illuminate\View\View;
 use Illuminate\Support\Facades\Validator;
 use App\Application\RegisterUser\RegisterUser;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Log;
 
 class ManageAccountController extends Controller
 {
@@ -30,7 +31,7 @@ class ManageAccountController extends Controller
             'last_name'   => 'required|string|max:100',
             'email'       => 'required|email|max:191',
             'password'    => 'required|min:6',
-            'role'        => 'required|in:student,teacher,admin',
+            'role'        => 'required|in:student,teacher,admin,sao',
             'student_id'  => 'nullable|string|max:50',
             'teacher_id'  => 'nullable|string|max:50',
         ];
@@ -74,13 +75,14 @@ class ManageAccountController extends Controller
                 'message' => 'User successfully created.',
                 'data'    => $user->toArray(),
             ], 201);
-
         } catch (\InvalidArgumentException $e) {
+            Log::info($e->getMessage());
             return response()->json([
                 'success' => false,
                 'errors'  => ['email' => [$e->getMessage()]],
             ], 422);
         } catch (\Exception $e) {
+            Log::info($e->getMessage());
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong. Please try again.',
@@ -105,12 +107,10 @@ class ManageAccountController extends Controller
             $this->registerUser->newUser($validator->validated());
 
             return back()->with('success', 'Account has been created successfully.');
-
         } catch (\InvalidArgumentException $e) {
             return back()
                 ->withInput()
                 ->with('error', $e->getMessage());
-
         } catch (\Exception $e) {
             return back()
                 ->withInput()

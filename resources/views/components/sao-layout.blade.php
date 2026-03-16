@@ -75,13 +75,13 @@
         </nav>
 
         <div class="p-4 mb-4">
-            <form method="POST" action="#">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
                     class="flex items-center w-full px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition">
-                    <!-- Right Arrow Escape Icon Matches specific mocked layout vector -->
+
                     <svg class="w-5 h-5 mr-3 object-contain" fill="none" stroke="currentColor" stroke-width="2"
-                         viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                        viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
                         <path d="M16 17l5-5-5-5M21 12H9" />
                         <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
                     </svg>
@@ -118,7 +118,9 @@
                 hour12: true
             });
             document.getElementById('date').textContent = now.toLocaleDateString('en-GB', {
-                day: '2-digit', month: '2-digit', year: 'numeric'
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
             });
         }
         setInterval(updateTime, 1000);

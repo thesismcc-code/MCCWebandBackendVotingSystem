@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Session;
 
 class SessionAuthMiddleware
@@ -17,28 +18,35 @@ class SessionAuthMiddleware
             'voting-logs',
             'election-control',
             'system-activity',
-            'reports-and-analytics'
+            'reports-and-analytics',
+            'student-eligibility',
+            'logout',
+        ],
+        'sao' => [
+            'sao-dashboard',
+            'sao-candidate-list',
+            'sao-voter-participation',
+            'sao-final-results',
+            'logout',
         ],
         'teacher' => [
             'comelec-dashboard',
             'comelec-manage-candidates',
-            'student-eligibility',
-            'sao-dashboard',
-            'sao-candidate-list',
-            'sao-voter-participation',
-            'sao-final-results'
+            'logout',
         ],
         'student' => [
             'students-dashboard',
             'students-profile',
             'students-verification',
             'students-tutorials',
-            'students-how-to-vote'
+            'students-how-to-vote',
+            'logout',
         ],
     ];
 
     private const ROLE_HOME = [
         'admin'   => 'view.dashboard',
+        'sao'=> 'view.sao-dashboard',
         'teacher' => 'view.comelec-dashboard',
         'student' => 'view.student-dashboard',
     ];
@@ -47,6 +55,7 @@ class SessionAuthMiddleware
     {
         // Not logged in → redirect to login
         if (!Session::has('auth_user')) {
+            Log::info('Invalid access');
             return redirect()->route('login')
                 ->with('error', 'You must be logged in to access this page.');
         }
