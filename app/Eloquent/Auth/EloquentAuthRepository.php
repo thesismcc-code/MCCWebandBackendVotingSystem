@@ -1,0 +1,95 @@
+<?php
+
+namespace App\Eloquent\Auth;
+
+use App\Domain\User\User;
+use App\Domain\Auth\AuthRepository;
+use App\Domain\User\UserRepository;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
+use Tymon\JWTAuth\Facades\JWTAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+
+class EloquentAuthRepository implements AuthRepository
+{
+    private UserRepository $userRepository;
+
+    public function __construct(UserRepository $userRepository)
+    {
+        $this->userRepository = $userRepository;
+    }
+
+    public function login(string $email, string $password): ?User
+    {
+        $user = $this->userRepository->findByEmail($email);
+
+        if (!$user || !Hash::check($password, $user->getPassword())) {
+            return null;
+        }
+
+        Session::put('auth_user', [
+            'id'          => $user->getId(),
+            'first_name'  => $user->getFirstName(),
+            'middle_name' => $user->getMiddleName(),
+            'last_name'   => $user->getLastName(),
+            'email'       => $user->getEmail(),
+            'role'        => $user->getRole(),
+            'student_id'  => $user->getStudentId(),
+            'teacher_id'  => $user->getTeacherId(),
+            'admin_id'    => $user->getAdminId(),
+        ]);
+
+        Session::regenerate();
+
+        return $user;
+    }
+
+    public function logout(string $user_id): bool
+    {
+        try {
+            Session::forget('auth_user');
+            Session::invalidate();
+            Session::regenerateToken();
+
+            return true;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+    public function loginJwt(string $email, string $password): ?string
+    {
+        $user = $this->userRepository->findByEmail($email);
+
+        if (!$user || !Hash::check($password, $user->getPassword())) {
+            return null;
+        }
+
+        try {
+            $payload = JWTAuth::factory()->customClaims([
+                'sub'         => $user->getId(),
+                'email'       => $user->getEmail(),
+                'role'        => $user->getRole(),
+                'first_name'  => $user->getFirstName(),
+                'last_name'   => $user->getLastName(),
+                'student_id'  => $user->getStudentId(),
+                'teacher_id'  => $user->getTeacherId(),
+                'admin_id'    => $user->getAdminId(),
+            ])->make();
+
+            return JWTAuth::encode($payload)->get();
+        } catch (JWTException $e) {
+            return null;
+        }
+    }
+
+    public function logoutJwt(string $token): bool
+    {
+        try {
+            JWTAuth::setToken($token)->invalidate();
+            return true;
+        } catch (JWTException $e) {
+            return false;
+        }
+    }
+}

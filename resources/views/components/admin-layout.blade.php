@@ -64,25 +64,25 @@
                 Quick Access
             </a>
             <hr class="border-blue-800 my-4 mx-1">
-            <a href="{{ route('view.manage-accounts')}}"
+            <a href="{{ route('view.manage-accounts') }}"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('manage-accounts*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/person.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Manage
                 Accounts
             </a>
-            <a href="{{route('view.system-activity')}}"
+            <a href="{{ route('view.system-activity') }}"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('system-activity*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/how_to_vote.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 System
                 Activity
             </a>
-            <a href="{{route('view.voting-logs')}}"
+            <a href="{{ route('view.voting-logs') }}"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('voting-logs*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/earthquake.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 Voting
                 Logs
             </a>
-            <a href="{{route('view.reports-and-analytics')}}"
+            <a href="{{ route('view.reports-and-analytics') }}"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('reports-and-analytics*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/chart_data.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
                 eports &
@@ -91,7 +91,7 @@
         </nav>
 
         <div class="p-4">
-            <form method="POST" action="#">
+            <form method="POST" action="{{ route('logout') }}">
                 @csrf
                 <button type="submit"
                     class="flex items-center w-full px-4 py-3 text-sm font-medium text-red-500 hover:bg-red-500/10 rounded-lg transition">

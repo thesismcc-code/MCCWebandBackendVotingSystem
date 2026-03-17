@@ -9,7 +9,9 @@ return [
     | Path to your Firebase service account JSON file.
     |
     */
-    'credentials' => env('FIREBASE_CREDENTIALS', storage_path('app/firebase/firebase-credentials.json')),
+    'credentials' => env('FIREBASE_CREDENTIALS')
+        ? base_path(env('FIREBASE_CREDENTIALS'))
+        : storage_path('app/firebase/firebase.json'),
 
     /*
     |--------------------------------------------------------------------------

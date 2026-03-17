@@ -10,7 +10,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* ... (Your original exact CSS stays unchanged here) ... */
         * {
             box-sizing: border-box;
             margin: 0;
@@ -91,6 +90,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            overflow-y: auto;
         }
 
         .login-container {
@@ -229,6 +229,11 @@
             opacity: 0.9;
         }
 
+        /* Hide new-student-only fields by default */
+        .new-student-fields {
+            display: none;
+        }
+
         @media (max-width: 900px) {
             body {
                 overflow-y: auto;
@@ -303,35 +308,31 @@
                 <div class="sign-as">Sign as</div>
 
                 <div class="toggle-container">
-                    <button class="tab-btn active" type="button" onclick="switchStudentType(this)">Old Student</button>
-                    <button class="tab-btn" type="button" onclick="switchStudentType(this)">New Student</button>
+                    <button class="tab-btn active" type="button" data-type="old" onclick="switchStudentType(this)">Old Student</button>
+                    <button class="tab-btn" type="button" data-type="new" onclick="switchStudentType(this)">New Student</button>
                 </div>
 
-                <form action="{{ route('validate-login') }}" method="POST" autocomplete="off">
+                {{-- Old Student Form --}}
+                <form id="form-old-student" action="{{ route('validate-login') }}" method="POST" autocomplete="off">
                     @csrf
-
-                    <!-- New Hidden Input passing to Laravel Backend -->
-                    <input type="hidden" name="student_type" id="student_type" value="Old Student">
+                    <input type="hidden" name="student_type" value="Old Student">
 
                     <div class="input-group">
-                        <label for="student_id">Student ID</label>
-                        <input type="text" class="form-control" id="student_id" name="student_id"
+                        <label for="student_id_old">Student ID</label>
+                        <input type="text" class="form-control" id="student_id_old" name="student_id"
                             placeholder="000-000-000">
                     </div>
 
                     <div class="input-group">
-                        <label for="password">Password</label>
+                        <label for="password_old">Password</label>
                         <div class="password-wrapper">
-                            <input type="password" class="form-control pr-icon" id="password" name="password"
+                            <input type="password" class="form-control pr-icon" id="password_old" name="password"
                                 placeholder="Enter your password">
-                            <button type="button" class="toggle-pass" onclick="togglePasswordVisibility()">
+                            <button type="button" class="toggle-pass" onclick="togglePasswordVisibility('password_old', 'eyeIcon_old')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-eye-off"
-                                    id="eyeIcon">
-                                    <path
-                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
-                                    </path>
+                                    stroke-linecap="round" stroke-linejoin="round" id="eyeIcon_old">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                                     <line x1="1" y1="1" x2="23" y2="23"></line>
                                 </svg>
                             </button>
@@ -340,17 +341,64 @@
 
                     <button type="submit" class="btn-submit">Sign In</button>
                 </form>
+
+                {{-- New Student Form --}}
+                <form id="form-new-student" action="{{ route('validate-login') }}" method="POST" autocomplete="off" style="display: none;">
+                    @csrf
+                    <input type="hidden" name="student_type" value="New Student">
+
+                    <div class="input-group">
+                        <label for="student_id_new">Student ID</label>
+                        <input type="text" class="form-control" id="student_id_new" name="student_id"
+                            placeholder="000-000-000">
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password_new">Create Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control pr-icon" id="password_new" name="password"
+                                placeholder="Create password">
+                            <button type="button" class="toggle-pass" onclick="togglePasswordVisibility('password_new', 'eyeIcon_new')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" id="eyeIcon_new">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="password_confirm">Confirm Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" class="form-control pr-icon" id="password_confirm" name="password_confirmation"
+                                placeholder="Confirm password">
+                            <button type="button" class="toggle-pass" onclick="togglePasswordVisibility('password_confirm', 'eyeIcon_confirm')">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                                    stroke-linecap="round" stroke-linejoin="round" id="eyeIcon_confirm">
+                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <line x1="1" y1="1" x2="23" y2="23"></line>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-submit">Sign Up</button>
+                </form>
+
             </div>
         </div>
     </div>
 
     <script>
-        function togglePasswordVisibility() {
-            const passwordField = document.getElementById("password");
+        function togglePasswordVisibility(fieldId, iconId) {
+            const passwordField = document.getElementById(fieldId);
             const isPassword = passwordField.getAttribute("type") === "password";
             passwordField.setAttribute("type", isPassword ? "text" : "password");
 
-            const eyeIconSvg = document.getElementById('eyeIcon');
+            const eyeIconSvg = document.getElementById(iconId);
             if (isPassword) {
                 eyeIconSvg.innerHTML = `
                     <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -360,17 +408,25 @@
                 eyeIconSvg.innerHTML = `
                     <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
                     <line x1="1" y1="1" x2="23" y2="23"></line>
-                 `;
+                `;
             }
         }
 
         function switchStudentType(btn) {
-            // UI classes handling
             document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
             btn.classList.add('active');
 
-            // Value passed back into Form Logic
-            document.getElementById('student_type').value = btn.textContent.trim();
+            const type = btn.getAttribute('data-type');
+            const formOld = document.getElementById('form-old-student');
+            const formNew = document.getElementById('form-new-student');
+
+            if (type === 'new') {
+                formOld.style.display = 'none';
+                formNew.style.display = 'block';
+            } else {
+                formOld.style.display = 'block';
+                formNew.style.display = 'none';
+            }
         }
     </script>
 </body>

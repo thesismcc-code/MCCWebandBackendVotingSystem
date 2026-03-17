@@ -12,30 +12,30 @@ interface UserRepository
      * @throws UserNotFoundException
      * @throws UserPersistenceException
      */
-    public function findById(int $id): User;
+    public function findById(string $id): ?User;
 
     /**
      * @throws UserEmailNotFoundException
      * @throws UserPersistenceException
      */
-    public function findByEmail(string $email): User;
+    public function findByEmail(string $email): ?User;
 
     /**
      * @throws UserPersistenceException
      */
-    public function saveNewUser(User $data): User;
-
-    /**
-     * @throws UserNotFoundException
-     * @throws UserPersistenceException
-     */
-    public function updateUser(User $data): User;
+    public function saveNewUser(User $data): ?User;
 
     /**
      * @throws UserNotFoundException
      * @throws UserPersistenceException
      */
-    public function deleteUser(int $id): void;
+    public function updateUser(User $data): ?User;
+
+    /**
+     * @throws UserNotFoundException
+     * @throws UserPersistenceException
+     */
+    public function deleteUser(string $id): void;
 
     /**
      * @return User[]
