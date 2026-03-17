@@ -85,7 +85,7 @@
             <a href="{{ route('view.reports-and-analytics') }}"
                 class="flex items-center px-4 py-3 text-sm font-medium rounded-lg {{ request()->is('reports-and-analytics*') ? 'bg-blue-800/40 text-white' : 'text-blue-200 hover:bg-blue-800/30' }}">
                 <img src="{{ asset('icons/chart_data.png') }}" alt="icon" class="w-5 h-5 mr-3 object-contain">
-                eports &
+                Reports &
                 Analytics
             </a>
         </nav>
