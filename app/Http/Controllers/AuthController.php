@@ -50,12 +50,10 @@ class AuthController extends Controller
             );
 
             return $this->redirectByRole($user->getRole());
-
         } catch (\InvalidArgumentException $e) {
             return back()
                 ->withInput()
                 ->with('error', $e->getMessage());
-
         } catch (\Exception $e) {
             return back()
                 ->withInput()
@@ -63,6 +61,70 @@ class AuthController extends Controller
         }
     }
 
+    public function studentIndex()
+    {
+        if (Session::has('auth_user')) {
+            return $this->redirectByRole(Session::get('auth_user.role'));
+        }
+
+        return view('student.loginpage');
+    }
+
+    public function studentLogin(Request $request)
+    {
+        $isStudentID = $request->filled('student_id');
+
+        if ($isStudentID) {
+            $validator = Validator::make($request->all(), [
+                'student_id' => 'required|string',
+                'password'   => 'required',
+            ], [
+                'student_id.required' => 'Student ID is required.',
+                'password.required'   => 'Password is required.',
+            ]);
+        } else {
+            $validator = Validator::make($request->all(), [
+                'email'    => 'required|email',
+                'password' => 'required',
+            ], $this->authValidationMessages());
+        }
+
+        if ($validator->fails()) {
+            return back()
+                ->withInput()
+                ->with('error', $validator->errors()->first());
+        }
+
+        try {
+            if ($isStudentID) {
+                $user = $this->registerAuth->loginWithStudentID(
+                    $request->input('student_id'),
+                    $request->input('password')
+                );
+            } else {
+                $user = $this->registerAuth->login(
+                    $request->input('email'),
+                    $request->input('password')
+                );
+
+                if ($user->getRole() !== 'student') {
+                    return back()
+                        ->withInput()
+                        ->with('error', 'Access denied. This login is for students only.');
+                }
+            }
+
+            return $this->redirectByRole($user->getRole());
+        } catch (\InvalidArgumentException $e) {
+            return back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        } catch (\Exception $e) {
+            return back()
+                ->withInput()
+                ->with('error', 'Something went wrong. Please try again.');
+        }
+    }
     public function logout()
     {
         $userId = Session::get('auth_user.id', '');
@@ -71,9 +133,6 @@ class AuthController extends Controller
         return redirect()->route('login')
             ->with('success', 'You have been logged out successfully.');
     }
-
-    // ── API / JWT ─────────────────────────────────────────────────
-
     public function loginAPI(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -101,13 +160,11 @@ class AuthController extends Controller
                 'token_type'   => 'bearer',
                 'expires_in'   => config('jwt.ttl') * 60,
             ], 200);
-
         } catch (\InvalidArgumentException $e) {
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 401);
-
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -115,7 +172,6 @@ class AuthController extends Controller
             ], 500);
         }
     }
-
     public function logoutAPI(Request $request): JsonResponse
     {
         try {
@@ -134,19 +190,16 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Logged out successfully.',
             ], 200);
-
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token has already expired.',
             ], 401);
-
         } catch (TokenInvalidException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token is invalid.',
             ], 401);
-
         } catch (JWTException $e) {
             return response()->json([
                 'success' => false,
@@ -154,7 +207,6 @@ class AuthController extends Controller
             ], 500);
         }
     }
-
     public function meAPI(Request $request): JsonResponse
     {
         try {
@@ -173,19 +225,16 @@ class AuthController extends Controller
                     'admin_id'    => $payload->get('admin_id'),
                 ],
             ], 200);
-
         } catch (TokenExpiredException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token has expired.',
             ], 401);
-
         } catch (TokenInvalidException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Token is invalid.',
             ], 401);
-
         } catch (JWTException $e) {
             return response()->json([
                 'success' => false,
@@ -197,9 +246,10 @@ class AuthController extends Controller
     private function redirectByRole(string $role)
     {
         return match ($role) {
-            'admin'   => redirect()->route('view.dashboard'),           // ← /dashboard
-            'teacher' => redirect()->route('view.comelec-dashboard'),   // ← /comelec-dashboard
-            'student' => redirect()->route('view.student-dashboard'),   // ← /students-dashboard
+            'admin'   => redirect()->route('view.dashboard'),
+            'sao'     => redirect()->route('view.sao-dashboard'),
+            'teacher' => redirect()->route('view.comelec-dashboard'),
+            'student' => redirect()->route('view.student-dashboard'),
             default   => redirect()->route('login'),
         };
     }
