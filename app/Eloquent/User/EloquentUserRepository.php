@@ -6,6 +6,7 @@ use App\Domain\User\User;
 use App\Domain\User\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Session;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
 
@@ -48,6 +49,46 @@ class EloquentUserRepository implements UserRepository
         }
 
         return null;
+    }
+
+    public function findByStudentID(string $studentId): ?User
+    {
+        $snapshot = $this->db
+            ->orderByChild('student_id')
+            ->equalTo($studentId)
+            ->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
+            return null;
+        }
+
+        foreach ($snapshot->getValue() as $key => $data) {
+            if (isset($data['role']) && $data['role'] === 'student') {
+                return $this->toUserWithPassword((string) $key, $data);
+            }
+        }
+
+        return null;
+    }
+
+    public function validateStudentID(string $studentId): bool
+    {
+        $snapshot = $this->db
+            ->orderByChild('student_id')
+            ->equalTo($studentId)
+            ->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
+            return false;
+        }
+
+        foreach ($snapshot->getValue() as $data) {
+            if (isset($data['role']) && $data['role'] === 'student') {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     public function saveNewUser(User $data): ?User
@@ -102,6 +143,33 @@ class EloquentUserRepository implements UserRepository
         }
 
         return $users;
+    }
+
+    public function countStudentsByYearPrefix(string $prefix): int
+    {
+        $snapshot = $this->db
+            ->orderByChild('student_id')
+            ->startAt($prefix)
+            ->endAt($prefix . '\uf8ff')
+            ->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
+            return 0;
+        }
+
+        $count = 0;
+
+        foreach ($snapshot->getValue() as $data) {
+            if (
+                isset($data['role'], $data['student_id']) &&
+                $data['role'] === 'student' &&
+                str_starts_with($data['student_id'], $prefix)
+            ) {
+                $count++;
+            }
+        }
+
+        return $count;
     }
 
     private function toUser(mixed $id, array $data): User

@@ -32,7 +32,7 @@ class RegisterUser
         }
 
         if ($data['role'] === 'student') {
-            $studentId = $this->generateID('student');
+            $studentId = $this->generateStudentID();
         }
 
         if ($data['role'] === 'teacher') {
@@ -74,6 +74,19 @@ class RegisterUser
 
         return $prefix . Str::random(12);
     }
+
+    private function generateStudentID(): string
+    {
+        $yearSuffix = substr(date('Y'), 1);
+
+        $prefix = 'STU-' . $yearSuffix . '-';
+        $count = $this->userRepository->countStudentsByYearPrefix($prefix);
+        $sequence = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
+
+        return $prefix . $sequence;
+    }
+
+
 
     public function getAllUsers(): array
     {

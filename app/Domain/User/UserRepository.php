@@ -15,6 +15,12 @@ interface UserRepository
     public function findById(string $id): ?User;
 
     /**
+     * @throws UserNotFoundException
+     * @throws UserPersistenceException
+     */
+    public function findByStudentID(string $studentId): ?User;
+
+    /**
      * @throws UserEmailNotFoundException
      * @throws UserPersistenceException
      */
@@ -42,4 +48,16 @@ interface UserRepository
      * @throws UserPersistenceException
      */
     public function allUsers(): array;
+
+    /**
+     * @throws UserNotFoundException
+     * @throws UserPersistenceException
+     */
+    public function countStudentsByYearPrefix(string $prefix): int;
+
+    /**
+     * @throws UserNotFoundException
+     * @throws UserPersistenceException
+     */
+    public function validateStudentID(string $studentId): bool;
 }

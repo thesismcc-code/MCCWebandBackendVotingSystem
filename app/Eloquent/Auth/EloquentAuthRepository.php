@@ -44,6 +44,30 @@ class EloquentAuthRepository implements AuthRepository
         return $user;
     }
 
+    public function loginWithStudentID(string $studentId, string $password): User
+    {
+        if (!$this->userRepository->validateStudentID($studentId)) {
+            throw new \InvalidArgumentException('Student ID not found.');
+        }
+
+        $user = $this->userRepository->findByStudentID($studentId);
+
+        if (!$user || !Hash::check($password, $user->getPassword())) {
+            throw new \InvalidArgumentException('Invalid Student ID or password.');
+        }
+
+        Session::put('auth_user', [
+            'id'         => $user->getId(),
+            'email'      => $user->getEmail(),
+            'role'       => $user->getRole(),
+            'first_name' => $user->getFirstName(),
+            'last_name'  => $user->getLastName(),
+            'student_id' => $user->getStudentId(),
+        ]);
+
+        return $user;
+    }
+
     public function logout(string $user_id): bool
     {
         try {

@@ -320,7 +320,7 @@
                     <div class="input-group">
                         <label for="student_id_old">Student ID</label>
                         <input type="text" class="form-control" id="student_id_old" name="student_id"
-                            placeholder="000-000-000">
+                            placeholder="STU-0**-0**">
                     </div>
 
                     <div class="input-group">
@@ -343,14 +343,14 @@
                 </form>
 
                 {{-- New Student Form --}}
-                <form id="form-new-student" action="{{ route('validate-login') }}" method="POST" autocomplete="off" style="display: none;">
+                <form id="form-new-student" action="{{ route('student.login') }}" method="POST" autocomplete="off" style="display: none;">
                     @csrf
                     <input type="hidden" name="student_type" value="New Student">
 
                     <div class="input-group">
                         <label for="student_id_new">Student ID</label>
                         <input type="text" class="form-control" id="student_id_new" name="student_id"
-                            placeholder="000-000-000">
+                            placeholder="STU-0**-0**">
                     </div>
 
                     <div class="input-group">
