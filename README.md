@@ -1,59 +1,220 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Election Voting Management System (EVMS)
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+[![Laravel Version](https://img.shields.io/badge/Laravel-12.x-blue.svg)](https://laravel.com)
+[![PHP Version](https://img.shields.io/badge/PHP-8.2+-red.svg)](https://www.php.net)
+[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![GitHub Repo](https://img.shields.io/badge/GitHub-Repository-blue)](https://github.com)
 
-## About Laravel
+A comprehensive Laravel-based Election and Voting Management System designed to handle voter eligibility, election 
+control, result analytics, and candidate management for students and administrators.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 📑 Table of Contents
+- [About](#about)
+- [Key Features](#key-features)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Directory Structure](#directory-structure)
+- [Configuration](#configuration)
+- [Routes Overview](#routes-overview)
+- [Contributing](#contributing)
+- [License](#license)
+- [Sponsors](#sponsors)
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+---
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+## 💻 About
 
-## Learning Laravel
+This project is a full-stack Laravel application tailored for **educational or institutional election 
+management**. It supports multiple roles including **Admins**, **SAO (System Administrator Officers)**, **Comelec 
+Officials**, and **Students**.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+Key capabilities include:
+*   Student eligibility verification via fingerprint/login.
+*   Secure JWT and Sanctum authentication.
+*   Election control dashboard with candidate lists.
+*   Real-time voting logs and system activity reports.
+*   Push notifications via Firebase Cloud Messaging.
+*   SMS/Call notifications via Twilio.
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+---
 
-## Laravel Sponsors
+## ✨ Key Features
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+| Feature | Description |
+| :--- | :--- |
+| **Student Portal** | Dashboard, profile update, voting interface, result viewing. |
+| **Admin Dashboard** | View system overview, manage users, election control center. |
+| **SAO Portal** | Manage candidates, election schedules, and official logs. |
+| **Comelec Portal** | Election oversight, result validation, and complaint management. |
+| **Reports & Analytics** | Generate PDF reports (using `phpoffice/phpspreadsheet`). |
+| **Notifications** | Push (FCM) and SMS (Twilio) alerts. |
 
-### Premium Partners
+---
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## 🚀 Prerequisites
 
-## Contributing
+Before you begin, ensure you have met the following requirements:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+- [Laravel 12](https://laravel.com/docs/introduction) (Requires PHP 8.2+)
+- [Composer](https://getcomposer.org/)
+- [Node.js & NPM](https://nodejs.org/)
+- PHP extensions: `pdo_mysql`, `mbstring`, `openssl`, `tokenizer`, `json`, `xml`, `curl`, `intl`, `bcmath`, 
+`ctype`, `fileinfo`, `gd`, `hash`, `imagick`, `zip`.
 
-## Code of Conduct
+### `.env` Configuration
+You will need to generate an application key and configure your database.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+```bash
+php artisan key:generate
+```
 
-## Security Vulnerabilities
+Ensure your `.env` file contains:
+```env
+DB_CONNECTION=mysql
+DB_DATABASE=evms
+DB_USERNAME=your_username
+DB_PASSWORD=your_password
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Firebase Cloud Messaging
+FCM_SERVER_KEY=your_firebase_key
+FCM_PROJECT_ID=your_project_id
 
-## License
+# Twilio
+TWILIO_SID=your_sid
+TWILIO_AUTH_TOKEN=your_token
+```
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+---
+
+## 🛠 Installation
+
+1.  **Clone the repository:**
+    ```bash
+    git clone <repository-url>
+    cd ElectionVoting-System
+    ```
+
+2.  **Install PHP Dependencies:**
+    ```bash
+    composer install
+    ```
+
+3.  **Install NPM Dependencies:**
+    ```bash
+    npm install
+    npm run build
+    ```
+    *(Note: Run `npm run watch` for development)*
+
+4.  **Configure Database:**
+    Update the `.env` file with your MySQL credentials.
+    Run the migrations to set up the schema:
+    ```bash
+    php artisan migrate
+    ```
+
+5.  **Start the Server:**
+    ```bash
+    php artisan serve
+    ```
+
+    Visit `http://localhost:8000` to access the application.
+
+---
+
+## 📂 Directory Structure
+
+The project follows a standard Laravel structure with additional directories for specific logic (e.g., election 
+data).
+
+```text
+.
+├── app
+│   ├── Console
+│   ├── Exceptions
+│   ├── Http
+│   │   ├── Controllers
+│   │   │   ├── Admin
+│   │   │   ├── Api
+│   │   │   ├── Auth
+│   │   │   ├── Comelec
+│   │   │   └── Student
+│   │   └── Middleware
+│   └── Models
+├── bootstrap
+├── config
+├── database
+│   ├── factories
+│   ├── migrations
+│   └── seeders
+├── public
+│   └── assets
+├── resources
+│   ├── views
+│   └── views
+├── routes
+│   ├── api.php
+│   └── web.php
+└── tests
+```
+
+---
+
+## 🔌 Routes Overview
+
+The application is divided into `web` routes (for the dashboard/portal) and `api` routes (for mobile/backend 
+consumption).
+
+### Web Routes (`routes/web.php`)
+
+| Route Path | Description | Role |
+| :--- | :--- | :--- |
+| `GET /login` | Authenticate user | Public |
+| `GET /student/dashboard` | Student dashboard | Student |
+| `GET /admin/dashboard` | Admin overview | Admin |
+| `GET /sao/dashboard` | SAO control panel | SAO |
+| `GET /comelec/dashboard` | Comelec oversight | Comelec |
+| `GET /reports/analytics` | Generate reports | Admin |
+| `POST /student/vote` | Cast a vote | Student |
+
+### API Routes (`routes/api.php`)
+
+| Route Path | Description | Role |
+| :--- | :--- | :--- |
+| `POST /api/auth/login` | User Login | Public |
+| `POST /api/auth/fingerprint` | Biometric Verification | Student |
+| `GET /api/candidates` | List Candidates | Student/Admin |
+| `GET /api/results` | Get Election Results | Student/Admin |
+| `POST /api/notification/send` | Send Twilio/Firebase msg | Admin |
+
+---
+
+## 🤝 Contributing
+
+Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Please 
+read the [Contributing Guide](CONTRIBUTING.md) for details on our code of conduct and the process for submitting 
+pull requests.
+
+1.  **Fork the Project.**
+2.  **Create your Feature Branch** (`git checkout -b feature/AmazingFeature`).
+3.  **Commit your Changes** (`git commit -m 'Add some AmazingFeature'`).
+4.  **Push to the Branch** (`git push origin feature/AmazingFeature`).
+5.  **Open a Pull Request.**
+
+## 📜 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+> "We believe in open-source. Feel free to contribute."
+
+---
+
+## 🌟 Sponsors
+
+<!-- Add logos or names of sponsors here -->
+
+- [Your Sponsor Name]
+- [Technology Partner]
+- [Institution Support]
+
+*Thank you for supporting open source!*
