@@ -23,35 +23,40 @@ class RegisterUser
             throw new \InvalidArgumentException('That email address is already taken.');
         }
 
-        $adminid = null;
+        $adminId   = null;
         $studentId = null;
         $teacherId = null;
+        $userId    = null;
 
         if ($data['role'] === 'admin') {
-            $adminid = $this->generateID('admin');
+            $userId  = $this->generateID('admin');
+            $adminId = $userId;
         }
 
         if ($data['role'] === 'student') {
+            $userId    = $this->generateID('student');
             $studentId = $this->generateStudentID();
         }
 
         if ($data['role'] === 'teacher') {
-            $teacherId = $this->generateID('teacher');
+            $userId    = $this->generateID('teacher');
+            $teacherId = $userId;
         }
 
         if ($data['role'] === 'sao') {
-            $teacherId = $this->generateID('teacher');
+            $userId    = $this->generateID('sao');
+            $teacherId = $userId;
         }
 
         $user = new User(
-            id: null,
+            id: $userId,
             first_name: $data['first_name'],
             middle_name: $data['middle_name'],
             last_name: $data['last_name'],
             email: $data['email'],
             password: $data['password'],
             role: $data['role'],
-            admin_id: $adminid,
+            admin_id: $adminId,
             student_id: $studentId,
             teacher_id: $teacherId,
             email_verified_at: null,
@@ -65,11 +70,11 @@ class RegisterUser
     private function generateID(string $role): string
     {
         $prefix = match ($role) {
-            'admin' => 'ADM',
+            'admin'   => 'ADM',
             'student' => 'STU',
             'teacher' => 'THR',
-            'sao' => 'SAO',
-            default => throw new \InvalidArgumentException('Invalid role')
+            'sao'     => 'SAO',
+            default   => throw new \InvalidArgumentException('Invalid role')
         };
 
         return $prefix . Str::random(12);
@@ -77,16 +82,14 @@ class RegisterUser
 
     private function generateStudentID(): string
     {
-        $yearSuffix = substr(date('Y'), 1);
+        $yearSuffix = substr(date('Y'), 1); // e.g. "026" for 2026
 
-        $prefix = 'STU-' . $yearSuffix . '-';
-        $count = $this->userRepository->countStudentsByYearPrefix($prefix);
+        $prefix   = 'STU-' . $yearSuffix . '-';
+        $count    = $this->userRepository->countStudentsByYearPrefix($prefix);
         $sequence = str_pad($count + 1, 3, '0', STR_PAD_LEFT);
 
         return $prefix . $sequence;
     }
-
-
 
     public function getAllUsers(): array
     {
