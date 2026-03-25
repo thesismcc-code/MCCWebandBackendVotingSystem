@@ -6,18 +6,23 @@ use App\Domain\User\User;
 use App\Domain\User\UserRepository;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Session;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
 
 class EloquentUserRepository implements UserRepository
 {
     private Reference $db;
-    private const COLLECTIONS = 'users';
+    private Reference $votesDb;
+    private Reference $electionsDb;
+    private const COLLECTIONS            = 'users';
+    private const VOTES_COLLECTIONS      = 'votes';
+    private const ELECTIONS_COLLECTIONS  = 'elections';
 
     public function __construct(Database $db)
     {
-        $this->db = $db->getReference(self::COLLECTIONS);
+        $this->db          = $db->getReference(self::COLLECTIONS);
+        $this->votesDb     = $db->getReference(self::VOTES_COLLECTIONS);
+        $this->electionsDb = $db->getReference(self::ELECTIONS_COLLECTIONS);
     }
 
     public function findById(string $id): ?User
@@ -107,7 +112,7 @@ class EloquentUserRepository implements UserRepository
             $id = $data->getId();
         } else {
             $newRef = $this->db->push($payload);
-            $id = $newRef->getKey();
+            $id     = $newRef->getKey();
         }
 
         return $this->toUser((string) $id, [...$payload, 'id' => $id]);
@@ -170,6 +175,100 @@ class EloquentUserRepository implements UserRepository
         }
 
         return $count;
+    }
+
+    private function getActiveElectionIds(): array
+    {
+        $snapshot = $this->electionsDb
+            ->orderByChild('status')
+            ->equalTo('active')
+            ->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
+            return [];
+        }
+
+        return array_keys($snapshot->getValue());
+    }
+
+    public function countStudentVoters(?array $activeElectionIds = null): int
+    {
+        $votesSnapshot = $this->votesDb->getSnapshot();
+
+        if (!$votesSnapshot->exists() || $votesSnapshot->getValue() === null) {
+            return 0;
+        }
+
+        // Collect unique voter IDs — scoped to active elections only if provided
+        $uniqueVoterIds = [];
+        foreach ($votesSnapshot->getValue() as $vote) {
+            if (!isset($vote['voter_id'])) {
+                continue;
+            }
+
+            // Skip votes that don't belong to an active election
+            if (
+                $activeElectionIds !== null &&
+                (!isset($vote['election_id']) || !in_array($vote['election_id'], $activeElectionIds, true))
+            ) {
+                continue;
+            }
+
+            $uniqueVoterIds[$vote['voter_id']] = true;
+        }
+
+        if (empty($uniqueVoterIds)) {
+            return 0;
+        }
+
+        $allUsers = $this->db->getValue();
+
+        if (empty($allUsers)) {
+            return 0;
+        }
+
+        return count(array_filter(
+            array_intersect_key($allUsers, $uniqueVoterIds),
+            fn($user) => isset($user['role']) && $user['role'] === 'student'
+        ));
+    }
+
+    public function countTotalStudents(): int
+    {
+        $snapshot = $this->db
+            ->orderByChild('role')
+            ->equalTo('student')
+            ->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
+            return 0;
+        }
+
+        return count($snapshot->getValue());
+    }
+
+    public function getVoterTurnout(): array
+    {
+        $activeElectionIds = $this->getActiveElectionIds();
+
+        if (empty($activeElectionIds)) {
+            return [
+                'voters'          => 0,
+                'total_students'  => $this->countTotalStudents(),
+                'turnout_percent' => 0.0,
+            ];
+        }
+
+        $voters        = $this->countStudentVoters($activeElectionIds);
+        $totalStudents = $this->countTotalStudents();
+
+        return [
+            'voters'          => $voters,
+            'total_students'  => $totalStudents,
+            'turnout_percent' => $totalStudents > 0
+                ? round(($voters / $totalStudents) * 100, 2)
+                : 0.0,
+        ];
     }
 
     private function toUser(mixed $id, array $data): User

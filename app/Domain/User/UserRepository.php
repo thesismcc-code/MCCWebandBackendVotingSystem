@@ -60,4 +60,8 @@ interface UserRepository
      * @throws UserPersistenceException
      */
     public function validateStudentID(string $studentId): bool;
+
+    public function countStudentVoters(): int;
+    public function countTotalStudents(): int;
+    public function getVoterTurnout(): array;
 }
