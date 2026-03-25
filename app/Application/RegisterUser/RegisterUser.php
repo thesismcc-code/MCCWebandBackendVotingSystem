@@ -100,4 +100,13 @@ class RegisterUser
     {
         return $this->userRepository->findByEmail($email);
     }
+
+    public function total_registered_voters(): int
+    {
+        return $this->userRepository->countStudentVoters();
+    }
+    public function turnOutRates(): array
+    {
+        return $this->userRepository->getVoterTurnout();
+    }
 }
