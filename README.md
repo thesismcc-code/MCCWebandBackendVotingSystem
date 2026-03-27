@@ -94,17 +94,25 @@ TWILIO_AUTH_TOKEN=your_token
     cd ElectionVoting-System
     ```
 
-2.  **Install PHP Dependencies:**
+2.  **Install all dependencies with one command:**
+    ```bash
+    chmod +x install install.sh
+    ./install
+    ```
+    This command will:
+    - Install Composer dependencies.
+    - Install NPM dependencies.
+    - Build frontend assets.
+    - Generate an application key (if `.env` exists).
+    - Run database migrations.
+
+3.  **Alternative manual installation (optional):**
     ```bash
     composer install
-    ```
-
-3.  **Install NPM Dependencies:**
-    ```bash
     npm install
     npm run build
     ```
-    *(Note: Run `npm run watch` for development)*
+    *(Note: Run `npm run watch` for development.)*
 
 4.  **Configure Database:**
     Update the `.env` file with your MySQL credentials.
@@ -113,12 +121,20 @@ TWILIO_AUTH_TOKEN=your_token
     php artisan migrate
     ```
 
-5.  **Start the Server:**
+5.  **Start the Server with one command:**
+    ```bash
+    chmod +x run run.sh
+    ./run
+    ```
+
+    *(This runs `php artisan serve` for you.)*
+
+    Visit `http://localhost:8000` to access the application.
+
+6.  **Alternative manual server start (optional):**
     ```bash
     php artisan serve
     ```
-
-    Visit `http://localhost:8000` to access the application.
 
 ---
 
