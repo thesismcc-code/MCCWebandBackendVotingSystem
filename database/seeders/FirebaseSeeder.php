@@ -14,33 +14,29 @@ class FirebaseSeeder extends Seeder
     protected Database $db;
 
     /** Computed in seedVotes() and reused in seedReports() for consistent turnout stats. */
-    private int $activeVoterCount = 0;
+    private int $activeVoterCount  = 0;
     private int $totalStudentCount = 0;
 
     // ─── LOGGING HELPERS ────────────────────────────────────────────────────────
 
-    /** Green  — record written, section done */
     private function logSuccess(string $message): void
     {
         $this->command->line("  <fg=green>{$message}</>");
         Log::info($message);
     }
 
-    /** Yellow — non-fatal notice, skipped item */
     private function logWarning(string $message): void
     {
         $this->command->line("  <fg=yellow>{$message}</>");
         Log::warning($message);
     }
 
-    /** Red    — something went wrong */
     private function logError(string $message): void
     {
         $this->command->line("  <fg=red>{$message}</>");
         Log::error($message);
     }
 
-    /** Default terminal color — section headers, progress notes */
     private function logInfo(string $message): void
     {
         $this->command->line("  {$message}");
@@ -168,9 +164,9 @@ class FirebaseSeeder extends Seeder
 
         // ── Fixed staff accounts ──────────────────────────────────────────────
         $staff = [
-            'ADMaB3kL9mNpQr' => ['first_name' => 'Alice',  'middle_name' => 'Marie', 'last_name' => 'Santos',    'email' => 'alice.santos@school.edu',   'role' => 'admin',   'student_id' => null, 'teacher_id' => null,             'admin_id' => 'ADMaB3kL9mNpQr'],
-            'SAOxK7wP2dYcHj' => ['first_name' => 'Bob',    'middle_name' => 'Cruz',  'last_name' => 'Reyes',     'email' => 'bob.reyes@school.edu',      'role' => 'sao',     'student_id' => null, 'teacher_id' => 'SAOxK7wP2dYcHj', 'admin_id' => null],
-            'THRmN4vZ8qEtWs' => ['first_name' => 'Carlos', 'middle_name' => 'Jose',  'last_name' => 'Dela Cruz', 'email' => 'carlos.delacruz@school.edu','role' => 'teacher', 'student_id' => null, 'teacher_id' => 'THRmN4vZ8qEtWs', 'admin_id' => null],
+            'ADMaB3kL9mNpQr' => ['first_name' => 'Alice',  'middle_name' => 'Marie', 'last_name' => 'Santos',    'email' => 'alice.santos@school.edu',    'role' => 'admin',   'student_id' => null, 'teacher_id' => null,             'admin_id' => 'ADMaB3kL9mNpQr'],
+            'SAOxK7wP2dYcHj' => ['first_name' => 'Bob',    'middle_name' => 'Cruz',  'last_name' => 'Reyes',     'email' => 'bob.reyes@school.edu',       'role' => 'sao',     'student_id' => null, 'teacher_id' => 'SAOxK7wP2dYcHj', 'admin_id' => null],
+            'THRmN4vZ8qEtWs' => ['first_name' => 'Carlos', 'middle_name' => 'Jose',  'last_name' => 'Dela Cruz', 'email' => 'carlos.delacruz@school.edu', 'role' => 'teacher', 'student_id' => null, 'teacher_id' => 'THRmN4vZ8qEtWs', 'admin_id' => null],
         ];
 
         foreach ($staff as $key => $user) {
@@ -231,7 +227,7 @@ class FirebaseSeeder extends Seeder
             ],
             'election_002' => [
                 'id'            => 'election_002',
-                'election_name' => 'SSC By-Elections 2024',
+                'election_name' => 'SSC By-Elections 2025',
                 'description'   => 'By-election for vacated SSC positions.',
                 'start_date'    => $this->daysFromNow(5),
                 'end_date'      => $this->daysFromNow(7),
@@ -241,8 +237,8 @@ class FirebaseSeeder extends Seeder
             ],
             'election_003' => [
                 'id'            => 'election_003',
-                'election_name' => 'College of Engineering Elections 2024',
-                'description'   => 'Department-level student council election.',
+                'election_name' => 'College of Engineering Elections 2025',
+                'description'   => 'Department-level student council election for CoE students.',
                 'start_date'    => $this->daysAgo(1),
                 'end_date'      => $this->daysFromNow(1),
                 'status'        => 'active',
@@ -280,19 +276,47 @@ class FirebaseSeeder extends Seeder
         $this->logInfo('Seeding /candidates...');
 
         $candidates = [
-            // ── election_001 ─────────────────────────────────────────────────
-            'cand_001' => ['id' => 'cand_001', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'President',      'manifesto' => 'Transparency and student welfare in all SSC decisions.',      'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
-            'cand_002' => ['id' => 'cand_002', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_002', 'election_id' => 'election_001', 'position' => 'President',      'manifesto' => 'Progress through unity — a stronger voice for every student.', 'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
-            'cand_003' => ['id' => 'cand_003', 'user_id' => 'STUyT9nB7rVdQz', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'Vice President', 'manifesto' => 'Bridging the gap between students and administration.',        'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
-            'cand_004' => ['id' => 'cand_004', 'user_id' => 'STUhR2mK4sJuPf', 'party_list_id' => 'party_003', 'election_id' => 'election_001', 'position' => 'Vice President', 'manifesto' => 'An independent voice dedicated solely to student needs.',      'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
-            'cand_005' => ['id' => 'cand_005', 'user_id' => 'STUwL8cF6tNxEv', 'party_list_id' => 'party_002', 'election_id' => 'election_001', 'position' => 'Secretary',      'manifesto' => 'Organized, transparent, and accountable to every student.',   'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
-            'cand_006' => ['id' => 'cand_006', 'user_id' => 'ADMaB3kL9mNpQr', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'Treasurer',      'manifesto' => 'Fiscal responsibility and full financial transparency.',        'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
+            // ── election_001 (closed) — 2 candidates per position ────────────
+            // Positions: President, Vice President, Secretary, Treasurer
+            'cand_001' => ['id' => 'cand_001', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'President',      'manifesto' => 'Transparency and student welfare in all SSC decisions.',       'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
+            'cand_002' => ['id' => 'cand_002', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_002', 'election_id' => 'election_001', 'position' => 'President',      'manifesto' => 'Progress through unity — a stronger voice for every student.',  'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
+            'cand_003' => ['id' => 'cand_003', 'user_id' => 'STUyT9nB7rVdQz', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'Vice President', 'manifesto' => 'Bridging the gap between students and administration.',         'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
+            'cand_004' => ['id' => 'cand_004', 'user_id' => 'STUhR2mK4sJuPf', 'party_list_id' => 'party_003', 'election_id' => 'election_001', 'position' => 'Vice President', 'manifesto' => 'An independent voice dedicated solely to student needs.',       'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
+            'cand_005' => ['id' => 'cand_005', 'user_id' => 'STUwL8cF6tNxEv', 'party_list_id' => 'party_002', 'election_id' => 'election_001', 'position' => 'Secretary',      'manifesto' => 'Organized, transparent, and accountable to every student.',    'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
+            'cand_006' => ['id' => 'cand_006', 'user_id' => 'ADMaB3kL9mNpQr', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'Treasurer',      'manifesto' => 'Fiscal responsibility and full financial transparency.',         'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
 
-            // ── election_003 (active) ─────────────────────────────────────────
-            'cand_007' => ['id' => 'cand_007', 'user_id' => 'SAOxK7wP2dYcHj', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Governor',      'manifesto' => 'Engineering a better tomorrow for all CoE students.',         'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-            'cand_008' => ['id' => 'cand_008', 'user_id' => 'THRmN4vZ8qEtWs', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Governor',      'manifesto' => 'Stronger labs, stronger students.',                          'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-            'cand_009' => ['id' => 'cand_009', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Vice Governor', 'manifesto' => 'Bridging CoE students to real industry opportunities.',       'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-            'cand_010' => ['id' => 'cand_010', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Vice Governor', 'manifesto' => 'Student wellness and academic support for every engineer.',    'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            // ── election_003 (active) — 3 candidates per position ─────────────
+            // Positions: President, Vice President, Secretary, Treasurer, Auditor, PRO
+
+            // President
+            'cand_007' => ['id' => 'cand_007', 'user_id' => 'SAOxK7wP2dYcHj', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'President',      'manifesto' => 'Engineering a better tomorrow through transparent leadership.',   'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_008' => ['id' => 'cand_008', 'user_id' => 'THRmN4vZ8qEtWs', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'President',      'manifesto' => 'Stronger students, stronger CoE — innovation in governance.',    'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_009' => ['id' => 'cand_009', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'President',      'manifesto' => 'Independent and student-first — CoE deserves real leadership.',   'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+
+            // Vice President
+            'cand_010' => ['id' => 'cand_010', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Vice President', 'manifesto' => 'Bridging CoE students to real academic and industry support.',    'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_011' => ['id' => 'cand_011', 'user_id' => 'STUyT9nB7rVdQz', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Vice President', 'manifesto' => 'Student wellness and academic support for every engineer.',        'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_012' => ['id' => 'cand_012', 'user_id' => 'STUhR2mK4sJuPf', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Vice President', 'manifesto' => 'An independent advocate for every CoE student concern.',          'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+
+            // Secretary
+            'cand_013' => ['id' => 'cand_013', 'user_id' => 'STUwL8cF6tNxEv', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Secretary',      'manifesto' => 'Efficient records, clear communication, full accountability.',     'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_014' => ['id' => 'cand_014', 'user_id' => 'ADMaB3kL9mNpQr', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Secretary',      'manifesto' => 'Every CoE decision documented, every student voice recorded.',     'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_015' => ['id' => 'cand_015', 'user_id' => 'SAOxK7wP2dYcHj', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Secretary',      'manifesto' => 'Transparent records and open communication as core values.',       'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+
+            // Treasurer
+            'cand_016' => ['id' => 'cand_016', 'user_id' => 'THRmN4vZ8qEtWs', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Treasurer',      'manifesto' => 'Responsible stewardship of every peso entrusted by CoE students.', 'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_017' => ['id' => 'cand_017', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Treasurer',      'manifesto' => 'Full financial transparency and zero tolerance for misuse.',        'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_018' => ['id' => 'cand_018', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Treasurer',      'manifesto' => 'Independent oversight ensuring every fund goes to students.',       'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+
+            // Auditor
+            'cand_019' => ['id' => 'cand_019', 'user_id' => 'STUyT9nB7rVdQz', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Auditor',        'manifesto' => 'Rigorous auditing to ensure every fund is properly accounted for.', 'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_020' => ['id' => 'cand_020', 'user_id' => 'STUhR2mK4sJuPf', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Auditor',        'manifesto' => 'Checks and balances — protecting the integrity of CoE funds.',      'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_021' => ['id' => 'cand_021', 'user_id' => 'STUwL8cF6tNxEv', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Auditor',        'manifesto' => 'Independent auditing with zero conflict of interest.',              'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+
+            // Public Relations Officer (PRO)
+            'cand_022' => ['id' => 'cand_022', 'user_id' => 'ADMaB3kL9mNpQr', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'PRO',            'manifesto' => 'Amplifying the CoE student voice on every platform.',              'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_023' => ['id' => 'cand_023', 'user_id' => 'SAOxK7wP2dYcHj', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'PRO',            'manifesto' => 'Creative, consistent, and student-centered communications.',        'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
+            'cand_024' => ['id' => 'cand_024', 'user_id' => 'THRmN4vZ8qEtWs', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'PRO',            'manifesto' => 'Independent voice ensuring all CoE news reaches every student.',    'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
         ];
 
         foreach ($candidates as $key => $candidate) {
@@ -327,6 +351,7 @@ class FirebaseSeeder extends Seeder
         $this->totalStudentCount = $totalStudents;
         $this->logInfo("Found {$totalStudents} student(s) to seed votes for.");
 
+        // ── election_001 (closed) — 100% turnout, 4 positions, 2 candidates each ─
         $election001Config = [
             'election_id' => 'election_001',
             'voter_count' => min(300, $totalStudents),
@@ -340,19 +365,22 @@ class FirebaseSeeder extends Seeder
             ],
         ];
 
-        // Dynamically cap at 60% of total students so turnout is always realistically
-        // below 100% — the election is still ongoing, not everyone has voted yet.
-        $activeVoterCount        = (int) floor($totalStudents * 0.60);
-        $this->activeVoterCount  = $activeVoterCount;
+        // ── election_003 (active) — 60% turnout, 6 positions, 3 candidates each ─
+        $activeVoterCount       = (int) floor($totalStudents * 0.60);
+        $this->activeVoterCount = $activeVoterCount;
 
         $election003Config = [
             'election_id' => 'election_003',
-            'voter_count' => $activeVoterCount, // 60% turnout — election is still active/ongoing
+            'voter_count' => $activeVoterCount,
             'start'       => $this->daysAgo(1),
             'end'         => $this->now(),
             'positions'   => [
-                'Governor'      => ['cand_007', 'cand_008'],
-                'Vice Governor' => ['cand_009', 'cand_010'],
+                'President'      => ['cand_007', 'cand_008', 'cand_009'],
+                'Vice President' => ['cand_010', 'cand_011', 'cand_012'],
+                'Secretary'      => ['cand_013', 'cand_014', 'cand_015'],
+                'Treasurer'      => ['cand_016', 'cand_017', 'cand_018'],
+                'Auditor'        => ['cand_019', 'cand_020', 'cand_021'],
+                'PRO'            => ['cand_022', 'cand_023', 'cand_024'],
             ],
         ];
 
@@ -364,7 +392,7 @@ class FirebaseSeeder extends Seeder
 
             shuffle($voters);
 
-            $this->logInfo("Generating votes for {$config['election_id']} ({$config['voter_count']} voters x {$positionCount} positions)...");
+            $this->logInfo("Generating votes for {$config['election_id']} ({$config['voter_count']} voters × {$positionCount} positions)...");
 
             foreach ($voters as $voterId) {
                 foreach ($config['positions'] as $position => $candidatePool) {
@@ -405,7 +433,12 @@ class FirebaseSeeder extends Seeder
                 'file_format'     => 'pdf',
                 'file_size_bytes' => 204800,
                 'filters'         => null,
-                'summary'         => ['total_votes' => 1200, 'total_voters' => 300, 'turnout_percent' => 100.0, 'positions' => ['President', 'Vice President', 'Secretary', 'Treasurer']],
+                'summary'         => [
+                    'total_votes'     => 300 * 4,
+                    'total_voters'    => 300,
+                    'turnout_percent' => 100.0,
+                    'positions'       => ['President', 'Vice President', 'Secretary', 'Treasurer'],
+                ],
                 'error_message'   => null,
                 'created_at'      => $this->daysAgo(2),
                 'updated_at'      => $this->daysAgo(2),
@@ -431,17 +464,19 @@ class FirebaseSeeder extends Seeder
                 'election_id'     => 'election_003',
                 'generated_by'    => 'ADMaB3kL9mNpQr',
                 'report_type'     => 'voter_turnout',
-                'status'          => 'pending',       // report not yet generated — election still running
+                'status'          => 'pending',
                 'file_path'       => null,
                 'file_name'       => null,
                 'file_format'     => null,
                 'file_size_bytes' => null,
                 'filters'         => null,
                 'summary'         => [
-                    'total_votes'     => $this->activeVoterCount * 2,                                                    // 2 positions per voter
-                    'total_voters'    => $this->activeVoterCount,                                                        // 60% of students so far
-                    'turnout_percent' => round(($this->activeVoterCount / $this->totalStudentCount) * 100, 2),           // always < 100%
-                    'positions'       => ['Governor', 'Vice Governor'],
+                    'total_votes'     => $this->activeVoterCount * 6,
+                    'total_voters'    => $this->activeVoterCount,
+                    'turnout_percent' => $this->totalStudentCount > 0
+                        ? round(($this->activeVoterCount / $this->totalStudentCount) * 100, 2)
+                        : 0.0,
+                    'positions'       => ['President', 'Vice President', 'Secretary', 'Treasurer', 'Auditor', 'PRO'],
                 ],
                 'error_message'   => null,
                 'created_at'      => $this->now(),
@@ -480,11 +515,11 @@ class FirebaseSeeder extends Seeder
         $this->logInfo('Seeding /system_logs...');
 
         $logs = [
-            'log_001' => ['id' => 'log_001', 'level' => 'info',     'message' => "Election 'SSC General Elections 2024' status changed to closed.",      'context' => ['election_id' => 'election_001', 'changed_by' => 'ADMaB3kL9mNpQr'],                            'created_at' => $this->daysAgo(3)],
-            'log_002' => ['id' => 'log_002', 'level' => 'info',     'message' => 'User STUrJ6hD1fXbLn registered as a candidate for position President.', 'context' => ['user_id' => 'STUrJ6hD1fXbLn', 'election_id' => 'election_001'],                              'created_at' => $this->daysAgo(25)],
-            'log_003' => ['id' => 'log_003', 'level' => 'warning',  'message' => 'Duplicate vote attempt detected for voter STUyT9nB7rVdQz.',              'context' => ['voter_id' => 'STUyT9nB7rVdQz', 'election_id' => 'election_001', 'position' => 'President'], 'created_at' => $this->daysAgo(8)],
-            'log_004' => ['id' => 'log_004', 'level' => 'error',    'message' => 'Report generation failed for report_004.',                               'context' => ['report_id' => 'report_004', 'reason' => 'PDF service timeout'],                             'created_at' => $this->daysAgo(1)],
-            'log_005' => ['id' => 'log_005', 'level' => 'critical', 'message' => 'Multiple failed login attempts detected from IP 192.168.1.50.',          'context' => ['ip' => '192.168.1.50', 'attempts' => 10],                                                   'created_at' => $this->now()],
+            'log_001' => ['id' => 'log_001', 'level' => 'info',     'message' => "Election 'SSC General Elections 2024' status changed to closed.",       'context' => ['election_id' => 'election_001', 'changed_by' => 'ADMaB3kL9mNpQr'],                             'created_at' => $this->daysAgo(3)],
+            'log_002' => ['id' => 'log_002', 'level' => 'info',     'message' => 'User STUrJ6hD1fXbLn registered as a candidate for position President.',  'context' => ['user_id' => 'STUrJ6hD1fXbLn', 'election_id' => 'election_001'],                               'created_at' => $this->daysAgo(25)],
+            'log_003' => ['id' => 'log_003', 'level' => 'warning',  'message' => 'Duplicate vote attempt detected for voter STUyT9nB7rVdQz.',               'context' => ['voter_id' => 'STUyT9nB7rVdQz', 'election_id' => 'election_001', 'position' => 'President'],  'created_at' => $this->daysAgo(8)],
+            'log_004' => ['id' => 'log_004', 'level' => 'error',    'message' => 'Report generation failed for report_004.',                                'context' => ['report_id' => 'report_004', 'reason' => 'PDF service timeout'],                               'created_at' => $this->daysAgo(1)],
+            'log_005' => ['id' => 'log_005', 'level' => 'critical', 'message' => 'Multiple failed login attempts detected from IP 192.168.1.50.',           'context' => ['ip' => '192.168.1.50', 'attempts' => 10],                                                    'created_at' => $this->now()],
         ];
 
         foreach ($logs as $key => $log) {
@@ -493,7 +528,6 @@ class FirebaseSeeder extends Seeder
                 'error', 'critical' => $this->logError("System log {$key}: {$log['message']}"),
                 default             => $this->logInfo("System log {$key}: {$log['message']}"),
             };
-
             $this->set('system_logs', $key, $log);
         }
 
