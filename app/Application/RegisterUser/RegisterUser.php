@@ -109,4 +109,13 @@ class RegisterUser
     {
         return $this->userRepository->getVoterTurnout();
     }
+
+    public function realtimeVoterTurnout(): array
+    {
+        return $this->userRepository->realtimeVoterTurnout();
+    }
+    public function voterTurnoutByYearLevel(): array
+    {
+        return $this->userRepository->voterTurnoutByYearLevel();
+    }
 }

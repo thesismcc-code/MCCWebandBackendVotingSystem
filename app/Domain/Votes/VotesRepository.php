@@ -9,5 +9,5 @@ interface VotesRepository
     public function addVote(Votes $vote): ?Votes;
     public function liveVoteCast(): int;
 
-
+    public function liveCandidateResult(): array;
 }

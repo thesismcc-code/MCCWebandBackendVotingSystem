@@ -199,14 +199,12 @@ class EloquentUserRepository implements UserRepository
             return 0;
         }
 
-        // Collect unique voter IDs — scoped to active elections only if provided
         $uniqueVoterIds = [];
         foreach ($votesSnapshot->getValue() as $vote) {
             if (!isset($vote['voter_id'])) {
                 continue;
             }
 
-            // Skip votes that don't belong to an active election
             if (
                 $activeElectionIds !== null &&
                 (!isset($vote['election_id']) || !in_array($vote['election_id'], $activeElectionIds, true))
@@ -269,6 +267,150 @@ class EloquentUserRepository implements UserRepository
                 ? round(($voters / $totalStudents) * 100, 2)
                 : 0.0,
         ];
+    }
+
+    /**
+     * Returns real-time voter turnout stats scoped to active elections.
+     *
+     * @return array{
+     *   total_students: int,
+     *   voted_count: int,
+     *   not_yet_voted: int,
+     *   turnout_percent: float
+     * }
+     */
+    public function realtimeVoterTurnout(): array
+    {
+        $activeElectionIds = $this->getActiveElectionIds();
+        $totalStudents     = $this->countTotalStudents();
+
+        if (empty($activeElectionIds) || $totalStudents === 0) {
+            return [
+                'total_students'  => $totalStudents,
+                'voted_count'     => 0,
+                'not_yet_voted'   => $totalStudents,
+                'turnout_percent' => 0.0,
+            ];
+        }
+
+        $votedCount = $this->countStudentVoters($activeElectionIds);
+
+        return [
+            'total_students'  => $totalStudents,
+            'voted_count'     => $votedCount,
+            'not_yet_voted'   => $totalStudents - $votedCount,
+            'turnout_percent' => round(($votedCount / $totalStudents) * 100, 2),
+        ];
+    }
+
+    /**
+     * Returns voter turnout broken down by year level, derived from enrollment year
+     * encoded in the student ID (format: STU-{enrollYear}-{seq}, e.g. STU-2023-001).
+     *
+     * Year level is calculated as: currentYear - enrollYear + 1
+     *   STU-2023-xxx in 2026 → 4th Year
+     *   STU-2024-xxx in 2026 → 3rd Year
+     *   STU-2025-xxx in 2026 → 2nd Year
+     *   STU-2026-xxx in 2026 → 1st Year
+     *
+     * Results are scoped to active elections and sorted from 1st Year to 4th Year.
+     *
+     * @return array<int, array{
+     *   year_level: string,
+     *   enroll_year: int,
+     *   total_students: int,
+     *   voted: int,
+     *   not_yet_voted: int,
+     *   turnout_percent: float
+     * }>
+     */
+    public function voterTurnoutByYearLevel(): array
+    {
+        $activeElectionIds = $this->getActiveElectionIds();
+        $currentYear       = (int) date('Y');
+
+        // Collect unique voter IDs scoped to active elections
+        $votedByStudent = [];
+
+        if (!empty($activeElectionIds)) {
+            $votesSnapshot = $this->votesDb->getSnapshot();
+
+            if ($votesSnapshot->exists() && $votesSnapshot->getValue() !== null) {
+                foreach ($votesSnapshot->getValue() as $vote) {
+                    if (
+                        isset($vote['voter_id'], $vote['election_id']) &&
+                        in_array($vote['election_id'], $activeElectionIds, true)
+                    ) {
+                        $votedByStudent[$vote['voter_id']] = true;
+                    }
+                }
+            }
+        }
+
+        $allUsers = $this->db->getValue();
+
+        if (empty($allUsers)) {
+            return [];
+        }
+
+        // Group students by enrollment year extracted from student ID.
+        // Student ID format: STU-{enrollYear}-{seq}  e.g. STU-2023-001
+        // Parts after explode('-'): ['STU', '2023', '001']
+        $yearGroups = [];
+
+        foreach ($allUsers as $userId => $user) {
+            if (!isset($user['role'], $user['student_id']) || $user['role'] !== 'student') {
+                continue;
+            }
+
+            $parts      = explode('-', $user['student_id']);
+            $enrollYear = isset($parts[1]) && is_numeric($parts[1]) ? (int) $parts[1] : null;
+
+            if ($enrollYear === null) {
+                continue;
+            }
+
+            if (!isset($yearGroups[$enrollYear])) {
+                $yearGroups[$enrollYear] = ['total' => 0, 'voted' => 0];
+            }
+
+            $yearGroups[$enrollYear]['total']++;
+
+            if (isset($votedByStudent[$userId])) {
+                $yearGroups[$enrollYear]['voted']++;
+            }
+        }
+
+        // Sort ascending by enrollment year so 1st Year appears first
+        ksort($yearGroups);
+
+        $result = [];
+
+        foreach ($yearGroups as $enrollYear => $counts) {
+            $total     = $counts['total'];
+            $voted     = $counts['voted'];
+            $yearLevel = $currentYear - $enrollYear + 1;
+
+            $label = match (true) {
+                $yearLevel === 1 => '1st Year',
+                $yearLevel === 2 => '2nd Year',
+                $yearLevel === 3 => '3rd Year',
+                $yearLevel === 4 => '4th Year',
+                $yearLevel > 4   => "{$yearLevel}th Year",
+                default          => "Year {$yearLevel}",
+            };
+
+            $result[] = [
+                'year_level'      => $label,
+                'enroll_year'     => $enrollYear,
+                'total_students'  => $total,
+                'voted'           => $voted,
+                'not_yet_voted'   => $total - $voted,
+                'turnout_percent' => $total > 0 ? round(($voted / $total) * 100, 2) : 0.0,
+            ];
+        }
+
+        return $result;
     }
 
     private function toUser(mixed $id, array $data): User

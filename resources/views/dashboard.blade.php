@@ -1,90 +1,79 @@
 @extends('components.admin-layout')
-
-@section('title', 'Admin Dashboard')
-
+@section('MCC', 'Voting System')
 @section('content')
-    <h2 class="text-2xl font-bold mb-6">Dashboard</h2>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <h2 class="text-2xl font-bold text-white mb-6">Dashboard</h2>
 
-        <!-- Total Registered Voters -->
-        <div class="bg-white rounded-xl p-4 flex items-center shadow-lg">
-            <div class="p-3 bg-blue-600 rounded-lg mr-4">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"></path>
-                </svg>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-gray-900">
-                    {{ $data['stats_card_data']['total_register_voters'] }}
-                </div>
-                <div class="text-[10px] text-gray-500 uppercase font-semibold text-nowrap">Total Registered Voters</div>
-            </div>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
-        <!-- Live Votes Cast -->
-        <div class="bg-white rounded-xl p-4 flex items-center shadow-lg">
-            <div class="p-3 bg-green-500 rounded-lg mr-4">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                </svg>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-gray-900">
-                    {{ $data['stats_card_data']['live_vote_cast'] }}
-                </div>
-                <div class="text-[10px] text-gray-500 uppercase font-semibold text-nowrap">Live Votes Cast</div>
-            </div>
-        </div>
+        @include('components.dashboard.statcard', [
+            'value' => $data['stats_card_data']['total_register_voters'],
+            'label' => 'Total Registered Voters',
+            'color' => 'blue',
+            'icon' => 'user',
+        ])
 
-        <!-- Running Candidates -->
-        <div class="bg-white rounded-xl p-4 flex items-center shadow-lg">
-            <div class="p-3 bg-yellow-500 rounded-lg mr-4">
-                <svg class="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
-                </svg>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-gray-900">
-                    {{ $data['stats_card_data']['running_candidates'] }}
-                </div>
-                <div class="text-[10px] text-gray-500 uppercase font-semibold text-nowrap">Running Candidates</div>
-            </div>
-        </div>
+        @include('components.dashboard.statcard', [
+            'value' => $data['stats_card_data']['live_vote_cast'],
+            'label' => 'Live Votes Cast',
+            'color' => 'green',
+            'icon' => 'check-circle',
+        ])
 
-        <!-- Turnout Rates -->
-        <div class="bg-white rounded-xl p-4 flex items-center shadow-lg">
-            <div class="p-3 bg-red-500 rounded-lg mr-4">
-                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z"></path>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z"></path>
-                </svg>
-            </div>
-            <div>
-                <div class="text-3xl font-bold text-gray-900">
-                    {{ $data['stats_card_data']['turn_out_rates']['turnout_percent'] }}%
-                </div>
-                <div class="text-[10px] text-gray-500 uppercase font-semibold text-nowrap">Turnout Rates</div>
-            </div>
-        </div>
+        @include('components.dashboard.statcard', [
+            'value' => $data['stats_card_data']['running_candidates'],
+            'label' => 'Running Candidates',
+            'color' => 'yellow',
+            'icon' => 'users',
+        ])
+
+        @include('components.dashboard.statcard', [
+            'value' => $data['stats_card_data']['turn_out_rates']['turnout_percent'] . '%',
+            'label' => 'Turnout Rates',
+            'color' => 'red',
+            'icon' => 'percent',
+        ])
+
     </div>
 
-    <!-- ... rest of your file (Results Section) -->
+    {{-- ── Section Header ──────────────────────────────────────────────────── --}}
+    <div class="flex items-center gap-2 mb-5">
+        <span class="w-3 h-3 rounded-full bg-red-500 animate-pulse inline-block"></span>
+        <h3 class="text-white font-extrabold text-sm tracking-widest uppercase">Live Candidate Results</h3>
+    </div>
 
+    {{-- ── Main Grid: Results + Sidebar ────────────────────────────────────── --}}
     <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-        <div class="lg:col-span-3 bg-white rounded-2xl p-6 shadow-xl">
-             <h3 class="text-blue-900 font-bold text-md mb-6 uppercase">Live Candidates Result</h3>
 
-             {{-- Example of how to loop through dynamic candidate results once you have them --}}
-             @forelse($data['live_candidate_result'] as $candidate)
-                @include('components.candidate-row', [
-                    'name' => $candidate['name'],
-                    'votes' => $candidate['votes'],
-                    'percentage' => $candidate['percentage'],
+        {{-- Left: Candidate Results by Position --}}
+        <div class="lg:col-span-3 flex flex-col gap-5">
+
+            @forelse($data['live_candidate_result'] as $position => $candidates)
+                @include('components.dashboard.candidateposistioncard', [
+                    'position' => $position,
+                    'candidates' => $candidates,
                 ])
-             @empty
-                <p class="text-gray-400 italic">No candidate results available yet.</p>
-             @endforelse
+            @empty
+                <div class="bg-white/10 rounded-2xl p-8 text-center text-white/50 italic">
+                    No candidate results available yet.
+                </div>
+            @endforelse
+
         </div>
+
+        {{-- Right Sidebar --}}
+        <div class="lg:col-span-2 flex flex-col gap-5">
+
+            @include('components.dashboard.realtimeturnoutcard', [
+                'turnout' => $data['realtime_turnout'],
+            ])
+
+            @include('components.dashboard.yearlevelturnoutcard', [
+                'yearLevels' => $data['per_year_level_turnout'],
+            ])
+
+        </div>
+
     </div>
+
 @endsection
