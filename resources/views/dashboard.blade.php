@@ -1,38 +1,37 @@
 @extends('components.admin-layout')
-@section('title', 'Admin Dashboard')
+@section('MCC', 'Voting System')
 @section('content')
 
     <h2 class="text-2xl font-bold text-white mb-6">Dashboard</h2>
 
-    {{-- ── Stats Cards ─────────────────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 
         @include('components.dashboard.statcard', [
             'value' => $data['stats_card_data']['total_register_voters'],
             'label' => 'Total Registered Voters',
             'color' => 'blue',
-            'icon'  => 'user',
+            'icon' => 'user',
         ])
 
         @include('components.dashboard.statcard', [
             'value' => $data['stats_card_data']['live_vote_cast'],
             'label' => 'Live Votes Cast',
             'color' => 'green',
-            'icon'  => 'check-circle',
+            'icon' => 'check-circle',
         ])
 
         @include('components.dashboard.statcard', [
             'value' => $data['stats_card_data']['running_candidates'],
             'label' => 'Running Candidates',
             'color' => 'yellow',
-            'icon'  => 'users',
+            'icon' => 'users',
         ])
 
         @include('components.dashboard.statcard', [
             'value' => $data['stats_card_data']['turn_out_rates']['turnout_percent'] . '%',
             'label' => 'Turnout Rates',
             'color' => 'red',
-            'icon'  => 'percent',
+            'icon' => 'percent',
         ])
 
     </div>
@@ -51,7 +50,7 @@
 
             @forelse($data['live_candidate_result'] as $position => $candidates)
                 @include('components.dashboard.candidateposistioncard', [
-                    'position'   => $position,
+                    'position' => $position,
                     'candidates' => $candidates,
                 ])
             @empty
