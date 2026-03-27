@@ -13,7 +13,13 @@ class RegisterVotes
         $this->votesRepository = $votesRepository;
     }
 
-    public function liveVoteCast():int{
+    public function liveVoteCast(): int
+    {
         return $this->votesRepository->liveVoteCast();
+    }
+
+    public function liveCandidateResult(): array
+    {
+        return $this->votesRepository->liveCandidateResult();
     }
 }

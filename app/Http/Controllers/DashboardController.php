@@ -27,22 +27,16 @@ class DashboardController extends Controller
     }
     public function index(): View
     {
-        $total_register_voters = $this->registerUser->total_registered_voters();
-        $live_vote_cast = $this->registerVote->liveVoteCast();
-        $running_candidates = $this->registerCandidates->getRunnCandidatesCount();
-        $turn_out_rates = $this->registerUser->turnOutRates();
-        $live_candidate_result = [];
-        $senators = [];
-
         $data = [
             "stats_card_data" => [
-                "total_register_voters" => $total_register_voters,
-                "live_vote_cast" => $live_vote_cast,
-                "running_candidates" => $running_candidates,
-                "turn_out_rates" => $turn_out_rates,
+                "total_register_voters" => $this->registerUser->total_registered_voters(),
+                "live_vote_cast" => $this->registerVote->liveVoteCast(),
+                "running_candidates" =>  $this->registerCandidates->getRunnCandidatesCount(),
+                "turn_out_rates" => $this->registerUser->turnOutRates(),
             ],
-            "live_candidate_result" => $live_candidate_result,
-            "senators" => $senators,
+            "live_candidate_result" => $this->registerVote->liveCandidateResult(),
+            "realtime_turnout" => $this->registerUser->realtimeVoterTurnout(),
+            "per_year_level_turnout" => $this->registerUser->voterTurnoutByYearLevel(),
         ];
         // dd($data);
         return view('dashboard', compact('data'));

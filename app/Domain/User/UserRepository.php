@@ -64,4 +64,6 @@ interface UserRepository
     public function countStudentVoters(): int;
     public function countTotalStudents(): int;
     public function getVoterTurnout(): array;
+    public function realtimeVoterTurnout(): array;
+    public function voterTurnoutByYearLevel(): array;
 }

@@ -136,10 +136,20 @@ class FirebaseSeeder extends Seeder
         return date('Y-m-d\TH:i:s', rand($startTs, $endTs));
     }
 
-    private function generateStudentId(int $seq): string
+    /**
+     * Generate a student ID encoding the enrollment year and a sequential number.
+     * Format: STU-{enrollYear}-{seq}
+     * Examples: STU-2023-001, STU-2026-100
+     *
+     * Enrollment years map to year levels (as of the current year):
+     *   currentYear - 0 → 1st Year (enrolled this year)
+     *   currentYear - 1 → 2nd Year
+     *   currentYear - 2 → 3rd Year
+     *   currentYear - 3 → 4th Year
+     */
+    private function generateStudentId(int $enrollYear, int $seq): string
     {
-        $yearSuffix = substr(date('Y'), 1);
-        return 'STU-' . $yearSuffix . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
+        return 'STU-' . $enrollYear . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
     }
 
     private function generateUserId(string $role): string
@@ -180,34 +190,56 @@ class FirebaseSeeder extends Seeder
             ]));
         }
 
-        // ── 300 student accounts ─────────────────────────────────────────────
+        // ── 100 students per enrollment year (400 total across 4 year levels) ─
+        // Enrollment years: currentYear-3 (4th yr) → currentYear (1st yr)
         $firstNames  = ['Juan','Maria','Jose','Ana','Miguel','Rosa','Carlos','Luz','Ramon','Elena','Pedro','Sofia','Luis','Carmen','Antonio','Isabel','Diego','Patricia','Eduardo','Monica','Felix','Jasmine','Cedric','Janine','Ryan','Aileen','Mark','Christine','Kevin','Trisha'];
         $middleNames = ['Santos','Reyes','Cruz','Dela Cruz','Garcia','Mendoza','Lopez','Torres','Hernandez','Flores'];
         $lastNames   = ['Bautista','Villanueva','Ramos','Castro','Aquino','Gonzales','Diaz','Marquez','Quispe','Lim','Tan','Go','Chan','Uy','Chua','Sy','Ko','Ng','Yu','Dee'];
 
-        $this->logInfo('Generating 300 student accounts...');
+        $currentYear  = (int) date('Y');
+        $enrollYears  = [
+            $currentYear - 3, // 4th Year
+            $currentYear - 2, // 3rd Year
+            $currentYear - 1, // 2nd Year
+            $currentYear,     // 1st Year
+        ];
 
-        for ($i = 1; $i <= 300; $i++) {
-            $userId = $this->generateUserId('student');
-            $this->set('users', $userId, [
-                'id'                => $userId,
-                'first_name'        => $firstNames[array_rand($firstNames)],
-                'middle_name'       => $middleNames[array_rand($middleNames)],
-                'last_name'         => $lastNames[array_rand($lastNames)],
-                'email'             => 'student' . str_pad($i, 4, '0', STR_PAD_LEFT) . '@school.edu',
-                'password'          => $password,
-                'role'              => 'student',
-                'student_id'        => $this->generateStudentId($i),
-                'teacher_id'        => null,
-                'admin_id'          => null,
-                'email_verified_at' => $this->daysAgo(rand(10, 180)),
-                'remember_token'    => null,
-                'created_at'        => $this->daysAgo(rand(10, 180)),
-                'updated_at'        => $this->daysAgo(rand(1, 10)),
-            ]);
+        $emailCounter = 1;
+
+        foreach ($enrollYears as $enrollYear) {
+            $yearLevel = $currentYear - $enrollYear + 1;
+            $this->logInfo("Generating 100 students enrolled in {$enrollYear} (Year {$yearLevel})...");
+
+            for ($seq = 1; $seq <= 100; $seq++) {
+                $userId = $this->generateUserId('student');
+
+                // Students enrolled earlier have older account timestamps
+                $daysOld = ($currentYear - $enrollYear) * 365 + rand(0, 60);
+
+                $this->set('users', $userId, [
+                    'id'                => $userId,
+                    'first_name'        => $firstNames[array_rand($firstNames)],
+                    'middle_name'       => $middleNames[array_rand($middleNames)],
+                    'last_name'         => $lastNames[array_rand($lastNames)],
+                    'email'             => 'student' . str_pad($emailCounter, 4, '0', STR_PAD_LEFT) . '@school.edu',
+                    'password'          => $password,
+                    'role'              => 'student',
+                    'student_id'        => $this->generateStudentId($enrollYear, $seq),
+                    'teacher_id'        => null,
+                    'admin_id'          => null,
+                    'email_verified_at' => $this->daysAgo($daysOld),
+                    'remember_token'    => null,
+                    'created_at'        => $this->daysAgo($daysOld),
+                    'updated_at'        => $this->daysAgo(rand(1, 30)),
+                ]);
+
+                $emailCounter++;
+            }
+
+            $this->logSuccess("Enrollment year {$enrollYear} (Year {$yearLevel}): 100 students seeded.");
         }
 
-        $this->logSuccess('300 students seeded successfully.');
+        $this->logSuccess('400 students seeded successfully (100 per year level).');
     }
 
     private function seedElections(): void
@@ -354,7 +386,7 @@ class FirebaseSeeder extends Seeder
         // ── election_001 (closed) — 100% turnout, 4 positions, 2 candidates each ─
         $election001Config = [
             'election_id' => 'election_001',
-            'voter_count' => min(300, $totalStudents),
+            'voter_count' => min(400, $totalStudents),
             'start'       => $this->daysAgo(10),
             'end'         => $this->daysAgo(3),
             'positions'   => [
@@ -434,8 +466,8 @@ class FirebaseSeeder extends Seeder
                 'file_size_bytes' => 204800,
                 'filters'         => null,
                 'summary'         => [
-                    'total_votes'     => 300 * 4,
-                    'total_voters'    => 300,
+                    'total_votes'     => 400 * 4,
+                    'total_voters'    => 400,
                     'turnout_percent' => 100.0,
                     'positions'       => ['President', 'Vice President', 'Secretary', 'Treasurer'],
                 ],
