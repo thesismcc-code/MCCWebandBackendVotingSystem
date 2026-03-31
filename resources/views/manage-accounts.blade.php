@@ -227,6 +227,7 @@
                         <select name="role"
                             class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white appearance-none">
                             <option value="">Select Role</option>
+                            <option value="student">Student</option>
                             <option value="comelec">Comelec</option>
                             <option value="sao">SAO Head</option>
                         </select>
