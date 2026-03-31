@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class EloquentUserRepository implements UserRepository
 {
@@ -137,17 +138,27 @@ class EloquentUserRepository implements UserRepository
         $this->db->getChild($id)->remove();
     }
 
-    public function allUsers(): array
+    public function allUsers(int $perPage): LengthAwarePaginator
     {
-        $snapshot = $this->db->getSnapshot();
-        if (!$snapshot->exists() || $snapshot->getValue() === null) return [];
+       $snapshot = $this->db->getSnapshot();
 
-        $users = [];
-        foreach ($snapshot->getValue() as $key => $data) {
-            $users[] = $this->toUser((string) $key, $data);
-        }
+       if(!$snapshot->exists() || $snapshot->getValue() === null) {
+              return new LengthAwarePaginator([], 0, $perPage, 1);
+       }
 
-        return $users;
+       $users = collect($snapshot->getValue())->map(fn($data, $key) => $this->toUser((string) $key, $data))->values();
+
+       $currentPage = LengthAwarePaginator::resolveCurrentPage();
+       $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+       return new LengthAwarePaginator(
+            $currentItems,
+            $users->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+       );
+
     }
 
     public function countStudentsByYearPrefix(string $prefix): int
@@ -269,16 +280,6 @@ class EloquentUserRepository implements UserRepository
         ];
     }
 
-    /**
-     * Returns real-time voter turnout stats scoped to active elections.
-     *
-     * @return array{
-     *   total_students: int,
-     *   voted_count: int,
-     *   not_yet_voted: int,
-     *   turnout_percent: float
-     * }
-     */
     public function realtimeVoterTurnout(): array
     {
         $activeElectionIds = $this->getActiveElectionIds();
@@ -303,33 +304,11 @@ class EloquentUserRepository implements UserRepository
         ];
     }
 
-    /**
-     * Returns voter turnout broken down by year level, derived from enrollment year
-     * encoded in the student ID (format: STU-{enrollYear}-{seq}, e.g. STU-2023-001).
-     *
-     * Year level is calculated as: currentYear - enrollYear + 1
-     *   STU-2023-xxx in 2026 → 4th Year
-     *   STU-2024-xxx in 2026 → 3rd Year
-     *   STU-2025-xxx in 2026 → 2nd Year
-     *   STU-2026-xxx in 2026 → 1st Year
-     *
-     * Results are scoped to active elections and sorted from 1st Year to 4th Year.
-     *
-     * @return array<int, array{
-     *   year_level: string,
-     *   enroll_year: int,
-     *   total_students: int,
-     *   voted: int,
-     *   not_yet_voted: int,
-     *   turnout_percent: float
-     * }>
-     */
     public function voterTurnoutByYearLevel(): array
     {
         $activeElectionIds = $this->getActiveElectionIds();
         $currentYear       = (int) date('Y');
 
-        // Collect unique voter IDs scoped to active elections
         $votedByStudent = [];
 
         if (!empty($activeElectionIds)) {
@@ -353,9 +332,6 @@ class EloquentUserRepository implements UserRepository
             return [];
         }
 
-        // Group students by enrollment year extracted from student ID.
-        // Student ID format: STU-{enrollYear}-{seq}  e.g. STU-2023-001
-        // Parts after explode('-'): ['STU', '2023', '001']
         $yearGroups = [];
 
         foreach ($allUsers as $userId => $user) {

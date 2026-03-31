@@ -5,6 +5,7 @@ namespace App\Application\RegisterUser;
 use App\Domain\User\User;
 use App\Domain\User\UserRepository;
 use Illuminate\Support\Str;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RegisterUser
 {
@@ -91,9 +92,9 @@ class RegisterUser
         return $prefix . $sequence;
     }
 
-    public function getAllUsers(): array
+    public function getAllUsers(int $perPage): LengthAwarePaginator
     {
-        return $this->userRepository->allUsers();
+        return $this->userRepository->allUsers($perPage);
     }
 
     public function findByEmail(string $email): ?User

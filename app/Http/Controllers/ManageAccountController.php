@@ -11,7 +11,7 @@ use Illuminate\Support\Facades\Log;
 
 class ManageAccountController extends Controller
 {
-    private $registerUser;
+    private RegisterUser $registerUser;
 
     public function __construct(RegisterUser $registerUser)
     {
@@ -20,7 +20,8 @@ class ManageAccountController extends Controller
 
     public function index(): View
     {
-        return view('manage-accounts');
+        $data = $this->registerUser->getAllUsers(7);
+        return view('manage-accounts', compact('data'));
     }
 
     private function userValidationRules(): array
