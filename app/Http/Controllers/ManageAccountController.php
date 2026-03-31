@@ -21,8 +21,9 @@ class ManageAccountController extends Controller
     public function index(Request $request): View
     {
         $schoolYearFilter = $request->get("school_year");
+        $counts = $this->registerUser->countUsersSummary();
         $data = $this->registerUser->getAllUsers(7, $schoolYearFilter);
-        return view('manage-accounts', compact('data', 'schoolYearFilter'));
+        return view('manage-accounts', compact('data', 'schoolYearFilter', 'counts'));
     }
 
     private function userValidationRules(): array
@@ -33,7 +34,7 @@ class ManageAccountController extends Controller
             'last_name'   => 'required|string|max:100',
             'email'       => 'required|email|max:191',
             'password'    => 'required|min:6',
-            'role'        => 'required|in:student,teacher,admin,sao',
+            'role'        => 'required|in:student,comelec   ,admin,sao',
             'student_id'  => 'nullable|string|max:50',
             'teacher_id'  => 'nullable|string|max:50',
         ];

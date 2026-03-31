@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Hash;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
 
 class EloquentUserRepository implements UserRepository
 {
@@ -116,6 +117,8 @@ class EloquentUserRepository implements UserRepository
             $id     = $newRef->getKey();
         }
 
+        cache()->forget('all_users_raw');
+
         return $this->toUser((string) $id, [...$payload, 'id' => $id]);
     }
 
@@ -129,40 +132,32 @@ class EloquentUserRepository implements UserRepository
         ];
 
         $this->db->getChild($data->getId())->update($payload);
-
+        cache()->forget('all_users_raw');
         return $this->toUser($data->getId(), $payload);
     }
 
     public function deleteUser(string $id): void
     {
         $this->db->getChild($id)->remove();
+        cache()->forget('all_users_raw');
     }
 
     public function allUsers(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
     {
-        $cacheKey = "all_users_{$schoolYearFilter}";
+        $users = $this->getUsersCollection()
+            ->map(fn($data, $key) => $this->toUser((string) $key, $data))
+            ->when($schoolYearFilter, function ($collection) use ($schoolYearFilter) {
+                [$startYear, $endYear] = explode('-', $schoolYearFilter);
+                $start = Carbon::create($startYear, 8, 1)->startOfDay();
+                $end = Carbon::create($endYear, 7, 31)->endOfDay();
 
-        $users = cache()->remember($cacheKey, now()->addMinutes(5), function () use ($schoolYearFilter) {
-            $snapshot = $this->db->getSnapshot();
-            if (!$snapshot->exists() || $snapshot->getValue() === null) return collect();
+                return $collection->filter(
+                    fn($user) => Carbon::parse($user->getCreatedAt())->between($start, $end)
+                );
+            })
+            ->values();
 
-            return collect($snapshot->getValue())
-                ->map(fn($data, $key) => $this->toUser((string) $key, $data))
-                ->when($schoolYearFilter, function ($collection) use ($schoolYearFilter) {
-                    // e.g. school_year "2024-2025" → filter created_at between Aug 2024 – Jul 2025
-                    [$startYear, $endYear] = explode('-', $schoolYearFilter);
-                    $start = Carbon::create($startYear, 8, 1)->startOfDay();
-                    $end   = Carbon::create($endYear, 7, 31)->endOfDay();
-
-                    return $collection->filter(function ($user) use ($start, $end) {
-                        $createdAt = Carbon::parse($user->getCreatedAt());
-                        return $createdAt->between($start, $end);
-                    });
-                })
-                ->values();
-        });
-
-        $currentPage  = LengthAwarePaginator::resolveCurrentPage();
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
         $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
 
         return new LengthAwarePaginator(
@@ -438,5 +433,31 @@ class EloquentUserRepository implements UserRepository
             created_at: $data['created_at'] ?? null,
             updated_at: $data['updated_at'] ?? null,
         );
+    }
+    public function countUsersSummary(): array
+    {
+        $users = $this->getUsersCollection();
+
+        if ($users->isEmpty()) {
+            return ['total' => 0, 'comelec' => 0, 'sao' => 0, 'admin' => 0];
+        }
+
+        return [
+            'total'   => $users->count(),
+            'comelec' => $users->filter(fn($u) => ($u['role'] ?? '') === 'comelec')->count(),
+            'sao'     => $users->filter(fn($u) => ($u['role'] ?? '') === 'sao')->count(),
+            'admin'   => $users->filter(fn($u) => ($u['role'] ?? '') === 'admin')->count(),
+        ];
+    }
+
+    private function getUsersCollection(): Collection
+    {
+        return cache()->remember('all_users_raw', now()->addMinutes(5), function () {
+            $snapshot = $this->db->getSnapshot();
+            if (!$snapshot->exists() || $snapshot->getValue() === null) {
+                return collect();
+            }
+            return collect($snapshot->getValue());
+        });
     }
 }

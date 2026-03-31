@@ -285,7 +285,7 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[32px] font-bold text-gray-900 leading-tight">3</div>
+                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['total'] }}</div>
                     <div class="text-[12px] text-gray-500 font-semibold tracking-wide">Total Accounts</div>
                 </div>
             </div>
@@ -301,7 +301,7 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[32px] font-bold text-gray-900 leading-tight">2</div>
+                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['comelec'] }}</div>
                     <div class="text-[12px] text-gray-500 font-semibold tracking-wide">Comelec Officers</div>
                 </div>
             </div>
@@ -317,7 +317,7 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[32px] font-bold text-gray-900 leading-tight">1</div>
+                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['sao'] }}</div>
                     <div class="text-[12px] text-gray-500 font-semibold tracking-wide">SAO Head</div>
                 </div>
             </div>

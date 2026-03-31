@@ -119,4 +119,8 @@ class RegisterUser
     {
         return $this->userRepository->voterTurnoutByYearLevel();
     }
+    public function countUsersSummary(): array
+    {
+        return $this->userRepository->countUsersSummary();
+    }
 }
