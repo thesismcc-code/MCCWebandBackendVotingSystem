@@ -335,11 +335,16 @@
                     </svg>
                 </div>
                 <select
-                    class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer text-left relative z-20 overflow-hidden leading-5 m-0 align-middle">
-                    <option value="" class="text-black hidden" disabled selected>School Year</option>
-                    <option value="2023-2024" class="text-black py-2">School Year 2023 - 2024</option>
-                    <option value="2024-2025" class="text-black py-2">School Year 2024 - 2025</option>
-                    <option value="2025-2026" class="text-black py-2">School Year 2025 - 2026</option>
+                    onchange="window.location.href = '{{ route('view.manage-accounts') }}?school_year=' + this.value"
+                    class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
+
+                    <option value="" class="text-black" {{ !$schoolYearFilter ? 'selected' : '' }}>All Years</option>
+                    <option value="2023-2024" class="text-black" {{ $schoolYearFilter === '2023-2024' ? 'selected' : '' }}>
+                        School Year 2023 - 2024</option>
+                    <option value="2024-2025" class="text-black" {{ $schoolYearFilter === '2024-2025' ? 'selected' : '' }}>
+                        School Year 2024 - 2025</option>
+                    <option value="2025-2026" class="text-black" {{ $schoolYearFilter === '2025-2026' ? 'selected' : '' }}>
+                        School Year 2025 - 2026</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white z-20">
                     <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor"

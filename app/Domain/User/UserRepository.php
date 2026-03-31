@@ -48,7 +48,7 @@ interface UserRepository
      * @return LengthAwarePaginator
      * @throws UserPersistenceException
      */
-    public function allUsers(int $perPage): LengthAwarePaginator;
+    public function allUsers(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator;
 
     /**
      * @throws UserNotFoundException

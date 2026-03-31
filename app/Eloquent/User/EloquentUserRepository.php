@@ -138,27 +138,40 @@ class EloquentUserRepository implements UserRepository
         $this->db->getChild($id)->remove();
     }
 
-    public function allUsers(int $perPage): LengthAwarePaginator
+    public function allUsers(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
     {
-       $snapshot = $this->db->getSnapshot();
+        $cacheKey = "all_users_{$schoolYearFilter}";
 
-       if(!$snapshot->exists() || $snapshot->getValue() === null) {
-              return new LengthAwarePaginator([], 0, $perPage, 1);
-       }
+        $users = cache()->remember($cacheKey, now()->addMinutes(5), function () use ($schoolYearFilter) {
+            $snapshot = $this->db->getSnapshot();
+            if (!$snapshot->exists() || $snapshot->getValue() === null) return collect();
 
-       $users = collect($snapshot->getValue())->map(fn($data, $key) => $this->toUser((string) $key, $data))->values();
+            return collect($snapshot->getValue())
+                ->map(fn($data, $key) => $this->toUser((string) $key, $data))
+                ->when($schoolYearFilter, function ($collection) use ($schoolYearFilter) {
+                    // e.g. school_year "2024-2025" → filter created_at between Aug 2024 – Jul 2025
+                    [$startYear, $endYear] = explode('-', $schoolYearFilter);
+                    $start = Carbon::create($startYear, 8, 1)->startOfDay();
+                    $end   = Carbon::create($endYear, 7, 31)->endOfDay();
 
-       $currentPage = LengthAwarePaginator::resolveCurrentPage();
-       $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+                    return $collection->filter(function ($user) use ($start, $end) {
+                        $createdAt = Carbon::parse($user->getCreatedAt());
+                        return $createdAt->between($start, $end);
+                    });
+                })
+                ->values();
+        });
 
-       return new LengthAwarePaginator(
+        $currentPage  = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        return new LengthAwarePaginator(
             $currentItems,
             $users->count(),
             $perPage,
             $currentPage,
             ['path' => request()->url(), 'query' => request()->query()]
-       );
-
+        );
     }
 
     public function countStudentsByYearPrefix(string $prefix): int

@@ -92,9 +92,9 @@ class RegisterUser
         return $prefix . $sequence;
     }
 
-    public function getAllUsers(int $perPage): LengthAwarePaginator
+    public function getAllUsers(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
     {
-        return $this->userRepository->allUsers($perPage);
+        return $this->userRepository->allUsers($perPage, $schoolYearFilter);
     }
 
     public function findByEmail(string $email): ?User

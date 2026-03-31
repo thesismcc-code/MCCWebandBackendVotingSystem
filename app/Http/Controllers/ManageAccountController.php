@@ -18,10 +18,11 @@ class ManageAccountController extends Controller
         $this->registerUser = $registerUser;
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        $data = $this->registerUser->getAllUsers(7);
-        return view('manage-accounts', compact('data'));
+        $schoolYearFilter = $request->get("school_year");
+        $data = $this->registerUser->getAllUsers(7, $schoolYearFilter);
+        return view('manage-accounts', compact('data', 'schoolYearFilter'));
     }
 
     private function userValidationRules(): array
