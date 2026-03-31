@@ -16,6 +16,7 @@ class SessionAuthMiddleware
             'manage-accounts',
             'finger-print',
             'voting-logs',
+            'store-new-accounts',
             'election-control',
             'system-activity',
             'reports-and-analytics',
@@ -46,7 +47,7 @@ class SessionAuthMiddleware
 
     private const ROLE_HOME = [
         'admin'   => 'view.dashboard',
-        'sao'=> 'view.sao-dashboard',
+        'sao' => 'view.sao-dashboard',
         'teacher' => 'view.comelec-dashboard',
         'student' => 'view.student-dashboard',
     ];

@@ -44,7 +44,12 @@
     </style>
 </head>
 
-<body x-data="{ openModal: false, showDeleteModal: false, openEditModal: false, showEditPass: false }" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
+<body x-data="{
+    openModal: {{ session('show_add_modal') ? 'true' : 'false' }},
+    showDeleteModal: false,
+    openEditModal: false,
+    showEditPass: false
+}" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
 
     <!-- Assuming components exist dynamically. Example: -->
     <!-- @include('components.notification') -->
@@ -195,41 +200,78 @@
         <div @click.away="openModal = false"
             class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl text-gray-800 relative">
             <h2 class="text-2xl font-bold mb-6 text-gray-900">Add New Account</h2>
+            {{-- General error banner --}}
+            @if (session('error') || $errors->has('general'))
+                <div
+                    class="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-[13px] font-medium">
+                    {{ session('error') ?? $errors->first('general') }}
+                </div>
+            @endif
+
+            {{-- Success banner --}}
+            @if (session('success'))
+                <div
+                    class="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-600 text-[13px] font-medium">
+                    {{ session('success') }}
+                </div>
+            @endif
 
             <!-- Placeholder Form Route Layout - Keep mapped backend constraints if known natively: -->
-            <!-- <form action="{{ route('store.new-accounts') }}" ... -->
-            <form class="space-y-4" method="POST" action="">
-                <!-- Token Mock -->
-                <!-- @csrf -->
+            <form action="{{ route('store.new-accounts') }}" class="space-y-4" method="POST">
+                @csrf
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">First Name</label>
-                    <input type="text" name="first_name" placeholder="Enter First Name"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    <input type="text" name="first_name" value="{{ old('first_name') }}"
+                        placeholder="Enter First Name"
+                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('first_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @error('first_name')
+                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Middle Name</label>
-                    <input type="text" name="middle_name" placeholder="Enter Middle Name"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    <input type="text" name="middle_name" value="{{ old('middle_name') }}"
+                        placeholder="Enter Middle Name"
+                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('middle_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @error('middle_name')
+                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Last Name</label>
-                    <input type="text" name="last_name" placeholder="Enter Last Name"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    <input type="text" name="last_name" value="{{ old('last_name') }}"
+                        placeholder="Enter Last Name"
+                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('last_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @error('last_name')
+                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Email Address</label>
-                    <input type="email" name="email" placeholder="example@gmail.com"
-                        class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    <input type="email" name="email" value="{{ old('email') }}"
+                        placeholder="example@gmail.com"
+                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('email') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @error('email')
+                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Role</label>
                     <div class="relative">
                         <select name="role"
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white appearance-none">
+                            class="w-full px-4 py-3 rounded-xl border {{ $errors->has('role') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white appearance-none">
                             <option value="">Select Role</option>
-                            <option value="student">Student</option>
-                            <option value="comelec">Comelec</option>
-                            <option value="sao">SAO Head</option>
+                            <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student
+                            </option>
+                            <option value="comelec" {{ old('role') === 'comelec' ? 'selected' : '' }}>Comelec
+                            </option>
+                            <option value="sao" {{ old('role') === 'sao' ? 'selected' : '' }}>SAO Head
+                            </option>
                         </select>
                         <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -238,16 +280,20 @@
                             </svg>
                         </div>
                     </div>
+                    @error('role')
+                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div>
-                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1 flex justify-between">
-                        Password
-                    </label>
-                    <div class="relative">
-                        <input type="password" name="password" placeholder="Enter Password"
-                            class="w-full px-4 py-3 rounded-xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                    </div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Password</label>
+                    <input type="password" name="password" placeholder="Enter Password"
+                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('password') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @error('password')
+                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                    @enderror
                 </div>
+
                 <div class="flex gap-3 pt-4">
                     <button type="button" @click="openModal = false"
                         class="flex-1 py-3 rounded-xl border border-red-400 text-red-500 font-bold text-xs hover:bg-red-50 uppercase tracking-wide transition-colors">Cancel</button>
