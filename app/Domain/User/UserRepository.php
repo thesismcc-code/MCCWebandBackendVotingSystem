@@ -5,6 +5,7 @@ namespace App\Domain\User;
 use App\Domain\User\Exceptions\UserNotFoundException;
 use App\Domain\User\Exceptions\UserEmailNotFoundException;
 use App\Domain\User\Exceptions\UserPersistenceException;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 interface UserRepository
 {
@@ -44,10 +45,10 @@ interface UserRepository
     public function deleteUser(string $id): void;
 
     /**
-     * @return User[]
+     * @return LengthAwarePaginator
      * @throws UserPersistenceException
      */
-    public function allUsers(): array;
+    public function allUsers(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator;
 
     /**
      * @throws UserNotFoundException
@@ -66,4 +67,5 @@ interface UserRepository
     public function getVoterTurnout(): array;
     public function realtimeVoterTurnout(): array;
     public function voterTurnoutByYearLevel(): array;
+    public function countUsersSummary():array;
 }

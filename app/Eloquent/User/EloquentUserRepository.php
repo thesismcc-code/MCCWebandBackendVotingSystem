@@ -8,6 +8,9 @@ use Carbon\Carbon;
 use Illuminate\Support\Facades\Hash;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class EloquentUserRepository implements UserRepository
 {
@@ -103,6 +106,7 @@ class EloquentUserRepository implements UserRepository
         $payload = [
             ...$data->toArray(),
             'password'   => Hash::make($data->getPassword()),
+            'is_deleted' => false,
             'created_at' => $now,
             'updated_at' => $now,
         ];
@@ -114,6 +118,20 @@ class EloquentUserRepository implements UserRepository
             $newRef = $this->db->push($payload);
             $id     = $newRef->getKey();
         }
+
+        Log::info('New account created', [
+            'firebase_key' => $id,
+            'email'        => $data->getEmail(),
+            'role'         => $data->getRole(),
+            'first_name'   => $data->getFirstName(),
+            'last_name'    => $data->getLastName(),
+            'admin_id'     => $data->getAdminId(),
+            'student_id'   => $data->getStudentId(),
+            'comelec_id'   => $data->getComelecId(),
+            'created_at'   => $now,
+        ]);
+
+        cache()->forget('all_users_raw');
 
         return $this->toUser((string) $id, [...$payload, 'id' => $id]);
     }
@@ -128,26 +146,45 @@ class EloquentUserRepository implements UserRepository
         ];
 
         $this->db->getChild($data->getId())->update($payload);
-
+        cache()->forget('all_users_raw');
         return $this->toUser($data->getId(), $payload);
     }
 
     public function deleteUser(string $id): void
     {
-        $this->db->getChild($id)->remove();
+        $this->db->getChild($id)->update([
+            'is_deleted' => true,
+            'updated_at' => Carbon::now()->toDateTimeLocalString(),
+        ]);
+
+        cache()->forget('all_users_raw');
     }
 
-    public function allUsers(): array
+    public function allUsers(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
     {
-        $snapshot = $this->db->getSnapshot();
-        if (!$snapshot->exists() || $snapshot->getValue() === null) return [];
+        $users = $this->getUsersCollection()
+            ->map(fn($data, $key) => $this->toUser((string) $key, $data))
+            ->when($schoolYearFilter, function ($collection) use ($schoolYearFilter) {
+                [$startYear, $endYear] = explode('-', $schoolYearFilter);
+                $start = Carbon::create($startYear, 8, 1)->startOfDay();
+                $end = Carbon::create($endYear, 7, 31)->endOfDay();
 
-        $users = [];
-        foreach ($snapshot->getValue() as $key => $data) {
-            $users[] = $this->toUser((string) $key, $data);
-        }
+                return $collection->filter(
+                    fn($user) => Carbon::parse($user->getCreatedAt())->between($start, $end)
+                );
+            })
+            ->values();
 
-        return $users;
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        return new LengthAwarePaginator(
+            $currentItems,
+            $users->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
     }
 
     public function countStudentsByYearPrefix(string $prefix): int
@@ -269,16 +306,6 @@ class EloquentUserRepository implements UserRepository
         ];
     }
 
-    /**
-     * Returns real-time voter turnout stats scoped to active elections.
-     *
-     * @return array{
-     *   total_students: int,
-     *   voted_count: int,
-     *   not_yet_voted: int,
-     *   turnout_percent: float
-     * }
-     */
     public function realtimeVoterTurnout(): array
     {
         $activeElectionIds = $this->getActiveElectionIds();
@@ -303,33 +330,11 @@ class EloquentUserRepository implements UserRepository
         ];
     }
 
-    /**
-     * Returns voter turnout broken down by year level, derived from enrollment year
-     * encoded in the student ID (format: STU-{enrollYear}-{seq}, e.g. STU-2023-001).
-     *
-     * Year level is calculated as: currentYear - enrollYear + 1
-     *   STU-2023-xxx in 2026 → 4th Year
-     *   STU-2024-xxx in 2026 → 3rd Year
-     *   STU-2025-xxx in 2026 → 2nd Year
-     *   STU-2026-xxx in 2026 → 1st Year
-     *
-     * Results are scoped to active elections and sorted from 1st Year to 4th Year.
-     *
-     * @return array<int, array{
-     *   year_level: string,
-     *   enroll_year: int,
-     *   total_students: int,
-     *   voted: int,
-     *   not_yet_voted: int,
-     *   turnout_percent: float
-     * }>
-     */
     public function voterTurnoutByYearLevel(): array
     {
         $activeElectionIds = $this->getActiveElectionIds();
         $currentYear       = (int) date('Y');
 
-        // Collect unique voter IDs scoped to active elections
         $votedByStudent = [];
 
         if (!empty($activeElectionIds)) {
@@ -353,9 +358,6 @@ class EloquentUserRepository implements UserRepository
             return [];
         }
 
-        // Group students by enrollment year extracted from student ID.
-        // Student ID format: STU-{enrollYear}-{seq}  e.g. STU-2023-001
-        // Parts after explode('-'): ['STU', '2023', '001']
         $yearGroups = [];
 
         foreach ($allUsers as $userId => $user) {
@@ -425,7 +427,7 @@ class EloquentUserRepository implements UserRepository
             role: $data['role'] ?? '',
             admin_id: $data['admin_id'] ?? null,
             student_id: $data['student_id'] ?? null,
-            teacher_id: $data['teacher_id'] ?? null,
+            comelec_id: $data['comelec_id'] ?? null,
             email_verified_at: $data['email_verified_at'] ?? null,
             created_at: $data['created_at'] ?? null,
             updated_at: $data['updated_at'] ?? null,
@@ -444,10 +446,36 @@ class EloquentUserRepository implements UserRepository
             role: $data['role'] ?? '',
             admin_id: $data['admin_id'] ?? null,
             student_id: $data['student_id'] ?? null,
-            teacher_id: $data['teacher_id'] ?? null,
+            comelec_id: $data['comelec_id'] ?? null,
             email_verified_at: $data['email_verified_at'] ?? null,
             created_at: $data['created_at'] ?? null,
             updated_at: $data['updated_at'] ?? null,
         );
+    }
+    public function countUsersSummary(): array
+    {
+        $users = $this->getUsersCollection();
+
+        if ($users->isEmpty()) {
+            return ['total' => 0, 'comelec' => 0, 'sao' => 0, 'admin' => 0];
+        }
+
+        return [
+            'total'   => $users->count(),
+            'comelec' => $users->filter(fn($u) => ($u['role'] ?? '') === 'comelec')->count(),
+            'sao'     => $users->filter(fn($u) => ($u['role'] ?? '') === 'sao')->count(),
+            'admin'   => $users->filter(fn($u) => ($u['role'] ?? '') === 'admin')->count(),
+        ];
+    }
+
+    private function getUsersCollection(): Collection
+    {
+        return cache()->remember('all_users_raw', now()->addMinutes(5), function () {
+            $snapshot = $this->db->getSnapshot();
+            if (!$snapshot->exists() || $snapshot->getValue() === null) {
+                return collect();
+            }
+            return collect($snapshot->getValue())->filter(fn($user) => empty($user['is_deleted']));
+        });
     }
 }

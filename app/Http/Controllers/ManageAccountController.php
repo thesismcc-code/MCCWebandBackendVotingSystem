@@ -11,16 +11,19 @@ use Illuminate\Support\Facades\Log;
 
 class ManageAccountController extends Controller
 {
-    private $registerUser;
+    private RegisterUser $registerUser;
 
     public function __construct(RegisterUser $registerUser)
     {
         $this->registerUser = $registerUser;
     }
 
-    public function index(): View
+    public function index(Request $request): View
     {
-        return view('manage-accounts');
+        $schoolYearFilter = $request->get("school_year");
+        $counts = $this->registerUser->countUsersSummary();
+        $data = $this->registerUser->getAllUsers(7, $schoolYearFilter);
+        return view('manage-accounts', compact('data', 'schoolYearFilter', 'counts'));
     }
 
     private function userValidationRules(): array
@@ -31,7 +34,7 @@ class ManageAccountController extends Controller
             'last_name'   => 'required|string|max:100',
             'email'       => 'required|email|max:191',
             'password'    => 'required|min:6',
-            'role'        => 'required|in:student,teacher,admin,sao',
+            'role'        => 'required|in:student,comelec,admin,sao',
             'student_id'  => 'nullable|string|max:50',
             'teacher_id'  => 'nullable|string|max:50',
         ];
@@ -98,23 +101,29 @@ class ManageAccountController extends Controller
         );
 
         if ($validator->fails()) {
-            return back()
+            return redirect()->route('view.manage-accounts')
+                ->withErrors($validator)
                 ->withInput()
-                ->with('error', $validator->errors()->first());
+                ->with('show_add_modal', true);
         }
 
         try {
             $this->registerUser->newUser($validator->validated());
-
-            return back()->with('success', 'Account has been created successfully.');
+            Log::info('New account created: ' . $validator->validated()['email']);
+            return redirect()->route('view.manage-accounts')
+                ->with('success', 'Account has been created successfully.');
         } catch (\InvalidArgumentException $e) {
-            return back()
+            Log::info($e->getMessage());
+            return redirect()->route('view.manage-accounts')
+                ->withErrors(['email' => $e->getMessage()])
                 ->withInput()
-                ->with('error', $e->getMessage());
+                ->with('show_add_modal', true);
         } catch (\Exception $e) {
-            return back()
+            Log::info($e->getMessage());
+            return redirect()->route('view.manage-accounts')
+                ->withErrors(['general' => 'Something went wrong. Please try again.'])
                 ->withInput()
-                ->with('error', 'Something went wrong. Please try again.');
+                ->with('show_add_modal', true);
         }
     }
 }

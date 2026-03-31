@@ -5,6 +5,7 @@ namespace App\Application\RegisterUser;
 use App\Domain\User\User;
 use App\Domain\User\UserRepository;
 use Illuminate\Support\Str;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class RegisterUser
 {
@@ -38,8 +39,8 @@ class RegisterUser
             $studentId = $this->generateStudentID();
         }
 
-        if ($data['role'] === 'teacher') {
-            $userId    = $this->generateID('teacher');
+        if ($data['role'] === 'comelec') {
+            $userId    = $this->generateID('comelec');
             $teacherId = $userId;
         }
 
@@ -58,7 +59,7 @@ class RegisterUser
             role: $data['role'],
             admin_id: $adminId,
             student_id: $studentId,
-            teacher_id: $teacherId,
+            comelec_id: $teacherId,
             email_verified_at: null,
             created_at: null,
             updated_at: null,
@@ -72,7 +73,7 @@ class RegisterUser
         $prefix = match ($role) {
             'admin'   => 'ADM',
             'student' => 'STU',
-            'teacher' => 'THR',
+            'comelec' => 'COM',
             'sao'     => 'SAO',
             default   => throw new \InvalidArgumentException('Invalid role')
         };
@@ -91,9 +92,9 @@ class RegisterUser
         return $prefix . $sequence;
     }
 
-    public function getAllUsers(): array
+    public function getAllUsers(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
     {
-        return $this->userRepository->allUsers();
+        return $this->userRepository->allUsers($perPage, $schoolYearFilter);
     }
 
     public function findByEmail(string $email): ?User
@@ -117,5 +118,9 @@ class RegisterUser
     public function voterTurnoutByYearLevel(): array
     {
         return $this->userRepository->voterTurnoutByYearLevel();
+    }
+    public function countUsersSummary(): array
+    {
+        return $this->userRepository->countUsersSummary();
     }
 }

@@ -35,7 +35,7 @@ class EloquentAuthRepository implements AuthRepository
             'email'       => $user->getEmail(),
             'role'        => $user->getRole(),
             'student_id'  => $user->getStudentId(),
-            'teacher_id'  => $user->getTeacherId(),
+            'comelec_id'  => $user->getComelecId(),
             'admin_id'    => $user->getAdminId(),
         ]);
 
@@ -97,7 +97,7 @@ class EloquentAuthRepository implements AuthRepository
                 'first_name'  => $user->getFirstName(),
                 'last_name'   => $user->getLastName(),
                 'student_id'  => $user->getStudentId(),
-                'teacher_id'  => $user->getTeacherId(),
+                'comelec_id'  => $user->getComelecId(),
                 'admin_id'    => $user->getAdminId(),
             ])->make();
 

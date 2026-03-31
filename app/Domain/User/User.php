@@ -12,7 +12,8 @@ class User
     private string $password;
     private string $role;
     private ?string $admin_id;
-    private ?string $student_id;    private ?string $teacher_id;
+    private ?string $student_id;
+    private ?string $comelec_id;
     private ?string $email_verified_at;
     private ?string $created_at;
     private ?string $updated_at;
@@ -27,7 +28,7 @@ class User
         string $role,
         ?string $admin_id = null,
         ?string $student_id = null,
-        ?string $teacher_id = null,
+        ?string $comelec_id = null,
         ?string $email_verified_at = null,
         ?string $created_at = null,
         ?string $updated_at = null
@@ -41,7 +42,7 @@ class User
         $this->role = $role;
         $this->admin_id = $admin_id;
         $this->student_id = $student_id;
-        $this->teacher_id = $teacher_id;
+        $this->comelec_id = $comelec_id;
         $this->email_verified_at = $email_verified_at;
         $this->created_at = $created_at;
         $this->updated_at = $updated_at;
@@ -59,7 +60,7 @@ class User
             'role' => $this->role,
             'admin_id' => $this->admin_id,
             'student_id' => $this->student_id,
-            'teacher_id' => $this->teacher_id,
+            'comelec_id' => $this->comelec_id,
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
@@ -101,7 +102,8 @@ class User
         return $this->role;
     }
 
-    public function getAdminId(): ?string{
+    public function getAdminId(): ?string
+    {
         return $this->admin_id;
     }
 
@@ -110,9 +112,9 @@ class User
         return $this->student_id;
     }
 
-    public function getTeacherId(): ?string
+    public function getComelecId(): ?string
     {
-        return $this->teacher_id;
+        return $this->comelec_id;
     }
 
     public function getEmailVerifiedAt(): ?string
