@@ -29,6 +29,8 @@ Route::post('/login',  [AuthController::class, 'login'])->name('login.post');
 
 Route::get('/students',         [AuthController::class, 'studentIndex'])->name('view.student');
 Route::post('/validate-login',  [AuthController::class, 'studentLogin'])->name('validate-login');
+Route::get('/students-tutorials',            [StudentTutorialController::class, 'index'])->name('view.student-tutorials');
+Route::get('/students-how-to-vote',          [StudentVoteTutorialController::class, 'index'])->name('view.students-how-to-vote');
 
 // ── Admin routes ──────────────────────────────────────────────
 Route::middleware('auth.session')->group(function () {
@@ -72,7 +74,4 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/students-update-profile',      [StudentProfileController::class, 'updateProfile'])->name('update-profile');
     Route::get('/students-verification',         [StudentVerificationController::class, 'index'])->name('view.student-verification');
     Route::post('/students-validate-verification', [StudentVerificationController::class, 'validateVerify'])->name('student-validateß-verification');
-    Route::get('/students-tutorials',            [StudentTutorialController::class, 'index'])->name('view.student-tutorials');
-    Route::get('/students-how-to-vote',          [StudentVoteTutorialController::class, 'index'])->name('view.students-how-to-vote');
-
 });

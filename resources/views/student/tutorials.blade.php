@@ -224,7 +224,7 @@
             <img src="{{ asset('icons/logo_white_bg.png') }}" alt="logo">
             <span class="logo-title">Account Tutorial</span>
         </div>
-        <a href="{{route('view.student-dashboard')}}" class="nav-home">Home</a>
+        <a href="{{route('view.student')}}" class="nav-home">Home</a>
     </header>
 
     <main class="tutorial-wrapper">

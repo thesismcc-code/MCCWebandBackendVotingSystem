@@ -291,8 +291,12 @@
                 <h1>Welcome to the Official<br>MCC Voting Portal.</h1>
                 <p>Your Vote, Your Voice — Anywhere.</p>
                 <div class="left-actions">
-                    <button>Account Setup</button>
-                    <button>How to vote?</button>
+                    <a href="{{ route('view.student-tutorials') }}">
+                        <button type="button">Account Setup</button>
+                    </a>
+                    <a href="{{ route('view.students-how-to-vote') }}">
+                        <button type="button">How to vote?</button>
+                    </a>
                 </div>
             </div>
         </div>
@@ -308,8 +312,10 @@
                 <div class="sign-as">Sign as</div>
 
                 <div class="toggle-container">
-                    <button class="tab-btn active" type="button" data-type="old" onclick="switchStudentType(this)">Old Student</button>
-                    <button class="tab-btn" type="button" data-type="new" onclick="switchStudentType(this)">New Student</button>
+                    <button class="tab-btn active" type="button" data-type="old" onclick="switchStudentType(this)">Old
+                        Student</button>
+                    <button class="tab-btn" type="button" data-type="new" onclick="switchStudentType(this)">New
+                        Student</button>
                 </div>
 
                 {{-- Old Student Form --}}
@@ -328,11 +334,14 @@
                         <div class="password-wrapper">
                             <input type="password" class="form-control pr-icon" id="password_old" name="password"
                                 placeholder="Enter your password">
-                            <button type="button" class="toggle-pass" onclick="togglePasswordVisibility('password_old', 'eyeIcon_old')">
+                            <button type="button" class="toggle-pass"
+                                onclick="togglePasswordVisibility('password_old', 'eyeIcon_old')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round" id="eyeIcon_old">
-                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                    </path>
                                     <line x1="1" y1="1" x2="23" y2="23"></line>
                                 </svg>
                             </button>
@@ -343,7 +352,8 @@
                 </form>
 
                 {{-- New Student Form --}}
-                <form id="form-new-student" action="{{ route('student.login') }}" method="POST" autocomplete="off" style="display: none;">
+                <form id="form-new-student" action="{{ route('student.login') }}" method="POST" autocomplete="off"
+                    style="display: none;">
                     @csrf
                     <input type="hidden" name="student_type" value="New Student">
 
@@ -358,11 +368,14 @@
                         <div class="password-wrapper">
                             <input type="password" class="form-control pr-icon" id="password_new" name="password"
                                 placeholder="Create password">
-                            <button type="button" class="toggle-pass" onclick="togglePasswordVisibility('password_new', 'eyeIcon_new')">
+                            <button type="button" class="toggle-pass"
+                                onclick="togglePasswordVisibility('password_new', 'eyeIcon_new')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round" id="eyeIcon_new">
-                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                    </path>
                                     <line x1="1" y1="1" x2="23" y2="23"></line>
                                 </svg>
                             </button>
@@ -372,13 +385,16 @@
                     <div class="input-group">
                         <label for="password_confirm">Confirm Password</label>
                         <div class="password-wrapper">
-                            <input type="password" class="form-control pr-icon" id="password_confirm" name="password_confirmation"
-                                placeholder="Confirm password">
-                            <button type="button" class="toggle-pass" onclick="togglePasswordVisibility('password_confirm', 'eyeIcon_confirm')">
+                            <input type="password" class="form-control pr-icon" id="password_confirm"
+                                name="password_confirmation" placeholder="Confirm password">
+                            <button type="button" class="toggle-pass"
+                                onclick="togglePasswordVisibility('password_confirm', 'eyeIcon_confirm')">
                                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20"
                                     viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                                     stroke-linecap="round" stroke-linejoin="round" id="eyeIcon_confirm">
-                                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"></path>
+                                    <path
+                                        d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24">
+                                    </path>
                                     <line x1="1" y1="1" x2="23" y2="23"></line>
                                 </svg>
                             </button>

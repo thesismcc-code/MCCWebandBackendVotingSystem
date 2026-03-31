@@ -213,7 +213,7 @@
             <h1>How to vote?</h1>
         </div>
         <div class="navbar-menu">
-            <a href="{{ route('view.student-dashboard') }}">Home</a>
+            <a href="{{ route('view.student') }}">Home</a>
         </div>
     </nav>
 
