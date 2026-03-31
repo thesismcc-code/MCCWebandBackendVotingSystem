@@ -39,8 +39,8 @@ class RegisterUser
             $studentId = $this->generateStudentID();
         }
 
-        if ($data['role'] === 'teacher') {
-            $userId    = $this->generateID('teacher');
+        if ($data['role'] === 'comelec') {
+            $userId    = $this->generateID('comelec');
             $teacherId = $userId;
         }
 
@@ -59,7 +59,7 @@ class RegisterUser
             role: $data['role'],
             admin_id: $adminId,
             student_id: $studentId,
-            teacher_id: $teacherId,
+            comelec_id: $teacherId,
             email_verified_at: null,
             created_at: null,
             updated_at: null,
@@ -73,7 +73,7 @@ class RegisterUser
         $prefix = match ($role) {
             'admin'   => 'ADM',
             'student' => 'STU',
-            'teacher' => 'THR',
+            'comelec' => 'COM',
             'sao'     => 'SAO',
             default   => throw new \InvalidArgumentException('Invalid role')
         };

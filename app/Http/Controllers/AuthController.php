@@ -133,6 +133,14 @@ class AuthController extends Controller
         return redirect()->route('login')
             ->with('success', 'You have been logged out successfully.');
     }
+    public function logoutStudent()
+    {
+        $userId = Session::get('auth_user.id', '');
+        $this->registerAuth->logout($userId);
+
+        return redirect('/students')
+            ->with('success', 'You have been logged out successfully.');
+    }
     public function loginAPI(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
@@ -248,7 +256,7 @@ class AuthController extends Controller
         return match ($role) {
             'admin'   => redirect()->route('view.dashboard'),
             'sao'     => redirect()->route('view.sao-dashboard'),
-            'teacher' => redirect()->route('view.comelec-dashboard'),
+            'comelec' => redirect()->route('view.comelec-dashboard'),
             'student' => redirect()->route('view.student-dashboard'),
             default   => redirect()->route('login'),
         };

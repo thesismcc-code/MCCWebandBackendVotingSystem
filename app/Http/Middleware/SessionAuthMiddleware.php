@@ -14,9 +14,9 @@ class SessionAuthMiddleware
             'dashboard',
             'quick-access',
             'manage-accounts',
+            'store-new-accounts',
             'finger-print',
             'voting-logs',
-            'store-new-accounts',
             'election-control',
             'system-activity',
             'reports-and-analytics',
@@ -30,7 +30,7 @@ class SessionAuthMiddleware
             'sao-final-results',
             'logout',
         ],
-        'teacher' => [
+        'comelec' => [
             'comelec-dashboard',
             'comelec-manage-candidates',
             'logout',
@@ -38,23 +38,24 @@ class SessionAuthMiddleware
         'student' => [
             'students-dashboard',
             'students-profile',
+            'students-update-profile',
             'students-verification',
+            'students-validate-verification',
             'students-tutorials',
             'students-how-to-vote',
-            'logout',
+            'student-logout',
         ],
     ];
 
     private const ROLE_HOME = [
         'admin'   => 'view.dashboard',
-        'sao' => 'view.sao-dashboard',
-        'teacher' => 'view.comelec-dashboard',
+        'sao'     => 'view.sao-dashboard',
+        'comelec' => 'view.comelec-dashboard',
         'student' => 'view.student-dashboard',
     ];
 
     public function handle(Request $request, Closure $next)
     {
-        // Not logged in → redirect to login
         if (!Session::has('auth_user')) {
             Log::info('Invalid access');
             return redirect()->route('login')
@@ -63,6 +64,14 @@ class SessionAuthMiddleware
 
         $role        = Session::get('auth_user.role');
         $currentPath = $request->path();
+
+        Log::info('Middleware check', [
+            'role'         => $role,
+            'current_path' => $currentPath,
+            'can_access'   => $this->canAccess($role, $currentPath),
+            'role_home'    => self::ROLE_HOME[$role] ?? 'NOT FOUND',
+            'auth_user'    => Session::get('auth_user'),
+        ]);
 
         if (!$this->canAccess($role, $currentPath)) {
             $home = self::ROLE_HOME[$role] ?? 'login';

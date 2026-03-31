@@ -10,6 +10,7 @@ use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 
 class EloquentUserRepository implements UserRepository
 {
@@ -105,6 +106,7 @@ class EloquentUserRepository implements UserRepository
         $payload = [
             ...$data->toArray(),
             'password'   => Hash::make($data->getPassword()),
+            'is_deleted' => false,
             'created_at' => $now,
             'updated_at' => $now,
         ];
@@ -116,6 +118,18 @@ class EloquentUserRepository implements UserRepository
             $newRef = $this->db->push($payload);
             $id     = $newRef->getKey();
         }
+
+        Log::info('New account created', [
+            'firebase_key' => $id,
+            'email'        => $data->getEmail(),
+            'role'         => $data->getRole(),
+            'first_name'   => $data->getFirstName(),
+            'last_name'    => $data->getLastName(),
+            'admin_id'     => $data->getAdminId(),
+            'student_id'   => $data->getStudentId(),
+            'comelec_id'   => $data->getComelecId(),
+            'created_at'   => $now,
+        ]);
 
         cache()->forget('all_users_raw');
 
@@ -138,7 +152,11 @@ class EloquentUserRepository implements UserRepository
 
     public function deleteUser(string $id): void
     {
-        $this->db->getChild($id)->remove();
+        $this->db->getChild($id)->update([
+            'is_deleted' => true,
+            'updated_at' => Carbon::now()->toDateTimeLocalString(),
+        ]);
+
         cache()->forget('all_users_raw');
     }
 
@@ -409,7 +427,7 @@ class EloquentUserRepository implements UserRepository
             role: $data['role'] ?? '',
             admin_id: $data['admin_id'] ?? null,
             student_id: $data['student_id'] ?? null,
-            teacher_id: $data['teacher_id'] ?? null,
+            comelec_id: $data['comelec_id'] ?? null,
             email_verified_at: $data['email_verified_at'] ?? null,
             created_at: $data['created_at'] ?? null,
             updated_at: $data['updated_at'] ?? null,
@@ -428,7 +446,7 @@ class EloquentUserRepository implements UserRepository
             role: $data['role'] ?? '',
             admin_id: $data['admin_id'] ?? null,
             student_id: $data['student_id'] ?? null,
-            teacher_id: $data['teacher_id'] ?? null,
+            comelec_id: $data['comelec_id'] ?? null,
             email_verified_at: $data['email_verified_at'] ?? null,
             created_at: $data['created_at'] ?? null,
             updated_at: $data['updated_at'] ?? null,
@@ -457,7 +475,7 @@ class EloquentUserRepository implements UserRepository
             if (!$snapshot->exists() || $snapshot->getValue() === null) {
                 return collect();
             }
-            return collect($snapshot->getValue());
+            return collect($snapshot->getValue())->filter(fn($user) => empty($user['is_deleted']));
         });
     }
 }

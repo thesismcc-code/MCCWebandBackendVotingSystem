@@ -240,18 +240,21 @@
                 <span class="nav-title">Digital Voting System</span>
             </div>
 
-            <!-- Navbar right segment (Notifications/User options) -->
             <div class="nav-actions">
-                <button type="button" class="btn-bell" aria-label="Notifications">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
-                        viewBox="0 0 24 24">
-                        <path
-                            d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z" />
-                    </svg>
-                </button>
+                <button type="button" class="btn-bell" aria-label="Notifications">...</button>
                 <a href="{{ route('view.student-profile') }}">
                     <img src="{{ asset('images/person_image.png') }}" alt="Student Avatar Profile" class="profile-img">
                 </a>
+                <form action="{{ route('student.logout') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="btn-bell">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor"
+                            viewBox="0 0 24 24">
+                            <path
+                                d="M17 7l-1.41 1.41L18.17 11H8v2h10.17l-2.58 2.58L17 17l5-5-5-5zM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5z" />
+                        </svg>
+                    </button>
+                </form>
             </div>
         </div>
     </nav>

@@ -185,6 +185,7 @@ class FirebaseSeeder extends Seeder
                 'password'          => $password,
                 'email_verified_at' => $this->now(),
                 'remember_token'    => null,
+                'is_deleted' => false,
                 'created_at'        => $this->daysAgo(90),
                 'updated_at'        => $this->daysAgo(90),
             ]));
@@ -192,9 +193,9 @@ class FirebaseSeeder extends Seeder
 
         // ── 100 students per enrollment year (400 total across 4 year levels) ─
         // Enrollment years: currentYear-3 (4th yr) → currentYear (1st yr)
-        $firstNames  = ['Juan','Maria','Jose','Ana','Miguel','Rosa','Carlos','Luz','Ramon','Elena','Pedro','Sofia','Luis','Carmen','Antonio','Isabel','Diego','Patricia','Eduardo','Monica','Felix','Jasmine','Cedric','Janine','Ryan','Aileen','Mark','Christine','Kevin','Trisha'];
-        $middleNames = ['Santos','Reyes','Cruz','Dela Cruz','Garcia','Mendoza','Lopez','Torres','Hernandez','Flores'];
-        $lastNames   = ['Bautista','Villanueva','Ramos','Castro','Aquino','Gonzales','Diaz','Marquez','Quispe','Lim','Tan','Go','Chan','Uy','Chua','Sy','Ko','Ng','Yu','Dee'];
+        $firstNames  = ['Juan', 'Maria', 'Jose', 'Ana', 'Miguel', 'Rosa', 'Carlos', 'Luz', 'Ramon', 'Elena', 'Pedro', 'Sofia', 'Luis', 'Carmen', 'Antonio', 'Isabel', 'Diego', 'Patricia', 'Eduardo', 'Monica', 'Felix', 'Jasmine', 'Cedric', 'Janine', 'Ryan', 'Aileen', 'Mark', 'Christine', 'Kevin', 'Trisha'];
+        $middleNames = ['Santos', 'Reyes', 'Cruz', 'Dela Cruz', 'Garcia', 'Mendoza', 'Lopez', 'Torres', 'Hernandez', 'Flores'];
+        $lastNames   = ['Bautista', 'Villanueva', 'Ramos', 'Castro', 'Aquino', 'Gonzales', 'Diaz', 'Marquez', 'Quispe', 'Lim', 'Tan', 'Go', 'Chan', 'Uy', 'Chua', 'Sy', 'Ko', 'Ng', 'Yu', 'Dee'];
 
         $currentYear  = (int) date('Y');
         $enrollYears  = [
@@ -229,6 +230,7 @@ class FirebaseSeeder extends Seeder
                     'admin_id'          => null,
                     'email_verified_at' => $this->daysAgo($daysOld),
                     'remember_token'    => null,
+                    'is_deleted'        => false,
                     'created_at'        => $this->daysAgo($daysOld),
                     'updated_at'        => $this->daysAgo(rand(1, 30)),
                 ]);
