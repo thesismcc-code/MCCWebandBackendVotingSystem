@@ -16,6 +16,7 @@ class SessionAuthMiddleware
             'manage-accounts',
             'store-new-accounts',
             'delete-user',
+            'update-user',
             'finger-print',
             'voting-logs',
             'election-control',

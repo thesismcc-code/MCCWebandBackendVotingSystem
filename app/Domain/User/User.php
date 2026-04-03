@@ -9,7 +9,7 @@ class User
     private string $middle_name;
     private string $last_name;
     private string $email;
-    private string $password;
+    private ?string $password;
     private string $role;
     private ?string $admin_id;
     private ?string $student_id;
@@ -24,7 +24,7 @@ class User
         string $middle_name,
         string $last_name,
         string $email,
-        string $password,
+        ?string $password,
         string $role,
         ?string $admin_id = null,
         ?string $student_id = null,
@@ -92,7 +92,7 @@ class User
         return $this->email;
     }
 
-    public function getPassword(): string
+    public function getPassword(): ?string
     {
         return $this->password;
     }

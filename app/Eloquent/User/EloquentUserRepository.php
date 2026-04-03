@@ -140,10 +140,10 @@ class EloquentUserRepository implements UserRepository
     {
         $now = Carbon::now()->toDateTimeLocalString();
 
-        $payload = [
+        $payload = array_filter([
             ...$data->toArray(),
             'updated_at' => $now,
-        ];
+        ], fn($v) => $v !== null);
 
         $this->db->getChild($data->getId())->update($payload);
         cache()->forget('all_users_raw');
