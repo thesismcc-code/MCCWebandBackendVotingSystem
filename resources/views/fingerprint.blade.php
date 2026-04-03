@@ -561,13 +561,12 @@
 
                             <div class="flex gap-[12px] pt-[8px] w-full px-2 mt-[-4px]">
                                 <button type="button" @click="openModal = false"
-                                    class="flex-1 w-full rounded-[14px] border-[2px] border-[#e1e5ee] bg-gray-50/50 text-[#8692a8] hover:border-[#ccd2df] hover:bg-gray-100 hover:text-gray-600 focus:outline-none transition py-[14px] uppercase text-[12px] tracking-wide font-[800] align-middle mb-[6px] tracking-widest pointer-events-auto shrink align-top inline text-center box-border pt-[12px]">Cancel
+                                    class="flex-1 rounded-[14px] border-[2px] border-[#e1e5ee] bg-gray-50/50 text-[#8692a8] hover:border-[#ccd2df] hover:bg-gray-100 hover:text-gray-600 focus:outline-none transition py-[14px] uppercase text-[12px] tracking-widest font-[800] text-center">
+                                    Cancel
                                 </button>
                                 <button type="button" @click="step = 2"
-                                    class="flex-[1.5] flex bg-[#1e52df] w-full rounded-[14px] align-middle shrink overflow-hidden text-center float-right items-center focus:ring-[2px] pl-[10px] w-auto inline mt-[-20px] transition group hover:-translate-y-[1px] shadow-[0_4px_10px_rgba(20,80,210,0.18)] hover:bg-blue-600 block pt-[4px] focus:shadow-[0_4px_8px_rgba(30,120,240,0.22)] border-[2px] cursor-pointer mb-2 justify-center box-border p-[4px] mt-[12px] h-full text-[#ffffff] min-h-[14px]">
-                                    <p
-                                        class="font-[800] min-h-max align-middle mb-0 pb-[13px] ml-0 inline pt-[8px] uppercase tracking-wide w-[80%] uppercase justify-center mx-2 text-[12px] break-word text-white">
-                                        Capture Biometrics !</p>
+                                    class="flex-1 rounded-[14px] bg-[#1e52df] hover:bg-blue-600 text-white focus:outline-none transition py-[14px] uppercase text-[12px] tracking-widest font-[800] text-center shadow-[0_4px_10px_rgba(20,80,210,0.18)] hover:-translate-y-[1px]">
+                                    Capture Biometrics
                                 </button>
                             </div>
                         </form>
