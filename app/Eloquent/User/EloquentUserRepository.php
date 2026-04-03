@@ -506,4 +506,71 @@ class EloquentUserRepository implements UserRepository
             return collect($snapshot->getValue())->filter(fn($user) => empty($user['is_deleted']));
         });
     }
+    public function countTotalStudentsEnrolledToday(): int
+    {
+        $today = Carbon::now()->toDateString();
+
+        $snapshot = $this->db
+            ->orderByChild('role')
+            ->equalTo('student')
+            ->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
+            return 0;
+        }
+
+        $count = 0;
+
+        foreach ($snapshot->getValue() as $data) {
+            if (
+                isset($data['created_at'], $data['role']) &&
+                $data['role'] === 'student' &&
+                !empty($data['is_deleted']) === false &&
+                Carbon::parse($data['created_at'])->toDateString() === $today
+            ) {
+                $count++;
+            }
+        }
+
+        return $count;
+    }
+    public function getUserAllStudents(int $perPage, ?string $student_id = null, ?string $course = null, ?string $year_level = null): LengthAwarePaginator
+    {
+        $currentYear = (int) date('Y');
+
+        $users = $this->getUsersCollection()
+            ->map(fn($data, $key) => $this->toUser((string) $key, $data))
+            ->filter(fn($user) => $user->getRole() === 'student')
+            ->when($student_id, fn($collection) => $collection->filter(
+                fn($user) => str_contains(strtolower($user->getStudentId() ?? ''), strtolower($student_id))
+            ))
+            ->when($course, fn($collection) => $collection->filter(
+                fn($user) => strtolower($user->getCourse() ?? '') === strtolower($course)
+            ))
+            ->when($year_level, function ($collection) use ($year_level, $currentYear) {
+                return $collection->filter(function ($user) use ($year_level, $currentYear) {
+                    $parts      = explode('-', $user->getStudentId() ?? '');
+                    $enrollYear = isset($parts[1]) && is_numeric($parts[1]) ? (int) $parts[1] : null;
+
+                    if ($enrollYear === null) return false;
+
+                    $computed = $currentYear - $enrollYear + 1;
+
+                    return (string) $computed === (string) $year_level;
+                });
+            })
+            ->sortByDesc(fn($user) => Carbon::parse($user->getCreatedAt()))
+            ->values();
+
+        $currentPage  = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        return new LengthAwarePaginator(
+            $currentItems,
+            $users->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    }
 }

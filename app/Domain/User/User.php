@@ -13,6 +13,8 @@ class User
     private string $role;
     private ?string $admin_id;
     private ?string $student_id;
+    private ?string $course;
+    private ?string $year_level;
     private ?string $comelec_id;
     private ?string $email_verified_at;
     private ?string $created_at;
@@ -28,6 +30,8 @@ class User
         string $role,
         ?string $admin_id = null,
         ?string $student_id = null,
+        ?string $course = null,
+        ?string $year_level = null,
         ?string $comelec_id = null,
         ?string $email_verified_at = null,
         ?string $created_at = null,
@@ -42,6 +46,8 @@ class User
         $this->role = $role;
         $this->admin_id = $admin_id;
         $this->student_id = $student_id;
+        $this->course = $course;
+        $this->year_level = $year_level;
         $this->comelec_id = $comelec_id;
         $this->email_verified_at = $email_verified_at;
         $this->created_at = $created_at;
@@ -60,6 +66,8 @@ class User
             'role' => $this->role,
             'admin_id' => $this->admin_id,
             'student_id' => $this->student_id,
+            'course' => $this->course,
+            'year_level' => $this->year_level,
             'comelec_id' => $this->comelec_id,
             'email_verified_at' => $this->email_verified_at,
             'created_at' => $this->created_at,
@@ -110,6 +118,15 @@ class User
     public function getStudentId(): ?string
     {
         return $this->student_id;
+    }
+
+    public function getCourse(): ?string
+    {
+        return $this->course;
+    }
+    public function getYearLevel(): ?string
+    {
+        return $this->year_level;
     }
 
     public function getComelecId(): ?string
