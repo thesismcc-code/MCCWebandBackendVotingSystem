@@ -173,6 +173,7 @@ class EloquentUserRepository implements UserRepository
                     fn($user) => Carbon::parse($user->getCreatedAt())->between($start, $end)
                 );
             })
+            ->sortByDesc(fn($user) => Carbon::parse($user->getCreatedAt()))
             ->values();
 
         $currentPage = LengthAwarePaginator::resolveCurrentPage();

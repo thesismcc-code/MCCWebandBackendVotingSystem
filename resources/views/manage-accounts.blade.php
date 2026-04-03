@@ -48,7 +48,8 @@
     openModal: {{ session('show_add_modal') ? 'true' : 'false' }},
     showDeleteModal: false,
     openEditModal: false,
-    showEditPass: false
+    showEditPass: false,
+    selectedUserId: null
 }" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
 
     <!-- Assuming components exist dynamically. Example: -->
@@ -88,10 +89,14 @@
                     class="bg-[#ce1b26] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-red-700 transition-colors">
                     Cancel
                 </button>
-                <button
-                    class="bg-[#1ccb14] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-green-600 transition-colors">
-                    Submit
-                </button>
+                <form id="delete-form" action="{{ route('delete-user') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="user_id" id="delete-user-id"> {{-- plain value, no Alpine binding --}}
+                    <button type="submit"
+                        class="bg-[#1ccb14] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                        Submit
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -476,7 +481,11 @@
                                 <td class="pl-6 pr-[42px] py-[22px]">
                                     <div class="flex items-center justify-end gap-3">
                                         @if ($user->getRole() !== 'admin')
-                                            <button @click="showDeleteModal = true"
+                                            <button
+                                                @click="
+                                                    document.getElementById('delete-user-id').value = '{{ $user->getId() }}';
+                                                    showDeleteModal = true
+                                                "
                                                 class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md border border-gray-100 hover:bg-red-50 hover:border-red-100 group transition-all">
                                                 <svg class="w-[16px] h-[16px] text-[#ced0db] group-hover:text-red-500 transition-colors"
                                                     fill="none" stroke="currentColor" stroke-width="2.2"

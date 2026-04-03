@@ -38,6 +38,7 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/quick-access',                           [QuickAccessController::class, 'index'])->name('view.quick-access');
     Route::get('/manage-accounts',                        [ManageAccountController::class, 'index'])->name('view.manage-accounts');
     Route::post('/store-new-accounts',                    [ManageAccountController::class, 'newUser'])->name('store.new-accounts');
+    Route::post('/delete-user',                           [ManageAccountController::class, "deleteUser"])->name('delete-user');
     Route::get('/finger-print',                           [FingerPrintController::class, 'index'])->name('view.finger-print');
     Route::get('/voting-logs',                            [VotingLogsController::class, 'index'])->name('view.voting-logs');
     Route::get('/election-control',                       [ElectionController::class, 'index'])->name('view.election-control');

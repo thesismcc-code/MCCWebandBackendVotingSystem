@@ -126,4 +126,9 @@ class ManageAccountController extends Controller
                 ->with('show_add_modal', true);
         }
     }
+    public function deleteUser(Request $request){
+       $this->registerUser->deleteUser($request->input('user_id'));
+       return redirect()->route('view.manage-accounts')
+                ->with('success', 'Account has been deleted successfully.');
+    }
 }

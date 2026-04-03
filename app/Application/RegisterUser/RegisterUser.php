@@ -123,4 +123,8 @@ class RegisterUser
     {
         return $this->userRepository->countUsersSummary();
     }
+    public function deleteUser(string $id): void
+    {
+        $this->userRepository->deleteUser($id);
+    }
 }
