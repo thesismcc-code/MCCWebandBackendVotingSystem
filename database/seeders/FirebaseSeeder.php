@@ -149,7 +149,9 @@ class FirebaseSeeder extends Seeder
      */
     private function generateStudentId(int $enrollYear, int $seq): string
     {
-        return 'STU-' . $enrollYear . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
+        // Format: STU-{2-digit year}-{3-digit seq} e.g. STU-026-001
+        $shortYear = substr((string) $enrollYear, -3); // takes last 3 digits e.g. 2026 → 026
+        return 'STU-' . $shortYear . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
     }
 
     private function generateUserId(string $role): string
@@ -172,33 +174,50 @@ class FirebaseSeeder extends Seeder
 
         $password = Hash::make('password123');
 
+        $courses = [
+            'Computer Science',
+            'Information Technology',
+            'Business Administration',
+            'Civil Engineering',
+            'Electrical Engineering',
+        ];
+
+        $yearLevelLabels = [
+            1 => '1st Year',
+            2 => '2nd Year',
+            3 => '3rd Year',
+            4 => '4th Year',
+        ];
+
         // ── Fixed staff accounts ──────────────────────────────────────────────
         $staff = [
-            'ADMaB3kL9mNpQr' => ['first_name' => 'Alice',  'middle_name' => 'Marie', 'last_name' => 'Santos',    'email' => 'alice.santos@school.edu',    'role' => 'admin',   'student_id' => null, 'teacher_id' => null,             'admin_id' => 'ADMaB3kL9mNpQr'],
-            'SAOxK7wP2dYcHj' => ['first_name' => 'Bob',    'middle_name' => 'Cruz',  'last_name' => 'Reyes',     'email' => 'bob.reyes@school.edu',       'role' => 'sao',     'student_id' => null, 'teacher_id' => 'SAOxK7wP2dYcHj', 'admin_id' => null],
-            'THRmN4vZ8qEtWs' => ['first_name' => 'Carlos', 'middle_name' => 'Jose',  'last_name' => 'Dela Cruz', 'email' => 'carlos.delacruz@school.edu', 'role' => 'teacher', 'student_id' => null, 'teacher_id' => 'THRmN4vZ8qEtWs', 'admin_id' => null],
+            'ADMaB3kL9mNpQr' => ['first_name' => 'Alice',  'middle_name' => 'Marie', 'last_name' => 'Santos',    'email' => 'alice.santos@school.edu',    'role' => 'admin',   'student_id' => null, 'admin_id' => 'ADMaB3kL9mNpQr'],
+            'SAOxK7wP2dYcHj' => ['first_name' => 'Bob',    'middle_name' => 'Cruz',  'last_name' => 'Reyes',     'email' => 'bob.reyes@school.edu',       'role' => 'sao',     'student_id' => null, 'admin_id' => null],
+            'THRmN4vZ8qEtWs' => ['first_name' => 'Carlos', 'middle_name' => 'Jose',  'last_name' => 'Dela Cruz', 'email' => 'carlos.delacruz@school.edu', 'role' => 'teacher', 'student_id' => null, 'admin_id' => null],
         ];
 
         foreach ($staff as $key => $user) {
             $this->set('users', $key, array_merge($user, [
                 'id'                => $key,
                 'password'          => $password,
+                'course'            => null,
+                'year_level'        => null,
+                'comelec_id'        => null,
                 'email_verified_at' => $this->now(),
                 'remember_token'    => null,
-                'is_deleted' => false,
+                'is_deleted'        => false,
                 'created_at'        => $this->daysAgo(90),
                 'updated_at'        => $this->daysAgo(90),
             ]));
         }
 
         // ── 100 students per enrollment year (400 total across 4 year levels) ─
-        // Enrollment years: currentYear-3 (4th yr) → currentYear (1st yr)
         $firstNames  = ['Juan', 'Maria', 'Jose', 'Ana', 'Miguel', 'Rosa', 'Carlos', 'Luz', 'Ramon', 'Elena', 'Pedro', 'Sofia', 'Luis', 'Carmen', 'Antonio', 'Isabel', 'Diego', 'Patricia', 'Eduardo', 'Monica', 'Felix', 'Jasmine', 'Cedric', 'Janine', 'Ryan', 'Aileen', 'Mark', 'Christine', 'Kevin', 'Trisha'];
         $middleNames = ['Santos', 'Reyes', 'Cruz', 'Dela Cruz', 'Garcia', 'Mendoza', 'Lopez', 'Torres', 'Hernandez', 'Flores'];
         $lastNames   = ['Bautista', 'Villanueva', 'Ramos', 'Castro', 'Aquino', 'Gonzales', 'Diaz', 'Marquez', 'Quispe', 'Lim', 'Tan', 'Go', 'Chan', 'Uy', 'Chua', 'Sy', 'Ko', 'Ng', 'Yu', 'Dee'];
 
-        $currentYear  = (int) date('Y');
-        $enrollYears  = [
+        $currentYear = (int) date('Y');
+        $enrollYears = [
             $currentYear - 3, // 4th Year
             $currentYear - 2, // 3rd Year
             $currentYear - 1, // 2nd Year
@@ -208,13 +227,13 @@ class FirebaseSeeder extends Seeder
         $emailCounter = 1;
 
         foreach ($enrollYears as $enrollYear) {
-            $yearLevel = $currentYear - $enrollYear + 1;
-            $this->logInfo("Generating 100 students enrolled in {$enrollYear} (Year {$yearLevel})...");
+            $yearLevel      = $currentYear - $enrollYear + 1;
+            $yearLevelLabel = $yearLevelLabels[$yearLevel] ?? "{$yearLevel}th Year";
+
+            $this->logInfo("Generating 100 students enrolled in {$enrollYear} ({$yearLevelLabel})...");
 
             for ($seq = 1; $seq <= 100; $seq++) {
-                $userId = $this->generateUserId('student');
-
-                // Students enrolled earlier have older account timestamps
+                $userId  = $this->generateUserId('student');
                 $daysOld = ($currentYear - $enrollYear) * 365 + rand(0, 60);
 
                 $this->set('users', $userId, [
@@ -226,8 +245,10 @@ class FirebaseSeeder extends Seeder
                     'password'          => $password,
                     'role'              => 'student',
                     'student_id'        => $this->generateStudentId($enrollYear, $seq),
-                    'teacher_id'        => null,
+                    'course'            => $courses[array_rand($courses)],
+                    'year_level'        => $yearLevelLabel,
                     'admin_id'          => null,
+                    'comelec_id'        => null,
                     'email_verified_at' => $this->daysAgo($daysOld),
                     'remember_token'    => null,
                     'is_deleted'        => false,
@@ -238,7 +259,7 @@ class FirebaseSeeder extends Seeder
                 $emailCounter++;
             }
 
-            $this->logSuccess("Enrollment year {$enrollYear} (Year {$yearLevel}): 100 students seeded.");
+            $this->logSuccess("Enrollment year {$enrollYear} ({$yearLevelLabel}): 100 students seeded.");
         }
 
         $this->logSuccess('400 students seeded successfully (100 per year level).');

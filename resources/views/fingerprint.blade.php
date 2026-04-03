@@ -253,7 +253,8 @@
                 </div>
                 <input type="text" name="student_id" value="{{ $student_id }}"
                     class="block w-full pl-[46px] pr-4 h-12 bg-[#1b43bc] border-[1px] border-[#3862e2]/70 hover:border-blue-300 rounded-[8px] text-[13.5px] text-white font-medium placeholder-blue-200/80 focus:outline-none focus:ring-[1px] focus:ring-blue-300 focus:border-blue-300 transition duration-150 shadow-inner outline-none"
-                    placeholder="Search by Student ID or Name">
+                    placeholder="Search by Student ID or Name" x-data="{ timeout: null }"
+                    @input="clearTimeout(timeout); timeout = setTimeout(() => $el.closest('form').submit(), 500)">
             </div>
 
             <!-- Course Filter -->
@@ -271,12 +272,12 @@
                 <select name="course" onchange="this.form.submit()"
                     class="block w-full pl-[48px] pr-10 h-12 bg-[#1b43bc] border-[1px] border-[#3862e2]/70 hover:border-blue-300 rounded-[8px] text-[13px] text-white font-medium focus:outline-none focus:ring-[1px] focus:ring-blue-300 transition appearance-none cursor-pointer outline-none">
                     <option class="text-gray-900 bg-white" value="">All Courses</option>
-                    <option class="text-gray-900 bg-white" value="Computer Science"
-                        {{ $course === 'Computer Science' ? 'selected' : '' }}>Computer Science</option>
-                    <option class="text-gray-900 bg-white" value="Information Technology"
-                        {{ $course === 'Information Technology' ? 'selected' : '' }}>Information Technology</option>
-                    <option class="text-gray-900 bg-white" value="Business Administration"
-                        {{ $course === 'Business Administration' ? 'selected' : '' }}>Business Administration</option>
+                    @foreach ($data['courses'] as $courseOption)
+                        <option class="text-gray-900 bg-white" value="{{ $courseOption }}"
+                            {{ $course === $courseOption ? 'selected' : '' }}>
+                            {{ $courseOption }}
+                        </option>
+                    @endforeach
                 </select>
                 <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-blue-200">
                     <svg class="h-[18px] w-[18px]" fill="none" stroke="currentColor" stroke-width="2.5"
@@ -369,7 +370,65 @@
                 </tbody>
             </table>
         </div>
+        <!-- PAGINATION -->
+        @if ($data['students']->lastPage() > 1)
+            <div class="flex items-center justify-between mt-5 px-1 pb-2 pr-20">
 
+                <!-- Showing X-Y of Z -->
+                <p class="text-blue-200/80 text-[13px] font-medium">
+                    Showing {{ $data['students']->firstItem() }}–{{ $data['students']->lastItem() }} of
+                    {{ $data['students']->total() }} students
+                </p>
+
+                <!-- Page Buttons -->
+                <div class="flex items-center gap-2">
+
+                    {{-- Previous --}}
+                    @if ($data['students']->onFirstPage())
+                        <span
+                            class="px-4 py-2 rounded-[8px] bg-white/10 text-white/30 text-[13px] font-semibold cursor-not-allowed select-none">
+                            ← Prev
+                        </span>
+                    @else
+                        <a href="{{ $data['students']->appends(request()->query())->previousPageUrl() }}"
+                            class="px-4 py-2 rounded-[8px] bg-white/20 hover:bg-white/30 text-white text-[13px] font-semibold transition">
+                            ← Prev
+                        </a>
+                    @endif
+
+                    {{-- Page Numbers --}}
+                    @foreach ($data['students']->appends(request()->query())->getUrlRange(1, $data['students']->lastPage()) as $page => $url)
+                        @if ($page == $data['students']->currentPage())
+                            <span
+                                class="px-3 py-2 rounded-[8px] bg-white text-blue-800 text-[13px] font-bold min-w-[36px] text-center">
+                                {{ $page }}
+                            </span>
+                        @elseif (abs($page - $data['students']->currentPage()) <= 2)
+                            <a href="{{ $url }}"
+                                class="px-3 py-2 rounded-[8px] bg-white/20 hover:bg-white/30 text-white text-[13px] font-semibold transition min-w-[36px] text-center">
+                                {{ $page }}
+                            </a>
+                        @elseif (abs($page - $data['students']->currentPage()) == 3)
+                            <span class="text-white/40 text-[13px] px-1">...</span>
+                        @endif
+                    @endforeach
+
+                    {{-- Next --}}
+                    @if ($data['students']->hasMorePages())
+                        <a href="{{ $data['students']->appends(request()->query())->nextPageUrl() }}"
+                            class="px-4 py-2 rounded-[8px] bg-white/20 hover:bg-white/30 text-white text-[13px] font-semibold transition">
+                            Next →
+                        </a>
+                    @else
+                        <span
+                            class="px-4 py-2 rounded-[8px] bg-white/10 text-white/30 text-[13px] font-semibold cursor-not-allowed select-none">
+                            Next →
+                        </span>
+                    @endif
+
+                </div>
+            </div>
+        @endif
         <!-- FLOATING ADD BUTTON -->
         <button @click="openModal = true" title="Add User Registration Capture Bio"
             aria-label="Add Student User Info Contexts App Layout Standard Tool Component Capture Setup Action Base Context Data "

@@ -162,4 +162,8 @@ class RegisterUser
     {
         return $this->userRepository->getUserAllStudents($perPage, $student_id, $course, $year_level);
     }
+    public function getUniqueCourses(): array
+    {
+        return $this->userRepository->getUniqueCourses();
+    }
 }

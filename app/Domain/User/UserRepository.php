@@ -71,4 +71,5 @@ interface UserRepository
     public function countUsersSummary(): array;
     public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator;
     public function getUserAllStudents(int $perPage, ?string $student_id = null, ?string $course = null, ?string $year_level = null): LengthAwarePaginator;
+    public function getUniqueCourses(): array;
 }
