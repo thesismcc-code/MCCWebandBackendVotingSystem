@@ -22,7 +22,7 @@ class ManageAccountController extends Controller
     {
         $schoolYearFilter = $request->get("school_year");
         $counts = $this->registerUser->countUsersSummary();
-        $data = $this->registerUser->getAllUsers(7, $schoolYearFilter);
+        $data = $this->registerUser->getUserExceptStudents(7, $schoolYearFilter);
         return view('manage-accounts', compact('data', 'schoolYearFilter', 'counts'));
     }
 

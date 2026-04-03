@@ -188,6 +188,26 @@ class EloquentUserRepository implements UserRepository
         );
     }
 
+    public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
+    {
+        $users = $this->getUsersCollection()
+            ->map(fn($data, $key) => $this->toUser((string) $key, $data))
+            ->filter(fn($user) => $user->getRole() !== 'student')
+            ->sortByDesc(fn($user) => Carbon::parse($user->getCreatedAt()))
+            ->values();
+
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        return new LengthAwarePaginator(
+            $currentItems,
+            count($users),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    }
+
     public function countStudentsByYearPrefix(string $prefix): int
     {
         $snapshot = $this->db

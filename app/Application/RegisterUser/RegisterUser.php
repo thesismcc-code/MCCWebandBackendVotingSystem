@@ -127,4 +127,8 @@ class RegisterUser
     {
         $this->userRepository->deleteUser($id);
     }
+    public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
+    {
+        return $this->userRepository->getUserExceptStudents($perPage, $schoolYearFilter);
+    }
 }
