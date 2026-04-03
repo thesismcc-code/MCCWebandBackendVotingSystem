@@ -67,5 +67,6 @@ interface UserRepository
     public function getVoterTurnout(): array;
     public function realtimeVoterTurnout(): array;
     public function voterTurnoutByYearLevel(): array;
-    public function countUsersSummary():array;
+    public function countUsersSummary(): array;
+    public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator;
 }

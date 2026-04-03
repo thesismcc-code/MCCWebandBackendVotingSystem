@@ -140,10 +140,17 @@ class EloquentUserRepository implements UserRepository
     {
         $now = Carbon::now()->toDateTimeLocalString();
 
-        $payload = [
-            ...$data->toArray(),
-            'updated_at' => $now,
-        ];
+        $payload = $data->toArray();
+
+        if (!empty($payload['password'])) {
+            $payload['password'] = Hash::make($payload['password']);
+        } else {
+            unset($payload['password']);
+        }
+
+        $payload['updated_at'] = $now;
+
+        $payload = array_filter($payload, fn($v) => $v !== null);
 
         $this->db->getChild($data->getId())->update($payload);
         cache()->forget('all_users_raw');
@@ -173,6 +180,7 @@ class EloquentUserRepository implements UserRepository
                     fn($user) => Carbon::parse($user->getCreatedAt())->between($start, $end)
                 );
             })
+            ->sortByDesc(fn($user) => Carbon::parse($user->getCreatedAt()))
             ->values();
 
         $currentPage = LengthAwarePaginator::resolveCurrentPage();
@@ -181,6 +189,26 @@ class EloquentUserRepository implements UserRepository
         return new LengthAwarePaginator(
             $currentItems,
             $users->count(),
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    }
+
+    public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
+    {
+        $users = $this->getUsersCollection()
+            ->map(fn($data, $key) => $this->toUser((string) $key, $data))
+            ->filter(fn($user) => $user->getRole() !== 'student')
+            ->sortByDesc(fn($user) => Carbon::parse($user->getCreatedAt()))
+            ->values();
+
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $currentItems = $users->slice(($currentPage - 1) * $perPage, $perPage)->values();
+
+        return new LengthAwarePaginator(
+            $currentItems,
+            count($users),
             $perPage,
             $currentPage,
             ['path' => request()->url(), 'query' => request()->query()]

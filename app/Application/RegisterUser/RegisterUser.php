@@ -67,6 +67,25 @@ class RegisterUser
 
         return $this->userRepository->saveNewUser($user);
     }
+    public function updateUser( array $data): ?User
+    {
+        $user = new User(
+            id: $data['user_id'],
+            first_name: $data['first_name'],
+            middle_name: $data['middle_name'],
+            last_name: $data['last_name'],
+            email: $data['email'],
+            password: $data['password'] ?? null,
+            role: $data['role'],
+            admin_id: null,
+            student_id: null,
+            comelec_id: null,
+            email_verified_at: null,
+            created_at: null,
+            updated_at: null,
+        );
+       return $this->userRepository->updateUser($user);
+    }
 
     private function generateID(string $role): string
     {
@@ -122,5 +141,13 @@ class RegisterUser
     public function countUsersSummary(): array
     {
         return $this->userRepository->countUsersSummary();
+    }
+    public function deleteUser(string $id): void
+    {
+        $this->userRepository->deleteUser($id);
+    }
+    public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
+    {
+        return $this->userRepository->getUserExceptStudents($perPage, $schoolYearFilter);
     }
 }

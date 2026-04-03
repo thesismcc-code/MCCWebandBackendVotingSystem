@@ -47,12 +47,10 @@
 <body x-data="{
     openModal: {{ session('show_add_modal') ? 'true' : 'false' }},
     showDeleteModal: false,
-    openEditModal: false,
-    showEditPass: false
+    openEditModal: {{ session('show_edit_modal') ? 'true' : 'false' }},
+    showEditPass: false,
+    selectedUserId: null
 }" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
-
-    <!-- Assuming components exist dynamically. Example: -->
-    <!-- @include('components.notification') -->
 
     <!-- ============================== -->
     <!-- DELETE CONFIRMATION MODAL      -->
@@ -88,10 +86,14 @@
                     class="bg-[#ce1b26] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-red-700 transition-colors">
                     Cancel
                 </button>
-                <button
-                    class="bg-[#1ccb14] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-green-600 transition-colors">
-                    Submit
-                </button>
+                <form id="delete-form" action="{{ route('delete-user') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="user_id" id="delete-user-id">
+                    <button type="submit"
+                        class="bg-[#1ccb14] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                        Submit
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -105,65 +107,128 @@
         x-transition:leave-end="opacity-0 scale-95"
         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
 
-        <!-- Modal Card -->
         <div @click.away="openEditModal = false"
             class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl text-gray-800 relative">
-            <h2 class="text-2xl font-bold mb-6 text-gray-900">Edit Account Role</h2>
+            <h2 class="text-2xl font-bold mb-6 text-gray-900">Edit Account</h2>
 
-            <form class="space-y-4" method="POST" action="">
-                <!-- Dummy form layout -->
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Full Name</label>
-                    <input type="text" value="Jose Perolino" disabled
-                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:outline-none text-sm font-medium text-gray-400 cursor-not-allowed">
+            {{-- Edit error banner --}}
+            @if (session('show_edit_modal') && $errors->any())
+                <div
+                    class="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-[13px] font-medium">
+                    Please fix the errors below.
                 </div>
+            @endif
+
+            {{-- Edit success banner --}}
+            @if (session('edit_success'))
+                <div
+                    class="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-600 text-[13px] font-medium">
+                    {{ session('edit_success') }}
+                </div>
+            @endif
+
+            <form class="space-y-4" method="POST" action="{{ route('update-user') }}">
+                @csrf
+                {{-- ===== HIDDEN — system fields only ===== --}}
+                <input type="hidden" name="user_id" id="edit-user-id">
+                <input type="hidden" name="admin_id" id="edit-admin-id">
+                <input type="hidden" name="student_id" id="edit-student-id">
+                <input type="hidden" name="comelec_id" id="edit-comelec-id">
+                <input type="hidden" name="created_at" id="edit-created-at">
+                <input type="hidden" name="updated_at" id="edit-updated-at">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase mb-1 ml-1">Email Address</label>
-                    <input type="email" value="perolino@gmail.com" disabled
-                        class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:outline-none text-sm font-medium text-gray-400 cursor-not-allowed">
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">First Name</label>
+                    <input type="text" name="first_name" id="edit-first-name"
+                        value="{{ session('show_edit_modal') ? old('first_name') : '' }}" placeholder="Enter First Name"
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_edit_modal') && $errors->has('first_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-700">
+                    @if (session('show_edit_modal'))
+                        @error('first_name')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
-                <!-- ONLY EDITABLE SECTION -->
                 <div>
-                    <label class="block text-xs font-bold text-blue-600 uppercase mb-1 ml-1">Role (Editable)</label>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Middle Name</label>
+                    <input type="text" name="middle_name" id="edit-middle-name"
+                        value="{{ session('show_edit_modal') ? old('middle_name') : '' }}"
+                        placeholder="Enter Middle Name"
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_edit_modal') && $errors->has('middle_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-700">
+                    @if (session('show_edit_modal'))
+                        @error('middle_name')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Last Name</label>
+                    <input type="text" name="last_name" id="edit-last-name"
+                        value="{{ session('show_edit_modal') ? old('last_name') : '' }}"
+                        placeholder="Enter Last Name"
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_edit_modal') && $errors->has('last_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-700">
+                    @if (session('show_edit_modal'))
+                        @error('last_name')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Email Address</label>
+                    <input type="email" name="email" id="edit-email"
+                        value="{{ session('show_edit_modal') ? old('email') : '' }}" placeholder="example@gmail.com"
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_edit_modal') && $errors->has('email') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-700">
+                    @if (session('show_edit_modal'))
+                        @error('email')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Role</label>
                     <div class="relative">
-                        <select name="role"
-                            class="w-full px-4 py-3 rounded-xl border border-blue-200 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold bg-blue-50/50 appearance-none text-gray-700 cursor-pointer hover:border-blue-400 transition-all">
-                            <option value="comelec" selected>Comelec</option>
-                            <option value="sao">SAO Head</option>
+                        <select name="role" id="edit-role"
+                            class="w-full px-4 py-3 rounded-xl border {{ session('show_edit_modal') && $errors->has('role') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-semibold bg-white appearance-none text-gray-700 cursor-pointer hover:border-blue-400 transition-all">
+                            <option value="comelec" {{ old('role') === 'comelec' ? 'selected' : '' }}>Comelec</option>
+                            <option value="sao" {{ old('role') === 'sao' ? 'selected' : '' }}>SAO Head</option>
                         </select>
-                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-blue-500">
+                        <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                     d="M19 9l-7 7-7-7"></path>
                             </svg>
                         </div>
                     </div>
+                    @if (session('show_edit_modal'))
+                        @error('role')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
-                <!-- TOGGLE-VIEW PASSWORD (STRICTLY VIEWABLE COMPLIANCE ONLY) -->
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1 flex justify-between">
-                        Account Password
+                        Password
                         <span @click="showEditPass = !showEditPass"
                             class="text-blue-500 lowercase hover:underline cursor-pointer tracking-wider mr-2 font-semibold">
                             Toggle Visibility
                         </span>
                     </label>
                     <div class="relative">
-                        <input :type="showEditPass ? 'text' : 'password'" value="mysecretpassword" readonly
-                            class="w-full px-4 py-3 rounded-xl border border-gray-100 bg-gray-50 focus:outline-none text-sm font-medium text-gray-500 cursor-not-allowed">
+                        <input :type="showEditPass ? 'text' : 'password'" name="password" id="edit-password"
+                            placeholder="Leave blank to keep current password"
+                            class="w-full px-4 py-3 rounded-xl border {{ session('show_edit_modal') && $errors->has('password') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium text-gray-700">
                         <div @click="showEditPass = !showEditPass"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-600 cursor-pointer">
                             <template x-if="!showEditPass">
-                                <!-- Eye Closed Icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
                                 </svg>
                             </template>
                             <template x-if="showEditPass">
-                                <!-- Eye Open Icon -->
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -173,19 +238,26 @@
                             </template>
                         </div>
                     </div>
+                    @if (session('show_edit_modal'))
+                        @error('password')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <div class="flex gap-3 pt-4">
                     <button type="button" @click="openEditModal = false; showEditPass = false"
-                        class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-500 font-bold text-xs hover:bg-gray-50 uppercase tracking-wide transition-colors">Cancel</button>
-                    <button type="button" @click="openEditModal = false; showEditPass = false"
-                        class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 uppercase tracking-wide shadow-lg shadow-blue-200/50 transition-all">Save
-                        Changes</button>
+                        class="flex-1 py-3 rounded-xl border border-gray-300 text-gray-500 font-bold text-xs hover:bg-gray-50 uppercase tracking-wide transition-colors">
+                        Cancel
+                    </button>
+                    <button type="submit"
+                        class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 uppercase tracking-wide shadow-lg shadow-blue-200/50 transition-all">
+                        Save Changes
+                    </button>
                 </div>
             </form>
         </div>
     </div>
-
 
     <!-- ============================== -->
     <!-- ADD NEW ACCOUNT MODAL          -->
@@ -196,19 +268,19 @@
         x-transition:leave-end="opacity-0 scale-95"
         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
 
-        <!-- Modal Card -->
         <div @click.away="openModal = false"
             class="bg-white rounded-3xl p-8 w-full max-w-md shadow-2xl text-gray-800 relative">
             <h2 class="text-2xl font-bold mb-6 text-gray-900">Add New Account</h2>
-            {{-- General error banner --}}
-            @if (session('error') || $errors->has('general'))
+
+            {{-- Add error banner --}}
+            @if (session('show_add_modal') && ($errors->has('general') || session('error')))
                 <div
                     class="mb-4 px-4 py-3 bg-red-50 border border-red-200 rounded-xl text-red-600 text-[13px] font-medium">
                     {{ session('error') ?? $errors->first('general') }}
                 </div>
             @endif
 
-            {{-- Success banner --}}
+            {{-- Add success banner --}}
             @if (session('success'))
                 <div
                     class="mb-4 px-4 py-3 bg-green-50 border border-green-200 rounded-xl text-green-600 text-[13px] font-medium">
@@ -216,7 +288,6 @@
                 </div>
             @endif
 
-            <!-- Placeholder Form Route Layout - Keep mapped backend constraints if known natively: -->
             <form action="{{ route('store.new-accounts') }}" class="space-y-4" method="POST">
                 @csrf
 
@@ -224,54 +295,59 @@
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">First Name</label>
                     <input type="text" name="first_name" value="{{ old('first_name') }}"
                         placeholder="Enter First Name"
-                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('first_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                    @error('first_name')
-                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
-                    @enderror
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_add_modal') && $errors->has('first_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @if (session('show_add_modal'))
+                        @error('first_name')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Middle Name</label>
                     <input type="text" name="middle_name" value="{{ old('middle_name') }}"
                         placeholder="Enter Middle Name"
-                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('middle_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                    @error('middle_name')
-                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
-                    @enderror
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_add_modal') && $errors->has('middle_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @if (session('show_add_modal'))
+                        @error('middle_name')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Last Name</label>
                     <input type="text" name="last_name" value="{{ old('last_name') }}"
                         placeholder="Enter Last Name"
-                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('last_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                    @error('last_name')
-                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
-                    @enderror
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_add_modal') && $errors->has('last_name') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @if (session('show_add_modal'))
+                        @error('last_name')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Email Address</label>
                     <input type="email" name="email" value="{{ old('email') }}"
                         placeholder="example@gmail.com"
-                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('email') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                    @error('email')
-                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
-                    @enderror
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_add_modal') && $errors->has('email') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @if (session('show_add_modal'))
+                        @error('email')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Role</label>
                     <div class="relative">
                         <select name="role"
-                            class="w-full px-4 py-3 rounded-xl border {{ $errors->has('role') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white appearance-none">
+                            class="w-full px-4 py-3 rounded-xl border {{ session('show_add_modal') && $errors->has('role') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white appearance-none">
                             <option value="">Select Role</option>
-                            <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student
-                            </option>
-                            <option value="comelec" {{ old('role') === 'comelec' ? 'selected' : '' }}>Comelec
-                            </option>
-                            <option value="sao" {{ old('role') === 'sao' ? 'selected' : '' }}>SAO Head
-                            </option>
+                            <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student</option>
+                            <option value="comelec" {{ old('role') === 'comelec' ? 'selected' : '' }}>Comelec</option>
+                            <option value="sao" {{ old('role') === 'sao' ? 'selected' : '' }}>SAO Head</option>
                         </select>
                         <div class="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,26 +356,33 @@
                             </svg>
                         </div>
                     </div>
-                    @error('role')
-                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
-                    @enderror
+                    @if (session('show_add_modal'))
+                        @error('role')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <div>
                     <label class="block text-xs font-bold text-gray-500 uppercase mb-1 ml-1">Password</label>
                     <input type="password" name="password" placeholder="Enter Password"
-                        class="w-full px-4 py-3 rounded-xl border {{ $errors->has('password') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
-                    @error('password')
-                        <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
-                    @enderror
+                        class="w-full px-4 py-3 rounded-xl border {{ session('show_add_modal') && $errors->has('password') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium">
+                    @if (session('show_add_modal'))
+                        @error('password')
+                            <p class="text-red-500 text-[11px] mt-1 ml-1 font-medium">{{ $message }}</p>
+                        @enderror
+                    @endif
                 </div>
 
                 <div class="flex gap-3 pt-4">
                     <button type="button" @click="openModal = false"
-                        class="flex-1 py-3 rounded-xl border border-red-400 text-red-500 font-bold text-xs hover:bg-red-50 uppercase tracking-wide transition-colors">Cancel</button>
+                        class="flex-1 py-3 rounded-xl border border-red-400 text-red-500 font-bold text-xs hover:bg-red-50 uppercase tracking-wide transition-colors">
+                        Cancel
+                    </button>
                     <button type="submit"
-                        class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 uppercase tracking-wide shadow-lg shadow-blue-200/50 transition-all">Add
-                        Account</button>
+                        class="flex-1 py-3 rounded-xl bg-blue-600 text-white font-bold text-xs hover:bg-blue-700 uppercase tracking-wide shadow-lg shadow-blue-200/50 transition-all">
+                        Add Account
+                    </button>
                 </div>
             </form>
         </div>
@@ -308,7 +391,6 @@
     <!-- HEADER SECTION -->
     <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
         <div class="flex items-center gap-4">
-            <!-- Replace standard Back URL to previous link bindings internally safely formatted. -->
             <a href="{{ route('view.quick-access') }}"
                 class="bg-white text-[#113285] rounded-full w-10 h-10 flex items-center justify-center hover:scale-110 transition-transform shadow-md">
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -328,14 +410,12 @@
         class="max-w-7xl mx-auto w-full bg-main-panel rounded-3xl p-6 md:p-10 relative shadow-2xl flex-1 flex flex-col mb-4 overflow-hidden">
 
         <!-- STATS CARDS -->
-        <!-- Reshaped strictly into Top 3 Elements aligned on screen layout requirements without Red block -->
         <div class="flex flex-wrap gap-5 mb-6 md:max-w-3xl relative z-10">
             <!-- 1. Total Accounts -->
             <div
                 class="bg-white rounded-[20px] p-5 py-4 w-[250px] flex items-center gap-4 shadow-sm flex-1 min-w-[240px]">
                 <div
                     class="bg-blue-600 w-[52px] h-[52px] rounded-[16px] flex items-center justify-center text-white shrink-0 shadow-md">
-                    <!-- Replace fallback icon or bind original directory mapping visually -->
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
@@ -378,10 +458,9 @@
                     <div class="text-[12px] text-gray-500 font-semibold tracking-wide">SAO Head</div>
                 </div>
             </div>
-            <!-- NOTE: 4. Erased red block to enforce identical match properly requested by User Guidelines (Rule "Gipa-erase delete block..") -->
         </div>
 
-        <!-- Right Side Added Filter Panel Header Box -->
+        <!-- FILTER -->
         <div class="flex justify-end relative z-10 w-full mb-3 -mt-3 pr-2 items-center min-w-max ml-auto">
             <div class="relative w-[280px]">
                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/90">
@@ -394,18 +473,14 @@
                 <select
                     onchange="window.location.href = '{{ route('view.manage-accounts') }}?school_year=' + this.value"
                     class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
-
                     <option value="" class="text-black" {{ !$schoolYearFilter ? 'selected' : '' }}>All Years
                     </option>
                     <option value="2023-2024" class="text-black"
-                        {{ $schoolYearFilter === '2023-2024' ? 'selected' : '' }}>
-                        School Year 2023 - 2024</option>
+                        {{ $schoolYearFilter === '2023-2024' ? 'selected' : '' }}>School Year 2023 - 2024</option>
                     <option value="2024-2025" class="text-black"
-                        {{ $schoolYearFilter === '2024-2025' ? 'selected' : '' }}>
-                        School Year 2024 - 2025</option>
+                        {{ $schoolYearFilter === '2024-2025' ? 'selected' : '' }}>School Year 2024 - 2025</option>
                     <option value="2025-2026" class="text-black"
-                        {{ $schoolYearFilter === '2025-2026' ? 'selected' : '' }}>
-                        School Year 2025 - 2026</option>
+                        {{ $schoolYearFilter === '2025-2026' ? 'selected' : '' }}>School Year 2025 - 2026</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white z-20">
                     <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor"
@@ -417,7 +492,6 @@
         </div>
 
         <!-- TABLE SECTION -->
-        <!-- Formats table columns padding, row spacings and exact style colors/alignments based precisely mapped -->
         <div
             class="bg-white rounded-2xl overflow-hidden shadow-xl flex-1 relative z-10 flex flex-col mb-4 max-h-[100%]">
             <div class="overflow-x-auto w-full max-h-full pb-[35px] hide-scrollbar rounded-b-2xl">
@@ -476,7 +550,11 @@
                                 <td class="pl-6 pr-[42px] py-[22px]">
                                     <div class="flex items-center justify-end gap-3">
                                         @if ($user->getRole() !== 'admin')
-                                            <button @click="showDeleteModal = true"
+                                            <button
+                                                @click="
+                                                    document.getElementById('delete-user-id').value = '{{ $user->getId() }}';
+                                                    showDeleteModal = true
+                                                "
                                                 class="w-8 h-8 flex items-center justify-center bg-gray-100 rounded-md border border-gray-100 hover:bg-red-50 hover:border-red-100 group transition-all">
                                                 <svg class="w-[16px] h-[16px] text-[#ced0db] group-hover:text-red-500 transition-colors"
                                                     fill="none" stroke="currentColor" stroke-width="2.2"
@@ -486,7 +564,21 @@
                                                 </svg>
                                             </button>
                                         @endif
-                                        <button @click="openEditModal = true; showEditPass = false"
+                                        <button
+                                            @click="
+                                                    document.getElementById('edit-user-id').value = '{{ $user->getId() }}';
+                                                    document.getElementById('edit-first-name').value = '{{ $user->getFirstName() }}';
+                                                    document.getElementById('edit-middle-name').value = '{{ $user->getMiddleName() }}';
+                                                    document.getElementById('edit-last-name').value = '{{ $user->getLastName() }}';
+                                                    document.getElementById('edit-email').value = '{{ $user->getEmail() }}';
+                                                    document.getElementById('edit-role').value = '{{ $user->getRole() }}';
+                                                    document.getElementById('edit-admin-id').value = '{{ $user->getAdminId() }}';
+                                                    document.getElementById('edit-student-id').value = '{{ $user->getStudentId() }}';
+                                                    document.getElementById('edit-comelec-id').value = '{{ $user->getComelecId() }}';
+                                                    document.getElementById('edit-created-at').value = '{{ $user->getCreatedAt() }}';
+                                                    document.getElementById('edit-updated-at').value = '{{ $user->getUpdatedAt() }}';
+                                                    openEditModal = true; showEditPass = false
+                                                "
                                             class="w-8 h-8 flex items-center justify-center bg-[#1853fc] hover:bg-[#123ebd] hover:-translate-y-px rounded-md text-white shadow-[0_2px_8px_rgba(24,83,252,0.4)] transition-all">
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor"
                                                 stroke-width="2.2" viewBox="0 0 24 24">
@@ -505,6 +597,7 @@
                         @endforelse
                     </tbody>
                 </table>
+
                 @if ($data->lastPage() > 1)
                     <div
                         class="flex items-center justify-between px-[42px] py-4 border-t border-gray-100 bg-white sticky bottom-0">
@@ -512,7 +605,6 @@
                             Showing {{ $data->firstItem() }}–{{ $data->lastItem() }} of {{ $data->total() }} accounts
                         </p>
                         <div class="flex items-center gap-2">
-
                             {{-- Previous --}}
                             @if ($data->onFirstPage())
                                 <span
@@ -532,7 +624,6 @@
                                 </a>
                             @endif
 
-                            {{-- 5 page buttons centered around current page --}}
                             @php
                                 $current = $data->currentPage();
                                 $last = $data->lastPage();
@@ -540,7 +631,6 @@
                                 $end = min($last, $start + 4);
                             @endphp
 
-                            {{-- Leading ellipsis --}}
                             @if ($start > 1)
                                 <a href="{{ $data->url(1) }}"
                                     class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 text-[13px] font-medium hover:bg-blue-50 hover:text-blue-600 transition-all">1</a>
@@ -550,7 +640,6 @@
                                 @endif
                             @endif
 
-                            {{-- Page window --}}
                             @for ($page = $start; $page <= $end; $page++)
                                 @if ($page == $current)
                                     <span
@@ -561,7 +650,6 @@
                                 @endif
                             @endfor
 
-                            {{-- Trailing ellipsis --}}
                             @if ($end < $last)
                                 @if ($end < $last - 1)
                                     <span
@@ -589,20 +677,17 @@
                                     </svg>
                                 </span>
                             @endif
-
                         </div>
                     </div>
                 @endif
             </div>
         </div>
 
-        <!-- FLOATING ADD BUTTON BOUND INTERNALLY -->
-        <!-- Fixed rule modification from requirements (ang add account button kay naasulod): changed "fixed bottom right outside -> absolute constrained block inner corner" AND replaced plain Add mapping cross shape natively  -->
+        <!-- FLOATING ADD BUTTON -->
         <button @click="openModal = true"
             class="absolute bottom-5 right-7 md:bottom-7 md:right-8 bg-[#0b64f9] w-14 h-14 rounded-full flex items-center justify-center text-white shadow-[0_5px_22px_rgba(5,20,80,0.6)] border-2 border-[#549bf7]/30 hover:bg-blue-600 hover:-translate-y-1 hover:shadow-2xl transition-all duration-300 z-50">
             <svg class="w-[26px] h-[26px]" fill="none" stroke="currentColor" stroke-width="2"
                 viewBox="0 0 24 24">
-                <!-- Custom SVG Person-Plus Exact Match Visually from Request -->
                 <path stroke-linecap="round" stroke-linejoin="round"
                     d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
