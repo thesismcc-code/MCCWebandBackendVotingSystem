@@ -163,6 +163,7 @@ class ManageAccountController extends Controller
             return redirect()->route('view.manage-accounts')
                 ->with('success', 'Account has been updated successfully.');
         }
+
         return redirect()->route('view.manage-accounts')
             ->withErrors(['general' => 'Something went wrong. Please try again.'])
             ->withInput()
