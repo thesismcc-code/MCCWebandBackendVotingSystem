@@ -1,328 +1,246 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>System Activity - Fingerprint Voting System</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Google Fonts -->
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Alpine.js -->
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #102864;
-            color: white;
-        }
-
-        /* Custom Colors */
-        .bg-main-panel {
-            background-color: #0C3189;
-            border: 1px solid rgba(59, 130, 246, 0.5);
-        }
-
-        /* Back Button */
-        .btn-back {
-            background-color: white;
-            color: #113285;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: transform 0.2s;
-            text-decoration: none;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        }
-        .btn-back:hover {
-            transform: scale(1.1);
-            color: #113285;
-        }
-
-        /* Toggle Buttons */
-        .btn-log-toggle {
-            padding: 8px 24px;
-            font-weight: 600;
-            border-radius: 8px;
-            border: none;
-            transition: all 0.2s;
-        }
-        .btn-log-active {
-            background-color: #0066FF;
-            color: white;
-        }
-        .btn-log-inactive {
-            background-color: white;
-            color: #111827;
-        }
-        .btn-log-inactive:hover {
-            background-color: #f3f4f6;
-        }
-
-        /* Filter Select Boxes */
-        .filter-box {
-            background-color: #102864;
-            border: 1px solid #3b82f6;
-            color: white;
-            border-radius: 8px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            min-width: 200px;
-            cursor: pointer;
-        }
-        .filter-box:hover {
-            background-color: #153275;
-        }
-
-        /* Table Styling */
-        .table-container {
-            background-color: white;
-            border-radius: 16px;
-            overflow: hidden;
-            color: #111827;
-            min-height: 400px;
-        }
-        .table thead th {
-            background-color: white;
-            color: #111827;
-            font-weight: 700;
-            border-bottom: 2px solid #e5e7eb;
-            padding: 1.25rem 1.5rem;
-        }
-        .table tbody td {
-            padding: 1rem 1.5rem;
-            vertical-align: middle;
-            border-bottom: 1px solid #e5e7eb;
-            font-weight: 500;
-            color: #1f2937;
-            height: 60px;
-        }
-
-        /* Pagination Buttons */
-        .pagination-btn {
-            width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 4px;
-            font-weight: 600;
-            text-decoration: none;
-            transition: background-color 0.2s;
-        }
-        .pg-active {
-            background-color: white;
-            color: #102864;
-        }
-        .pg-inactive {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-        .pg-inactive:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
-        }
-
-        /* Utility to hide elements */
-        .d-none {
-            display: none !important;
-        }
+        body { font-family: 'Inter', sans-serif; background-color: #102864; }
+        .bg-main-panel { background-color: #0C3189; }
+        [x-cloak] { display: none !important; }
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
 
-<body class="p-3 p-md-4 min-vh-100 d-flex flex-column">
+<body x-data="{
+    activeTab: 'realtime'
+}" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
 
     <!-- HEADER SECTION -->
-    <div class="container-xl mb-4 px-0">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{{ route('view.quick-access') }}" class="btn-back">
-                <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path></svg>
+    <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('view.quick-access') }}"
+                class="bg-white text-[#113285] rounded-full w-10 h-10 flex items-center justify-center hover:scale-110 transition-transform shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
+                </svg>
             </a>
             <div>
-                <h1 class="h3 fw-bold m-0 lh-sm">System Activity</h1>
-                <p class="small text-white-50 m-0 fw-medium">Real-time monitoring of system usage and security events</p>
+                <h1 class="text-2xl font-bold tracking-tight text-white leading-tight">System Activity</h1>
+                <p class="text-blue-200 text-[11px] font-medium mt-0.5">Real-time monitoring of system usage and security events</p>
             </div>
         </div>
     </div>
 
     <!-- MAIN CONTAINER -->
-    <div class="container-xl bg-main-panel rounded-4 p-4 p-md-5 shadow-lg flex-fill d-flex flex-column gap-4 position-relative">
+    <div class="max-w-7xl mx-auto w-full bg-main-panel rounded-3xl p-6 md:p-10 relative shadow-2xl flex-1 flex flex-col mb-4 overflow-hidden">
 
-        <!-- Toggle Buttons -->
-        <div class="d-flex gap-3">
-            <button id="btnRealTime" class="btn-log-toggle btn-log-active" onclick="showRealTime()">Real Time Logs</button>
-            <button id="btnError" class="btn-log-toggle btn-log-inactive" onclick="showError()">Error Logs</button>
+        <!-- TOGGLE BUTTONS -->
+        <div class="flex gap-3 mb-6">
+            <button
+                @click="activeTab = 'realtime'"
+                :class="activeTab === 'realtime'
+                    ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
+                    : 'bg-white text-gray-900 hover:bg-gray-100'"
+                class="px-6 py-2 rounded-lg font-semibold text-sm transition-all">
+                Real Time Logs
+            </button>
+            <button
+                @click="activeTab = 'error'"
+                :class="activeTab === 'error'
+                    ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
+                    : 'bg-white text-gray-900 hover:bg-gray-100'"
+                class="px-6 py-2 rounded-lg font-semibold text-sm transition-all">
+                Error Logs
+            </button>
         </div>
 
-        <!-- Filter Row -->
-        <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mt-2">
-            <!-- Dynamic Title -->
-            <h2 id="tableTitle" class="h2 fw-normal mb-0">Real Time Logs</h2>
+        <!-- FILTER ROW -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
 
-            <div class="d-flex gap-3">
+            <!-- Dynamic Title -->
+            <h2 class="text-2xl font-normal text-white">
+                <span x-show="activeTab === 'realtime'">Real Time Logs</span>
+                <span x-show="activeTab === 'error'" x-cloak>Error Logs</span>
+            </h2>
+
+            <!-- Filters -->
+            <div class="flex gap-3">
                 <!-- User Filter -->
-                <div class="dropdown">
-                    <button class="filter-box dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                        <span class="flex-grow-1 text-start">All Users</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">All Users</a></li>
-                        <li><a class="dropdown-item" href="#">Admin</a></li>
-                        <li><a class="dropdown-item" href="#">Student</a></li>
-                    </ul>
+                <div class="relative w-[200px]">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/90">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                        </svg>
+                    </div>
+                    <select class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
+                        <option value="" class="text-black">All Users</option>
+                        <option value="admin" class="text-black">Admin</option>
+                        <option value="student" class="text-black">Student</option>
+                        <option value="comelec" class="text-black">Comelec</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white z-20">
+                        <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
                 </div>
 
                 <!-- Date Filter -->
-                <div class="dropdown">
-                    <button class="filter-box dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-                        <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
-                        <span class="flex-grow-1 text-start">Date</span>
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#">Today</a></li>
-                        <li><a class="dropdown-item" href="#">Yesterday</a></li>
-                        <li><a class="dropdown-item" href="#">Last Week</a></li>
-                    </ul>
+                <div class="relative w-[200px]">
+                    <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/90">
+                        <svg class="w-[18px] h-[18px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                        </svg>
+                    </div>
+                    <select class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
+                        <option value="" class="text-black">All Dates</option>
+                        <option value="today" class="text-black">Today</option>
+                        <option value="yesterday" class="text-black">Yesterday</option>
+                        <option value="last_week" class="text-black">Last Week</option>
+                    </select>
+                    <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white z-20">
+                        <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"/>
+                        </svg>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- REAL TIME LOGS TABLE -->
-        <div id="realTimeTable" class="table-container shadow">
-            <div class="table-responsive">
-                <table class="table mb-0">
+        <!-- TABLE SECTION -->
+        <div class="bg-white rounded-2xl overflow-hidden shadow-xl flex-1 relative z-10 flex flex-col mb-4" style="min-height: 0;">
+            <div class="overflow-x-auto w-full flex-1 rounded-b-2xl" style="overflow-y: auto; min-height: 0;">
+
+                <!-- REAL TIME LOGS TABLE -->
+                <table x-show="activeTab === 'realtime'" class="w-full text-left border-collapse min-w-[700px] mb-8">
                     <thead>
-                        <tr>
-                            <th scope="col" class="text-center" style="width: 15%">Date</th>
-                            <th scope="col" style="width: 15%">Time</th>
-                            <th scope="col" style="width: 15%">User</th>
-                            <th scope="col" style="width: 55%">Activity</th>
+                        <tr class="border-b-2 border-gray-100 bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.015)] sticky top-0 z-30">
+                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] text-center w-[15%]">Date</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">Time</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">User</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16]">Activity</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td class="text-center">12-12-2025</td>
-                            <td>10:01:23 AM</td>
-                            <td>Student</td>
-                            <td>Fingerprint scan successful</td>
+                    <tbody class="divide-y divide-gray-100/60 bg-white">
+                        <tr class="hover:bg-blue-50/20 transition-colors">
+                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
+                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:23 AM</td>
+                            <td class="px-6 py-[22px]">
+                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
+                            </td>
+                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Fingerprint scan successful</td>
                         </tr>
-                        <tr>
-                            <td class="text-center">12-12-2025</td>
-                            <td>10:01:30 AM</td>
-                            <td>Admin</td>
-                            <td>Admin logged in</td>
+                        <tr class="hover:bg-blue-50/20 transition-colors">
+                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
+                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:30 AM</td>
+                            <td class="px-6 py-[22px]">
+                                <span class="bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center">Admin</span>
+                            </td>
+                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Admin logged in</td>
                         </tr>
-                        <tr>
-                            <td class="text-center">12-12-2025</td>
-                            <td>10:02:15 AM</td>
-                            <td>Admin</td>
-                            <td>Added new position</td>
+                        <tr class="hover:bg-blue-50/20 transition-colors">
+                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
+                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:02:15 AM</td>
+                            <td class="px-6 py-[22px]">
+                                <span class="bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center">Admin</span>
+                            </td>
+                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Added new position</td>
                         </tr>
-                        <tr>
-                            <td class="text-center">12-12-2025</td>
-                            <td>10:02:34 AM</td>
-                            <td>Student</td>
-                            <td>User logged in</td>
+                        <tr class="hover:bg-blue-50/20 transition-colors">
+                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
+                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:02:34 AM</td>
+                            <td class="px-6 py-[22px]">
+                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
+                            </td>
+                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">User logged in</td>
                         </tr>
-                        <tr>
-                            <td class="text-center">12-12-2025</td>
-                            <td>10:03:00 AM</td>
-                            <td>Comelec</td>
-                            <td>Added candidate</td>
+                        <tr class="hover:bg-blue-50/20 transition-colors">
+                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
+                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:03:00 AM</td>
+                            <td class="px-6 py-[22px]">
+                                <span class="bg-[#fee173] text-[#4f4316] text-[10px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border border-yellow-300 inline-flex items-center">Comelec</span>
+                            </td>
+                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Added candidate</td>
                         </tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
 
-        <!-- ERROR LOGS TABLE (Initially Hidden) -->
-        <div id="errorTable" class="table-container shadow d-none">
-            <div class="table-responsive">
-                <table class="table mb-0">
+                <!-- ERROR LOGS TABLE -->
+                <table x-show="activeTab === 'error'" x-cloak class="w-full text-left border-collapse min-w-[700px] mb-8">
                     <thead>
-                        <tr>
-                            <th scope="col" class="text-center" style="width: 20%">Date</th>
-                            <th scope="col" style="width: 20%">Time</th>
-                            <th scope="col" style="width: 20%">User</th>
-                            <th scope="col" style="width: 40%">Activity</th>
+                        <tr class="border-b-2 border-gray-100 bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.015)] sticky top-0 z-30">
+                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] text-center w-[15%]">Date</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">Time</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">User</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16]">Activity</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td class="text-center">12-12-2025</td>
-                            <td>10:01:23 AM</td>
-                            <td>Student</td>
-                            <td class="text-danger">Failed fingerprint scan</td>
+                    <tbody class="divide-y divide-gray-100/60 bg-white">
+                        <tr class="hover:bg-red-50/20 transition-colors">
+                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
+                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:23 AM</td>
+                            <td class="px-6 py-[22px]">
+                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
+                            </td>
+                            <td class="px-6 py-[22px] text-[14.5px] text-red-500 font-semibold">Failed fingerprint scan</td>
+                        </tr>
+                        <tr class="hover:bg-red-50/20 transition-colors">
+                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
+                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:30 AM</td>
+                            <td class="px-6 py-[22px]">
+                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
+                            </td>
+                            <td class="px-6 py-[22px] text-[14.5px] text-red-500 font-semibold">Login attempt blocked</td>
                         </tr>
                         <tr>
-                            <td class="text-center">12-12-2025</td>
-                            <td>10:01:30 AM</td>
-                            <td>Student</td>
-                            <td class="text-danger">Login attempt blocked</td>
+                            <td colspan="4" class="py-16 text-center text-gray-400 font-medium text-sm">
+                                No more error logs found.
+                            </td>
                         </tr>
-                        <!-- Empty rows for spacing consistency -->
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td></tr>
-                        <tr><td></td><td></td><td></td><td></td></tr>
                     </tbody>
                 </table>
-            </div>
-        </div>
 
-        <!-- Pagination -->
-        <div class="d-flex justify-content-center gap-2 mt-auto pt-4">
-            <a href="#" class="pagination-btn pg-active">1</a>
-            <a href="#" class="pagination-btn pg-inactive">2</a>
-            <a href="#" class="pagination-btn pg-active">
-                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
-            </a>
+            </div>
+
+            <!-- PAGINATION -->
+            <div class="flex items-center justify-between px-[42px] py-4 border-t border-gray-100 bg-white sticky bottom-0">
+                <p class="text-[13px] text-gray-400 font-medium">Showing 1–5 of 10 logs</p>
+                <div class="flex items-center gap-2">
+                    {{-- Previous --}}
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 text-gray-300 cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
+                        </svg>
+                    </span>
+
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1853fc] text-white text-[13px] font-bold shadow">1</span>
+                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 text-[13px] font-medium hover:bg-blue-50 hover:text-blue-600 transition-all">2</a>
+
+                    {{-- Next --}}
+                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            </div>
         </div>
 
     </div>
 
-    <!-- Bootstrap Bundle JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Script to Handle Toggling -->
-    <script>
-        function showRealTime() {
-            // Logic for Buttons
-            document.getElementById('btnRealTime').classList.add('btn-log-active');
-            document.getElementById('btnRealTime').classList.remove('btn-log-inactive');
-
-            document.getElementById('btnError').classList.add('btn-log-inactive');
-            document.getElementById('btnError').classList.remove('btn-log-active');
-
-            // Logic for Tables
-            document.getElementById('realTimeTable').classList.remove('d-none');
-            document.getElementById('errorTable').classList.add('d-none');
-
-            // Logic for Title
-            document.getElementById('tableTitle').innerText = "Real Time Logs";
-        }
-
-        function showError() {
-            // Logic for Buttons
-            document.getElementById('btnError').classList.add('btn-log-active');
-            document.getElementById('btnError').classList.remove('btn-log-inactive');
-
-            document.getElementById('btnRealTime').classList.add('btn-log-inactive');
-            document.getElementById('btnRealTime').classList.remove('btn-log-active');
-
-            // Logic for Tables
-            document.getElementById('errorTable').classList.remove('d-none');
-            document.getElementById('realTimeTable').classList.add('d-none');
-
-            // Logic for Title
-            document.getElementById('tableTitle').innerText = "Error Logs";
-        }
-    </script>
 </body>
 </html>
