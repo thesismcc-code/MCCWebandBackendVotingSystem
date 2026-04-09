@@ -64,9 +64,12 @@ interface UserRepository
 
     public function countStudentVoters(): int;
     public function countTotalStudents(): int;
+    public function countTotalStudentsEnrolledToday(): int;
     public function getVoterTurnout(): array;
     public function realtimeVoterTurnout(): array;
     public function voterTurnoutByYearLevel(): array;
     public function countUsersSummary(): array;
     public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator;
+    public function getUserAllStudents(int $perPage, ?string $student_id = null, ?string $course = null, ?string $year_level = null): LengthAwarePaginator;
+    public function getUniqueCourses(): array;
 }

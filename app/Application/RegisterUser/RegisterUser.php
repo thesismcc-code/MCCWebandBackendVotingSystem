@@ -67,7 +67,7 @@ class RegisterUser
 
         return $this->userRepository->saveNewUser($user);
     }
-    public function updateUser( array $data): ?User
+    public function updateUser(array $data): ?User
     {
         $user = new User(
             id: $data['user_id'],
@@ -84,7 +84,7 @@ class RegisterUser
             created_at: null,
             updated_at: null,
         );
-       return $this->userRepository->updateUser($user);
+        return $this->userRepository->updateUser($user);
     }
 
     private function generateID(string $role): string
@@ -149,5 +149,21 @@ class RegisterUser
     public function getUserExceptStudents(int $perPage, ?string $schoolYearFilter = null): LengthAwarePaginator
     {
         return $this->userRepository->getUserExceptStudents($perPage, $schoolYearFilter);
+    }
+    public function countTotalStudents(): int
+    {
+        return $this->userRepository->countTotalStudents();
+    }
+    public function countTotalStudentsEnrolledToday(): int
+    {
+        return $this->userRepository->countTotalStudentsEnrolledToday();
+    }
+    public function getUserAllStudents(int $perPage, ?string $student_id = null, ?string $course = null, ?string $year_level = null): LengthAwarePaginator
+    {
+        return $this->userRepository->getUserAllStudents($perPage, $student_id, $course, $year_level);
+    }
+    public function getUniqueCourses(): array
+    {
+        return $this->userRepository->getUniqueCourses();
     }
 }
