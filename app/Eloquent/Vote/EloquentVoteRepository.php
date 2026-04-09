@@ -248,16 +248,17 @@ class EloquentVoteRepository implements VotesRepository
 
         return $results;
     }
-    private function getActiveElectionID(): ?string{
+    private function getActiveElectionID(): ?string
+    {
         $snapshot = $this->electionsDb->orderByChild('status')->equalTo('active')->getSnapshot();
 
-        if (!$snapshot->exists() || $snapshot->getValue() === null){
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
             return null;
         }
 
         return array_key_first($snapshot->getValue());
     }
-    public function getVotingLogs( int $perPage, ?string $search, ?string $course, ?string $yearLevel): LengthAwarePaginator
+    public function getVotingLogs(int $perPage, ?string $search, ?string $course, ?string $yearLevel): LengthAwarePaginator
     {
         $electionID = $this->getActiveElectionId();
         if (!$electionID) {
@@ -341,5 +342,80 @@ class EloquentVoteRepository implements VotesRepository
             1,
             ['path' => request()->url(), 'query' => request()->query()]
         );
+    }
+    public function getAllVotingLogsForExport(?string $search = null, ?string $course = null, ?string $yearLevel = null): array
+    {
+        $elecitonID = $this->getActiveElectionID();
+        $electionName = $this->getActiveElectionName();
+
+        if (!$elecitonID) {
+            return ['election_name' => $electionName, 'logs' => []];
+        }
+
+        $votesSnapshot = $this->votesDb
+            ->orderByChild('election_id')
+            ->equalTo($elecitonID)
+            ->getSnapshot();
+
+        if (!$votesSnapshot->exists() || $votesSnapshot->getValue() === null) {
+            return ['election_name' => $electionName, 'logs' => []];
+        }
+
+        $voterTimestamps = [];
+        foreach ($votesSnapshot->getValue() as $vote) {
+            $voterId = $vote['voter_id'] ?? null;
+            if (!$voterId) continue;
+            if (!isset($voterTimestamps[$voterId])) {
+                $voterTimestamps[$voterId] = $vote['created_at'] ?? '';
+            }
+        }
+
+        $allUsers = $this->usersDb->getValue() ?? [];
+        $logs     = [];
+
+        foreach ($voterTimestamps as $voterId => $votedAt) {
+            $user = $allUsers[$voterId] ?? null;
+            if (!$user || ($user['role'] ?? '') !== 'student') continue;
+
+            if ($course    && strtolower($user['course']     ?? '') !== strtolower($course))    continue;
+            if ($yearLevel && strtolower($user['year_level'] ?? '') !== strtolower($yearLevel)) continue;
+
+            $fullName = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+
+            if ($search) {
+                $needle = strtolower($search);
+                if (
+                    !str_contains(strtolower($user['student_id'] ?? ''), $needle) &&
+                    !str_contains(strtolower($fullName), $needle)
+                ) continue;
+            }
+
+            $logs[] = [
+                'student_id' => $user['student_id'] ?? '',
+                'name'       => $fullName,
+                'course'     => $user['course']     ?? '',
+                'year_level' => $user['year_level'] ?? '',
+                'voted_at'   => $votedAt,
+                'status'     => 'Voted',
+            ];
+        }
+
+        usort($logs, fn($a, $b) => strcmp($b['voted_at'], $a['voted_at']));
+
+        return [
+            'election_name' => $electionName,
+            'logs'          => $logs,
+        ];
+    }
+    private function getActiveElectionName(): string
+    {
+        $snapshot = $this->electionsDb->orderByChild('status')->equalTo('active')->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null) {
+            return 'N/A';
+        }
+        $election = array_values($snapshot->getValue())[0] ?? null;
+
+        return $election['name'] ?? 'N/A';
     }
 }

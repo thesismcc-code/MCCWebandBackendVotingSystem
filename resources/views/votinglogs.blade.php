@@ -104,18 +104,26 @@
             </div>
 
             <!-- Export PDF Card -->
-            <div
-                class="bg-white rounded-xl p-4 flex items-center gap-4 shadow-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                <div class="bg-[#00e626] w-12 h-12 rounded-xl flex items-center justify-center text-white">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
-                    </svg>
-                </div>
-                <div>
-                    <h3 class="text-gray-900 font-bold text-lg">Export to PDF</h3>
-                </div>
-            </div>
+                <a href="{{ route(
+                    'voting-logs.export-pdf',
+                    array_filter([
+                        'search' => request('search'),
+                        'course' => request('course'),
+                        'year_level' => request('year_level'),
+                    ]),
+                ) }}"
+                    class="bg-white rounded-xl p-4 flex items-center gap-4 shadow-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                    <div class="bg-[#00e626] w-12 h-12 rounded-xl flex items-center justify-center text-white">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-900 font-bold text-lg">Export to PDF</h3>
+                        <p class="text-gray-500 text-xs">Download current filtered results</p>
+                    </div>
+                </a>
         </div>
 
         <!-- FILTERS ROW -->

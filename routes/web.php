@@ -42,6 +42,7 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/update-user',                           [ManageAccountController::class, 'updateUser'])->name('update-user');
     Route::get('/finger-print',                           [FingerPrintController::class, 'index'])->name('view.finger-print');
     Route::get('/voting-logs',                            [VotingLogsController::class, 'index'])->name('view.voting-logs');
+    Route::get('/voting-logs/export-pdf',                 [VotingLogsController::class, 'exportPdf'])->name('voting-logs.export-pdf');
     Route::get('/election-control',                       [ElectionController::class, 'index'])->name('view.election-control');
     Route::get('/election-control-posistion-setup',       [ElectionController::class, 'indexPosistionSetup'])->name('view.election-control-posistion-setup');
     Route::get('/election-control-candidate-list',        [ElectionController::class, 'indexCandidateList'])->name('view.election-control-candidate-list');

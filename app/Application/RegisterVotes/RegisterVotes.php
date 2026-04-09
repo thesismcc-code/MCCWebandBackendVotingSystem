@@ -28,4 +28,9 @@ class RegisterVotes
     {
         return $this->votesRepository->getVotingLogs($perPage, $search, $course, $yearLevel);
     }
+
+    public function getAllVotingLogsForExport(?string $search = null, ?string $course = null, ?string $yearLevel = null): array
+    {
+        return $this->votesRepository->getAllVotingLogsForExport($search, $course, $yearLevel);
+    }
 }

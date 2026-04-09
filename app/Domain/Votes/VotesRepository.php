@@ -12,4 +12,5 @@ interface VotesRepository
     public function liveVoteCast(): int;
     public function liveCandidateResult(): array;
     public function getVotingLogs(int $perPage, ?string $search, ?string $course, ?string $yearLevel): LengthAwarePaginator;
+    public function getAllVotingLogsForExport(?string $search = null, ?string $course = null, ?string $yearLevel = null): array;
 }
