@@ -6,6 +6,7 @@ use App\Domain\Votes\Votes;
 use App\Domain\Votes\VotesRepository;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
+use Illuminate\Pagination\LengthAwarePaginator;
 
 class EloquentVoteRepository implements VotesRepository
 {
@@ -155,8 +156,8 @@ class EloquentVoteRepository implements VotesRepository
             }
             return $nameCache[$userId] = trim(
                 ($userData['first_name']  ?? '') . ' ' .
-                ($userData['middle_name'] ?? '') . ' ' .
-                ($userData['last_name']   ?? '')
+                    ($userData['middle_name'] ?? '') . ' ' .
+                    ($userData['last_name']   ?? '')
             ) ?: 'Unknown';
         };
 
@@ -215,8 +216,8 @@ class EloquentVoteRepository implements VotesRepository
             }
             return $nameCache[$userId] = trim(
                 ($userData['first_name']  ?? '') . ' ' .
-                ($userData['middle_name'] ?? '') . ' ' .
-                ($userData['last_name']   ?? '')
+                    ($userData['middle_name'] ?? '') . ' ' .
+                    ($userData['last_name']   ?? '')
             ) ?: 'Unknown';
         };
 
@@ -246,5 +247,99 @@ class EloquentVoteRepository implements VotesRepository
         });
 
         return $results;
+    }
+    private function getActiveElectionID(): ?string{
+        $snapshot = $this->electionsDb->orderByChild('status')->equalTo('active')->getSnapshot();
+
+        if (!$snapshot->exists() || $snapshot->getValue() === null){
+            return null;
+        }
+
+        return array_key_first($snapshot->getValue());
+    }
+    public function getVotingLogs( int $perPage, ?string $search, ?string $course, ?string $yearLevel): LengthAwarePaginator
+    {
+        $electionID = $this->getActiveElectionId();
+        if (!$electionID) {
+            return $this->emptyPagenator($perPage);
+        }
+        $voteSnapshot = $this->votesDb
+            ->orderByChild('election_id')
+            ->equalTo($electionID)
+            ->getSnapshot();
+
+        if (!$voteSnapshot->exists() || $voteSnapshot->getValue() === null) {
+            return $this->emptyPagenator($perPage);
+        }
+
+        $voterTimestamps = [];
+        foreach ($voteSnapshot->getValue() as $vote) {
+            $voterId = $vote['voter_id'] ?? null;
+            if (!$voterId) continue;
+
+            if (!isset($voterTimestamps[$voterId])) {
+                $voterTimestamps[$voterId] = $vote['created_at'] ?? null;
+            }
+        }
+
+        if (empty($voterTimestamps)) {
+            return $this->emptyPagenator($perPage);
+        }
+
+        $allUsers = $this->usersDb->getValue() ?? [];
+
+        $logs = [];
+
+        foreach ($voterTimestamps as $voterID => $votedAt) {
+            $user = $allUsers[$voterID] ?? null;
+
+            if (!$user || ($user['role'] ?? '') !== 'student') continue;
+            if ($course && strtolower($user['course'] ?? '') !== strtolower($course)) continue;
+            if ($yearLevel && strtolower($user['year_level'] ?? '') !== strtolower($yearLevel)) continue;
+
+            $fullname = trim(($user['first_name'] ?? '') . ' ' . ($user['middle_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+
+            if ($search) {
+                $needle = strtolower($search);
+                $matchID = str_contains(strtolower($user['student_id'] ?? ''), $needle);
+                $matchName = str_contains(strtolower($fullname), $needle);
+
+                if (!$matchID && !$matchName) continue;
+            }
+
+            $logs[] = [
+                'voter_id'   => $voterID,
+                'student_id' => $user['student_id'] ?? 'Unknown',
+                'name'       => $fullname,
+                'course'     => $user['course'],
+                'year_level' => $user['year_level'],
+                'voted_at'   => $votedAt,
+                'status'     => 'Voted',
+            ];
+        }
+
+        usort($logs, fn($a, $b) => strcmp($b['voted_at'], $a['voted_at']));
+
+        $total = count($logs);
+        $currentPage = LengthAwarePaginator::resolveCurrentPage();
+        $items = array_slice($logs, ($currentPage - 1) * $perPage, $perPage);
+
+        return new LengthAwarePaginator(
+            $items,
+            $total,
+            $perPage,
+            $currentPage,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
+    }
+    private function emptyPagenator(int $perPage): LengthAwarePaginator
+    {
+        return new LengthAwarePaginator(
+            [],
+            0,
+            $perPage,
+            1,
+            ['path' => request()->url(), 'query' => request()->query()]
+        );
     }
 }
