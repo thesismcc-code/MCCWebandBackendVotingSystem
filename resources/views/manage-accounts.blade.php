@@ -345,7 +345,7 @@
                         <select name="role"
                             class="w-full px-4 py-3 rounded-xl border {{ session('show_add_modal') && $errors->has('role') ? 'border-red-400' : 'border-gray-200' }} focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm font-medium bg-white appearance-none">
                             <option value="">Select Role</option>
-                            <option value="student" {{ old('role') === 'student' ? 'selected' : '' }}>Student</option>
+                            <option value="admin" {{ old('role') === 'admin' ? 'selected' : '' }}>Admin</option>
                             <option value="comelec" {{ old('role') === 'comelec' ? 'selected' : '' }}>Comelec</option>
                             <option value="sao" {{ old('role') === 'sao' ? 'selected' : '' }}>SAO Head</option>
                         </select>
