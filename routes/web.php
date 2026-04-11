@@ -22,6 +22,7 @@ use App\Http\Controllers\StudentProfileController;
 use App\Http\Controllers\StudentVerificationController;
 use App\Http\Controllers\StudentTutorialController;
 use App\Http\Controllers\StudentVoteTutorialController;
+use App\Http\Controllers\SecurityLogsController;
 
 // ── Public routes ─────────────────────────────────────────────
 Route::get('/',        [AuthController::class, 'index'])->name('login');
@@ -43,6 +44,7 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/finger-print',                           [FingerPrintController::class, 'index'])->name('view.finger-print');
     Route::get('/voting-logs',                            [VotingLogsController::class, 'index'])->name('view.voting-logs');
     Route::get('/voting-logs/export-pdf',                 [VotingLogsController::class, 'exportPdf'])->name('voting-logs.export-pdf');
+    Route::get('/security-logs',                          [SecurityLogsController::class, 'index'])->name('view.security-logs');
     Route::get('/election-control',                       [ElectionController::class, 'index'])->name('view.election-control');
     Route::get('/election-control-posistion-setup',       [ElectionController::class, 'indexPosistionSetup'])->name('view.election-control-posistion-setup');
     Route::get('/election-control-candidate-list',        [ElectionController::class, 'indexCandidateList'])->name('view.election-control-candidate-list');

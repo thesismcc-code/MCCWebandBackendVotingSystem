@@ -94,7 +94,7 @@
                             authentication<br>attempts</p>
                     </div>
                 </div>
-                <a href="#" class="text-[#102864] hover:scale-110 transition-transform">
+                <a href="{{ route('view.security-logs') }}" class="text-[#102864] hover:scale-110 transition-transform">
                     <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd"
                             d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z"
@@ -104,26 +104,26 @@
             </div>
 
             <!-- Export PDF Card -->
-                <a href="{{ route(
-                    'voting-logs.export-pdf',
-                    array_filter([
-                        'search' => request('search'),
-                        'course' => request('course'),
-                        'year_level' => request('year_level'),
-                    ]),
-                ) }}"
-                    class="bg-white rounded-xl p-4 flex items-center gap-4 shadow-lg cursor-pointer hover:bg-gray-50 transition-colors">
-                    <div class="bg-[#00e626] w-12 h-12 rounded-xl flex items-center justify-center text-white">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                        </svg>
-                    </div>
-                    <div>
-                        <h3 class="text-gray-900 font-bold text-lg">Export to PDF</h3>
-                        <p class="text-gray-500 text-xs">Download current filtered results</p>
-                    </div>
-                </a>
+            <a href="{{ route(
+                'voting-logs.export-pdf',
+                array_filter([
+                    'search' => request('search'),
+                    'course' => request('course'),
+                    'year_level' => request('year_level'),
+                ]),
+            ) }}"
+                class="bg-white rounded-xl p-4 flex items-center gap-4 shadow-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                <div class="bg-[#00e626] w-12 h-12 rounded-xl flex items-center justify-center text-white">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                    </svg>
+                </div>
+                <div>
+                    <h3 class="text-gray-900 font-bold text-lg">Export to PDF</h3>
+                    <p class="text-gray-500 text-xs">Download current filtered results</p>
+                </div>
+            </a>
         </div>
 
         <!-- FILTERS ROW -->
