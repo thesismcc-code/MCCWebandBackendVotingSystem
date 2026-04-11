@@ -94,6 +94,7 @@ class FirebaseSeeder extends Seeder
         $this->seedVotes();
         $this->seedReports();
         $this->seedSystemLogs();
+        $this->seedSecurityLogs(); // ← NEW
 
         $this->logInfo('');
         $this->logSuccess('Firebase seeding complete!');
@@ -112,7 +113,6 @@ class FirebaseSeeder extends Seeder
         }
     }
 
-    // ─── DATE HELPERS ───────────────────────────────────────────────────────────
 
     private function now(): string
     {
@@ -149,8 +149,7 @@ class FirebaseSeeder extends Seeder
      */
     private function generateStudentId(int $enrollYear, int $seq): string
     {
-        // Format: STU-{2-digit year}-{3-digit seq} e.g. STU-026-001
-        $shortYear = substr((string) $enrollYear, -3); // takes last 3 digits e.g. 2026 → 026
+        $shortYear = substr((string) $enrollYear, -3);
         return 'STU-' . $shortYear . '-' . str_pad($seq, 3, '0', STR_PAD_LEFT);
     }
 
@@ -189,7 +188,6 @@ class FirebaseSeeder extends Seeder
             4 => '4th Year',
         ];
 
-        // ── Fixed staff accounts ──────────────────────────────────────────────
         $staff = [
             'ADMaB3kL9mNpQr' => ['first_name' => 'Alice',  'middle_name' => 'Marie', 'last_name' => 'Santos',    'email' => 'alice.santos@school.edu',    'role' => 'admin',   'student_id' => null, 'admin_id' => 'ADMaB3kL9mNpQr'],
             'SAOxK7wP2dYcHj' => ['first_name' => 'Bob',    'middle_name' => 'Cruz',  'last_name' => 'Reyes',     'email' => 'bob.reyes@school.edu',       'role' => 'sao',     'student_id' => null, 'admin_id' => null],
@@ -211,17 +209,16 @@ class FirebaseSeeder extends Seeder
             ]));
         }
 
-        // ── 100 students per enrollment year (400 total across 4 year levels) ─
         $firstNames  = ['Juan', 'Maria', 'Jose', 'Ana', 'Miguel', 'Rosa', 'Carlos', 'Luz', 'Ramon', 'Elena', 'Pedro', 'Sofia', 'Luis', 'Carmen', 'Antonio', 'Isabel', 'Diego', 'Patricia', 'Eduardo', 'Monica', 'Felix', 'Jasmine', 'Cedric', 'Janine', 'Ryan', 'Aileen', 'Mark', 'Christine', 'Kevin', 'Trisha'];
         $middleNames = ['Santos', 'Reyes', 'Cruz', 'Dela Cruz', 'Garcia', 'Mendoza', 'Lopez', 'Torres', 'Hernandez', 'Flores'];
         $lastNames   = ['Bautista', 'Villanueva', 'Ramos', 'Castro', 'Aquino', 'Gonzales', 'Diaz', 'Marquez', 'Quispe', 'Lim', 'Tan', 'Go', 'Chan', 'Uy', 'Chua', 'Sy', 'Ko', 'Ng', 'Yu', 'Dee'];
 
         $currentYear = (int) date('Y');
         $enrollYears = [
-            $currentYear - 3, // 4th Year
-            $currentYear - 2, // 3rd Year
-            $currentYear - 1, // 2nd Year
-            $currentYear,     // 1st Year
+            $currentYear - 3,
+            $currentYear - 2,
+            $currentYear - 1,
+            $currentYear,
         ];
 
         $emailCounter = 1;
@@ -331,44 +328,27 @@ class FirebaseSeeder extends Seeder
         $this->logInfo('Seeding /candidates...');
 
         $candidates = [
-            // ── election_001 (closed) — 2 candidates per position ────────────
-            // Positions: President, Vice President, Secretary, Treasurer
             'cand_001' => ['id' => 'cand_001', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'President',      'manifesto' => 'Transparency and student welfare in all SSC decisions.',       'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
             'cand_002' => ['id' => 'cand_002', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_002', 'election_id' => 'election_001', 'position' => 'President',      'manifesto' => 'Progress through unity — a stronger voice for every student.',  'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
             'cand_003' => ['id' => 'cand_003', 'user_id' => 'STUyT9nB7rVdQz', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'Vice President', 'manifesto' => 'Bridging the gap between students and administration.',         'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
             'cand_004' => ['id' => 'cand_004', 'user_id' => 'STUhR2mK4sJuPf', 'party_list_id' => 'party_003', 'election_id' => 'election_001', 'position' => 'Vice President', 'manifesto' => 'An independent voice dedicated solely to student needs.',       'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
             'cand_005' => ['id' => 'cand_005', 'user_id' => 'STUwL8cF6tNxEv', 'party_list_id' => 'party_002', 'election_id' => 'election_001', 'position' => 'Secretary',      'manifesto' => 'Organized, transparent, and accountable to every student.',    'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
             'cand_006' => ['id' => 'cand_006', 'user_id' => 'ADMaB3kL9mNpQr', 'party_list_id' => 'party_001', 'election_id' => 'election_001', 'position' => 'Treasurer',      'manifesto' => 'Fiscal responsibility and full financial transparency.',         'status' => 'approved', 'created_at' => $this->daysAgo(25), 'updated_at' => $this->daysAgo(20)],
-
-            // ── election_003 (active) — 3 candidates per position ─────────────
-            // Positions: President, Vice President, Secretary, Treasurer, Auditor, PRO
-
-            // President
             'cand_007' => ['id' => 'cand_007', 'user_id' => 'SAOxK7wP2dYcHj', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'President',      'manifesto' => 'Engineering a better tomorrow through transparent leadership.',   'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_008' => ['id' => 'cand_008', 'user_id' => 'THRmN4vZ8qEtWs', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'President',      'manifesto' => 'Stronger students, stronger CoE — innovation in governance.',    'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_009' => ['id' => 'cand_009', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'President',      'manifesto' => 'Independent and student-first — CoE deserves real leadership.',   'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-
-            // Vice President
             'cand_010' => ['id' => 'cand_010', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Vice President', 'manifesto' => 'Bridging CoE students to real academic and industry support.',    'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_011' => ['id' => 'cand_011', 'user_id' => 'STUyT9nB7rVdQz', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Vice President', 'manifesto' => 'Student wellness and academic support for every engineer.',        'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_012' => ['id' => 'cand_012', 'user_id' => 'STUhR2mK4sJuPf', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Vice President', 'manifesto' => 'An independent advocate for every CoE student concern.',          'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-
-            // Secretary
             'cand_013' => ['id' => 'cand_013', 'user_id' => 'STUwL8cF6tNxEv', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Secretary',      'manifesto' => 'Efficient records, clear communication, full accountability.',     'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_014' => ['id' => 'cand_014', 'user_id' => 'ADMaB3kL9mNpQr', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Secretary',      'manifesto' => 'Every CoE decision documented, every student voice recorded.',     'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_015' => ['id' => 'cand_015', 'user_id' => 'SAOxK7wP2dYcHj', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Secretary',      'manifesto' => 'Transparent records and open communication as core values.',       'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-
-            // Treasurer
             'cand_016' => ['id' => 'cand_016', 'user_id' => 'THRmN4vZ8qEtWs', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Treasurer',      'manifesto' => 'Responsible stewardship of every peso entrusted by CoE students.', 'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_017' => ['id' => 'cand_017', 'user_id' => 'STUrJ6hD1fXbLn', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Treasurer',      'manifesto' => 'Full financial transparency and zero tolerance for misuse.',        'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_018' => ['id' => 'cand_018', 'user_id' => 'STUgC5pM3kWoAe', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Treasurer',      'manifesto' => 'Independent oversight ensuring every fund goes to students.',       'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-
-            // Auditor
             'cand_019' => ['id' => 'cand_019', 'user_id' => 'STUyT9nB7rVdQz', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'Auditor',        'manifesto' => 'Rigorous auditing to ensure every fund is properly accounted for.', 'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_020' => ['id' => 'cand_020', 'user_id' => 'STUhR2mK4sJuPf', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'Auditor',        'manifesto' => 'Checks and balances — protecting the integrity of CoE funds.',      'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_021' => ['id' => 'cand_021', 'user_id' => 'STUwL8cF6tNxEv', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'Auditor',        'manifesto' => 'Independent auditing with zero conflict of interest.',              'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
-
-            // Public Relations Officer (PRO)
             'cand_022' => ['id' => 'cand_022', 'user_id' => 'ADMaB3kL9mNpQr', 'party_list_id' => 'party_001', 'election_id' => 'election_003', 'position' => 'PRO',            'manifesto' => 'Amplifying the CoE student voice on every platform.',              'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_023' => ['id' => 'cand_023', 'user_id' => 'SAOxK7wP2dYcHj', 'party_list_id' => 'party_002', 'election_id' => 'election_003', 'position' => 'PRO',            'manifesto' => 'Creative, consistent, and student-centered communications.',        'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
             'cand_024' => ['id' => 'cand_024', 'user_id' => 'THRmN4vZ8qEtWs', 'party_list_id' => 'party_003', 'election_id' => 'election_003', 'position' => 'PRO',            'manifesto' => 'Independent voice ensuring all CoE news reaches every student.',    'status' => 'approved', 'created_at' => $this->daysAgo(15), 'updated_at' => $this->daysAgo(10)],
@@ -406,7 +386,6 @@ class FirebaseSeeder extends Seeder
         $this->totalStudentCount = $totalStudents;
         $this->logInfo("Found {$totalStudents} student(s) to seed votes for.");
 
-        // ── election_001 (closed) — 100% turnout, 4 positions, 2 candidates each ─
         $election001Config = [
             'election_id' => 'election_001',
             'voter_count' => min(400, $totalStudents),
@@ -420,7 +399,6 @@ class FirebaseSeeder extends Seeder
             ],
         ];
 
-        // ── election_003 (active) — 60% turnout, 6 positions, 3 candidates each ─
         $activeVoterCount       = (int) floor($totalStudents * 0.60);
         $this->activeVoterCount = $activeVoterCount;
 
@@ -587,5 +565,118 @@ class FirebaseSeeder extends Seeder
         }
 
         $this->logSuccess('System logs seeded successfully.');
+    }
+
+    private function seedSecurityLogs(): void
+    {
+        $this->logInfo('Seeding /security_logs...');
+
+        $usersSnapshot = $this->db->getReference('/users')->getSnapshot();
+        $students      = [];
+
+        if ($usersSnapshot->exists() && $usersSnapshot->getValue() !== null) {
+            foreach ($usersSnapshot->getValue() as $user) {
+                if (isset($user['role']) && $user['role'] === 'student') {
+                    $students[] = $user;
+                }
+            }
+        }
+
+        $staticLogs = [
+            'sec_log_001' => [
+                'id'             => 'sec_log_001',
+                'student_id'     => 'CS-2025-001',
+                'first_name'     => 'Jose',
+                'last_name'      => 'Perolino',
+                'course'         => 'Computer Science',
+                'year_level'     => '4th Year',
+                'log_type'       => 'duplicate_vote',
+                'first_attempt'  => '2025-12-05T10:43:00',
+                'second_attempt' => '2025-12-05T10:43:00',
+                'election_id'    => 'election_001',
+                'status'         => 'blocked',
+                'created_at'     => $this->daysAgo(10),
+            ],
+            'sec_log_002' => [
+                'id'             => 'sec_log_002',
+                'student_id'     => 'IT-2025-035',
+                'first_name'     => 'Myles',
+                'last_name'      => 'Macrohon',
+                'course'         => 'Information Technology',
+                'year_level'     => '2nd Year',
+                'log_type'       => 'duplicate_vote',
+                'first_attempt'  => '2025-12-05T13:30:00',
+                'second_attempt' => '2025-12-05T13:30:00',
+                'election_id'    => 'election_001',
+                'status'         => 'blocked',
+                'created_at'     => $this->daysAgo(10),
+            ],
+            'sec_log_003' => [
+                'id'             => 'sec_log_003',
+                'student_id'     => 'BA-2025-141',
+                'first_name'     => 'Honey',
+                'last_name'      => 'Malang',
+                'course'         => 'Business Administration',
+                'year_level'     => '3rd Year',
+                'log_type'       => 'rejected_fingerprint',
+                'first_attempt'  => '2025-12-05T08:41:00',
+                'second_attempt' => '2025-12-05T08:41:00',
+                'election_id'    => 'election_001',
+                'status'         => 'blocked',
+                'created_at'     => $this->daysAgo(10),
+            ],
+            'sec_log_004' => [
+                'id'             => 'sec_log_004',
+                'student_id'     => 'CS-2025-225',
+                'first_name'     => 'Jahaira',
+                'last_name'      => 'Ampaso',
+                'course'         => 'Business Administration',
+                'year_level'     => '1st Year',
+                'log_type'       => 'denied_access',
+                'first_attempt'  => '2025-12-05T10:43:00',
+                'second_attempt' => '2025-12-05T10:43:00',
+                'election_id'    => 'election_001',
+                'status'         => 'blocked',
+                'created_at'     => $this->daysAgo(10),
+            ],
+        ];
+
+        foreach ($staticLogs as $key => $log) {
+            $this->set('security_logs', $key, $log);
+        }
+
+        if (! empty($students)) {
+            $logTypes   = ['duplicate_vote', 'duplicate_vote', 'duplicate_vote', 'duplicate_vote', 'rejected_fingerprint', 'rejected_fingerprint', 'denied_access'];
+            $sampleSize = min(6, count($students));
+            $sampled    = array_slice($students, 0, $sampleSize);
+            $counter    = 5;
+
+            foreach ($sampled as $student) {
+                $logType        = $logTypes[array_rand($logTypes)];
+                $attemptTime    = $this->randomDateBetween($this->daysAgo(15), $this->daysAgo(1));
+                $key            = 'sec_log_' . str_pad($counter, 3, '0', STR_PAD_LEFT);
+
+                $this->set('security_logs', $key, [
+                    'id'             => $key,
+                    'student_id'     => $student['student_id'] ?? 'N/A',
+                    'first_name'     => $student['first_name'] ?? '',
+                    'last_name'      => $student['last_name'] ?? '',
+                    'course'         => $student['course'] ?? 'N/A',
+                    'year_level'     => $student['year_level'] ?? 'N/A',
+                    'log_type'       => $logType,
+                    'first_attempt'  => $attemptTime,
+                    'second_attempt' => $attemptTime,
+                    'election_id'    => 'election_001',
+                    'status'         => 'blocked',
+                    'created_at'     => $attemptTime,
+                ]);
+
+                $counter++;
+            }
+
+            $this->logSuccess("Dynamic security logs written for {$sampleSize} real students.");
+        }
+
+        $this->logSuccess('Security logs seeded successfully.');
     }
 }
