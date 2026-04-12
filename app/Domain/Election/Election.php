@@ -6,6 +6,7 @@ class Election
 {
     private string $id;
     private string $electionName;
+    private string $description;
     private string $semester;
     private string $academicYear;
     private string $startDate;
@@ -18,6 +19,7 @@ class Election
     public function __construct(
         string $id,
         string $electionName,
+        string $description,
         string $semester,
         string $academicYear,
         string $startDate,
@@ -30,6 +32,7 @@ class Election
     ) {
         $this->id = $id;
         $this->electionName = $electionName;
+        $this->description = $description;
         $this->semester = $semester;
         $this->academicYear = $academicYear;
         $this->startDate = $startDate;
@@ -40,6 +43,24 @@ class Election
         $this->createdAt = $createdAt;
         $this->updatedAt = $updatedAt;
     }
+
+    public static function fromFirebase(array $data): self
+    {
+        return new self(
+            id: $data['id']            ?? '',
+            electionName: $data['election_name'] ?? '',
+            description: $data['description']   ?? '',
+            semester: $data['semester']      ?? '',
+            academicYear: $data['academic_year'] ?? '',
+            startDate: $data['start_date']    ?? '',
+            endDate: $data['end_date']      ?? '',
+            openingTime: $data['opening_time']  ?? '',
+            closingTime: $data['closing_time']  ?? '',
+            status: $data['status']        ?? 'upcoming',
+            createdAt: $data['created_at']    ?? '',
+            updatedAt: $data['updated_at']    ?? '',
+        );
+    }
     public function getId(): string
     {
         return $this->id;
@@ -47,6 +68,10 @@ class Election
     public function getElectionName(): string
     {
         return $this->electionName;
+    }
+    public function getDescription(): string
+    {
+        return $this->description;
     }
     public function getSemester(): string
     {
@@ -96,12 +121,12 @@ class Election
     {
         return $this->status === 'closed';
     }
-
     public function toArray(): array
     {
         return [
             'id'            => $this->id,
             'election_name' => $this->electionName,
+            'description'   => $this->description,
             'semester'      => $this->semester,
             'academic_year' => $this->academicYear,
             'start_date'    => $this->startDate,
@@ -112,21 +137,5 @@ class Election
             'created_at'    => $this->createdAt,
             'updated_at'    => $this->updatedAt,
         ];
-    }
-    public static function fromFirebase(array $data): self
-    {
-        return new self(
-            id: $data['id']            ?? '',
-            electionName: $data['election_name'] ?? '',
-            semester: $data['semester']      ?? '',
-            academicYear: $data['academic_year'] ?? '',
-            startDate: $data['start_date']    ?? '',
-            endDate: $data['end_date']      ?? '',
-            openingTime: $data['opening_time']  ?? '',
-            closingTime: $data['closing_time']  ?? '',
-            status: $data['status']        ?? 'upcoming',
-            createdAt: $data['created_at']    ?? '',
-            updatedAt: $data['updated_at']    ?? '',
-        );
     }
 }

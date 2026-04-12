@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Session;
 class SessionAuthMiddleware
 {
     private const ROLE_ROUTES = [
-        'admin'   => [
+        'admin' => [
             'dashboard',
             'quick-access',
             'manage-accounts',
@@ -19,9 +19,9 @@ class SessionAuthMiddleware
             'update-user',
             'finger-print',
             'voting-logs',
+            'security-logs',
             'election-control',
             'system-activity',
-            'security-logs',
             'reports-and-analytics',
             'student-eligibility',
             'logout',
@@ -31,6 +31,7 @@ class SessionAuthMiddleware
             'sao-candidate-list',
             'sao-voter-participation',
             'sao-final-results',
+            'student-eligibility',
             'logout',
         ],
         'comelec' => [

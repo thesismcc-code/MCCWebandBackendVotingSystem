@@ -48,6 +48,14 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/election-control',                       [ElectionController::class, 'index'])->name('view.election-control');
     Route::get('/election-control-posistion-setup',       [ElectionController::class, 'indexPosistionSetup'])->name('view.election-control-posistion-setup');
     Route::get('/election-control-candidate-list',        [ElectionController::class, 'indexCandidateList'])->name('view.election-control-candidate-list');
+    Route::post('/election-control/save-general',         [ElectionController::class, 'saveGeneralSettings'])->name('election.save-general');
+    Route::post('/election-control/save-schedule',        [ElectionController::class, 'saveScheduleSettings'])->name('election.save-schedule');
+    Route::post('/election-control/position/save',        [ElectionController::class, 'savePosition'])->name('election.position.save');
+    Route::post('/election-control/position/update',      [ElectionController::class, 'updatePosition'])->name('election.position.update');
+    Route::post('/election-control/position/delete',      [ElectionController::class, 'deletePosition'])->name('election.position.delete');
+    Route::post('/election-control/candidate/save',       [ElectionController::class, 'saveCandidate'])->name('election.candidate.save');
+    Route::post('/election-control/candidate/update',     [ElectionController::class, 'updateCandidate'])->name('election.candidate.update');
+    Route::post('/election-control/candidate/delete',     [ElectionController::class, 'deleteCandidate'])->name('election.candidate.delete');
     Route::get('/system-activity',                        [SystemActivityController::class, 'index'])->name('view.system-activity');
     Route::get('/reports-and-analytics',                  [ReportAndAnalyticsController::class, 'index'])->name('view.reports-and-analytics');
     Route::get('/reports-and-analytics-end-of-election',  [ReportAndAnalyticsController::class, 'indexEndOfElection'])->name('view.reports-and-analytics-end-of-election');

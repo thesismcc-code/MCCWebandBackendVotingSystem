@@ -4,6 +4,9 @@ namespace App\Domain\Election;
 
 interface ElectionRepository
 {
+    public function getActiveElection(): ?Election;
+    public function updateElectionSchedule(string $electionId, array $data): void;
+    public function updateElectionGeneral(string $electionId, array $data): void;
     public function getElection(): ?Election;
     public function saveElection(array $data): void;
     public function getAllPositions(): array;

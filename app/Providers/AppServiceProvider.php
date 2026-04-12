@@ -13,6 +13,8 @@ use App\Domain\Candidates\CandidatesRepository;
 use App\Eloquent\Candidates\EloquentCandidateRepository;
 use App\Domain\SecurityLogs\SecurityLogsRepository;
 use App\Eloquent\SecurityLogs\EloquentSecurityLogsRepository;
+use App\Domain\Election\ElectionRepository;
+use App\Eloquent\Election\EloquentElectionRepository;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -26,6 +28,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(VotesRepository::class, EloquentVoteRepository::class);
         $this->app->bind(CandidatesRepository::class, EloquentCandidateRepository::class);
         $this->app->bind(SecurityLogsRepository::class, EloquentSecurityLogsRepository::class);
+        $this->app->bind(ElectionRepository::class, EloquentElectionRepository::class);
     }
 
     /**

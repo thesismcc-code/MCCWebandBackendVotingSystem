@@ -15,9 +15,12 @@ class EloquentElectionRepository implements ElectionRepository
 {
     private Database  $db;
     private Reference $electionDB;
+    private Reference $electionsDB;
     private Reference $positionsDB;
     private Reference $candidatesDB;
+
     private const ELECTION_COLLECTION   = 'election_settings';
+    private const ELECTIONS_COLLECTION  = 'elections';
     private const POSITIONS_COLLECTION  = 'positions';
     private const CANDIDATES_COLLECTION = 'candidates';
 
@@ -25,10 +28,70 @@ class EloquentElectionRepository implements ElectionRepository
     {
         $this->db           = $database;
         $this->electionDB   = $this->db->getReference(self::ELECTION_COLLECTION);
+        $this->electionsDB  = $this->db->getReference(self::ELECTIONS_COLLECTION);
         $this->positionsDB  = $this->db->getReference(self::POSITIONS_COLLECTION);
         $this->candidatesDB = $this->db->getReference(self::CANDIDATES_COLLECTION);
     }
+    public function getActiveElection(): ?Election
+    {
+        try {
+            $snapshot = $this->electionsDB->getSnapshot();
 
+            if (! $snapshot->exists() || $snapshot->getValue() === null) {
+                return null;
+            }
+
+            $all = collect($snapshot->getValue())
+                ->filter(fn($item) => is_array($item))
+                ->map(fn($item) => Election::fromFirebase($item));
+
+            return $all->firstWhere(fn(Election $e) => $e->isActive())
+                ?? $all->firstWhere(fn(Election $e) => $e->isUpcoming());
+        } catch (\Throwable $e) {
+            Log::error('EloquentElectionRepository::getActiveElection — ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    public function updateElectionSchedule(string $electionId, array $data): void
+    {
+        try {
+            $this->db
+                ->getReference(self::ELECTIONS_COLLECTION . '/' . $electionId)
+                ->update(array_merge(
+                    array_intersect_key($data, array_flip([
+                        'start_date',
+                        'end_date',
+                        'opening_time',
+                        'closing_time',
+                    ])),
+                    ['updated_at' => now()->toISOString()]
+                ));
+        } catch (\Throwable $e) {
+            Log::error('EloquentElectionRepository::updateElectionSchedule — ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public function updateElectionGeneral(string $electionId, array $data): void
+    {
+        try {
+            $this->db
+                ->getReference(self::ELECTIONS_COLLECTION . '/' . $electionId)
+                ->update(array_merge(
+                    array_intersect_key($data, array_flip([
+                        'election_name',
+                        'semester',
+                        'academic_year',
+                        'description',
+                    ])),
+                    ['updated_at' => now()->toISOString()]
+                ));
+        } catch (\Throwable $e) {
+            Log::error('EloquentElectionRepository::updateElectionGeneral — ' . $e->getMessage());
+            throw $e;
+        }
+    }
     public function getElection(): ?Election
     {
         try {
@@ -128,6 +191,9 @@ class EloquentElectionRepository implements ElectionRepository
     {
         return count($this->getAllPositions());
     }
+
+    // ─── CANDIDATES ─────────────────────────────────────────────────────────────
+
     public function getAllCandidates(): array
     {
         try {
@@ -148,6 +214,7 @@ class EloquentElectionRepository implements ElectionRepository
             return [];
         }
     }
+
     public function getCandidatesByPosition(string $positionName): array
     {
         return collect($this->getAllCandidates())
@@ -155,6 +222,7 @@ class EloquentElectionRepository implements ElectionRepository
             ->values()
             ->toArray();
     }
+
     public function saveCandidate(array $data): void
     {
         try {
@@ -171,6 +239,7 @@ class EloquentElectionRepository implements ElectionRepository
             throw $e;
         }
     }
+
     public function updateCandidate(string $id, array $data): void
     {
         try {
@@ -182,6 +251,7 @@ class EloquentElectionRepository implements ElectionRepository
             throw $e;
         }
     }
+
     public function deleteCandidate(string $id): void
     {
         try {
