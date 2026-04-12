@@ -21,6 +21,7 @@ class SessionAuthMiddleware
             'voting-logs',
             'election-control',
             'system-activity',
+            'security-logs',
             'reports-and-analytics',
             'student-eligibility',
             'logout',
