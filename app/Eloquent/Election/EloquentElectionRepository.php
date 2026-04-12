@@ -128,9 +128,6 @@ class EloquentElectionRepository implements ElectionRepository
     {
         return count($this->getAllPositions());
     }
-
-    // ─── CANDIDATES ─────────────────────────────────────────────────────────────
-
     public function getAllCandidates(): array
     {
         try {
@@ -151,7 +148,6 @@ class EloquentElectionRepository implements ElectionRepository
             return [];
         }
     }
-
     public function getCandidatesByPosition(string $positionName): array
     {
         return collect($this->getAllCandidates())
@@ -159,7 +155,6 @@ class EloquentElectionRepository implements ElectionRepository
             ->values()
             ->toArray();
     }
-
     public function saveCandidate(array $data): void
     {
         try {
@@ -176,7 +171,6 @@ class EloquentElectionRepository implements ElectionRepository
             throw $e;
         }
     }
-
     public function updateCandidate(string $id, array $data): void
     {
         try {
@@ -188,7 +182,6 @@ class EloquentElectionRepository implements ElectionRepository
             throw $e;
         }
     }
-
     public function deleteCandidate(string $id): void
     {
         try {
