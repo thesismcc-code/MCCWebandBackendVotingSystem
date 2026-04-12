@@ -4,77 +4,115 @@ namespace App\Domain\Candidates;
 
 class Candidates
 {
-    private ?string $id;
-    private ?string $party_list_id;
-    private ?string $election_id;
-    private ?string $position_id;
-    private ?string $manifesto;
-    private ?string $status;
-    private ?string $created_at;
-    private ?string $updated_at;
-
     public function __construct(
-        string $id,
-        ?string $party_list_id,
-        ?string $election_id,
-        ?string $position_id,
-        ?string $manifesto,
-        ?string $status,
-        ?string $created_at,
-        ?string $updated_at
-    ) {
-        $this->id = $id;
-        $this->party_list_id = $party_list_id;
-        $this->election_id = $election_id;
-        $this->position_id = $position_id;
-        $this->manifesto = $manifesto;
-        $this->status = $status;
-        $this->created_at = $created_at;
-        $this->updated_at = $updated_at;
+        private string $id,
+        private string $electionId,
+        private string $positionId,
+        private string $positionName,
+        private string $fullName,
+        private string $course,
+        private string $year,
+        private string $politicalParty,
+        private string $platformAgenda,
+        private string $imageUrl,
+        private string $status,
+        private string $createdAt,
+        private string $updatedAt,
+    ) {}
+    public static function fromFirebase(array $data): self
+    {
+        return new self(
+            id: $data['id']              ?? '',
+            electionId: $data['election_id']     ?? '',
+            positionId: $data['position_id']     ?? '',
+            positionName: $data['position_name']   ?? '',
+            fullName: $data['full_name']        ?? '',
+            course: $data['course']           ?? '',
+            year: $data['year']             ?? '',
+            politicalParty: $data['political_party']  ?? '',
+            platformAgenda: $data['platform_agenda']  ?? '',
+            imageUrl: $data['image_url']        ?? '',
+            status: $data['status']           ?? 'active',
+            createdAt: $data['created_at']      ?? '',
+            updatedAt: $data['updated_at']      ?? '',
+        );
     }
-    public function toArray() : array{
-        return [
-            "id"=> $this->id,
-            "party_list_id"=> $this->party_list_id,
-            "election_id"=> $this->election_id,
-            "position_id"=> $this->position_id,
-            "manifesto"=> $this->manifesto,
-            "status"=> $this->status,
-            "created_at"=> $this->created_at,
-            "updated_at"=> $this->updated_at
-        ];
-    }
-
-    public function getId(): ?string
+    public function getId(): string
     {
         return $this->id;
     }
-    public function getPartyListId(): ?string
+    public function getElectionId(): string
     {
-        return $this->party_list_id;
+        return $this->electionId;
     }
-    public function getElectionId(): ?string
+    public function getPositionId(): string
     {
-        return $this->election_id;
+        return $this->positionId;
     }
-    public function getPositionId(): ?string
+    public function getPositionName(): string
     {
-        return $this->position_id;
+        return $this->positionName;
     }
-    public function getManifesto(): ?string
+    public function getFullName(): string
     {
-        return $this->manifesto;
+        return $this->fullName;
     }
-    public function getStatus(): ?string
+    public function getCourse(): string
+    {
+        return $this->course;
+    }
+    public function getYear(): string
+    {
+        return $this->year;
+    }
+    public function getPoliticalParty(): string
+    {
+        return $this->politicalParty;
+    }
+    public function getPlatformAgenda(): string
+    {
+        return $this->platformAgenda;
+    }
+    public function getImageUrl(): string
+    {
+        return $this->imageUrl;
+    }
+    public function getStatus(): string
     {
         return $this->status;
     }
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(): string
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
-    public function getUpdatedAt(): ?string
+    public function getUpdatedAt(): string
     {
-        return $this->updated_at;
+        return $this->updatedAt;
+    }
+    public function hasImage(): bool
+    {
+        return $this->imageUrl !== '';
+    }
+    public function isActive(): bool
+    {
+        return $this->status === 'active';
+    }
+    public function toArray(): array
+    {
+        return [
+            'id'             => $this->id,
+            'election_id'    => $this->electionId,
+            'position_id'    => $this->positionId,
+            'position_name'  => $this->positionName,
+            'full_name'      => $this->fullName,
+            'course'         => $this->course,
+            'year'           => $this->year,
+            'political_party' => $this->politicalParty,
+            'platform_agenda' => $this->platformAgenda,
+            'image_url'      => $this->imageUrl,
+            'status'         => $this->status,
+            'created_at'     => $this->createdAt,
+            'updated_at'     => $this->updatedAt,
+        ];
     }
 }
