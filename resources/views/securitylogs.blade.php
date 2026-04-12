@@ -54,9 +54,9 @@
 </head>
 
 <body x-data="{
-    searchQuery: '',
-    selectedCourse: '',
-    selectedYearLevel: ''
+    searchQuery: '{{ request('search', '') }}',
+    selectedCourse: '{{ request('course', '') }}',
+    selectedYearLevel: '{{ request('year_level', '') }}'
 }" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
 
     <!-- HEADER SECTION -->
@@ -94,14 +94,14 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['duplicate_votes'] ?? 4 }}</div>
+                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['duplicate_votes'] ?? 4 }}
+                    </div>
                     <div class="text-[12px] text-gray-500 font-semibold tracking-wide">Duplicate Vote Attempts</div>
                 </div>
             </div>
 
             <!-- 2. Rejected Fingerprint Scans -->
-            <div
-                class="bg-white rounded-[20px] p-5 py-4 flex items-center gap-4 shadow-sm flex-1 min-w-[240px]">
+            <div class="bg-white rounded-[20px] p-5 py-4 flex items-center gap-4 shadow-sm flex-1 min-w-[240px]">
                 <div
                     class="bg-[#e53e3e] w-[52px] h-[52px] rounded-[16px] flex items-center justify-center text-white shrink-0 shadow-md">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -110,14 +110,14 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['rejected_fingerprints'] ?? 2 }}</div>
+                    <div class="text-[32px] font-bold text-gray-900 leading-tight">
+                        {{ $counts['rejected_fingerprints'] ?? 2 }}</div>
                     <div class="text-[12px] text-gray-500 font-semibold tracking-wide">Rejected Fingerprint Scans</div>
                 </div>
             </div>
 
             <!-- 3. Denied Access Attempts -->
-            <div
-                class="bg-white rounded-[20px] p-5 py-4 flex items-center gap-4 shadow-sm flex-1 min-w-[240px]">
+            <div class="bg-white rounded-[20px] p-5 py-4 flex items-center gap-4 shadow-sm flex-1 min-w-[240px]">
                 <div
                     class="bg-[#ffd93d] w-[52px] h-[52px] rounded-[16px] flex items-center justify-center text-white shrink-0 shadow-md">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -126,7 +126,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['denied_access'] ?? 1 }}</div>
+                    <div class="text-[32px] font-bold text-gray-900 leading-tight">{{ $counts['denied_access'] ?? 1 }}
+                    </div>
                     <div class="text-[12px] text-gray-500 font-semibold tracking-wide">Denied Access Attempts</div>
                 </div>
             </div>
@@ -143,12 +144,9 @@
                             d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0" />
                     </svg>
                 </div>
-                <input
-                    type="text"
-                    x-model="searchQuery"
-                    placeholder="Search by Student ID or Name"
-                    class="block w-full py-[10px] pl-[44px] pr-4 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 text-[13.5px] font-medium text-white placeholder-white/60 shadow-sm hover:bg-white/10 transition-colors"
-                >
+                <input type="text" x-model="searchQuery" placeholder="Search by Student ID or Name"
+                    @keydown.enter="applyFilters()"
+                    class="block w-full py-[10px] pl-[44px] pr-4 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 text-[13.5px] font-medium text-white placeholder-white/60 shadow-sm hover:bg-white/10 transition-colors">
             </div>
 
             <!-- Course Filter -->
@@ -159,13 +157,14 @@
                             d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z" />
                     </svg>
                 </div>
-                <select
-                    x-model="selectedCourse"
-                    onchange="applyFilters()"
+                <select x-model="selectedCourse" onchange="applyFilters()"
                     class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
                     <option value="" class="text-black">All Courses</option>
                     @foreach ($courses ?? [] as $course)
-                        <option value="{{ $course }}" class="text-black">{{ $course }}</option>
+                        <option value="{{ $course }}" class="text-black"
+                            {{ request('course') === $course ? 'selected' : '' }}>
+                            {{ $course }}
+                        </option>
                     @endforeach
                     {{-- Fallback static options if no dynamic data --}}
                     @if (empty($courses))
@@ -175,7 +174,8 @@
                     @endif
                 </select>
                 <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white z-20">
-                    <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
@@ -189,18 +189,21 @@
                             d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
                 </div>
-                <select
-                    x-model="selectedYearLevel"
-                    onchange="applyFilters()"
+                <select x-model="selectedYearLevel" onchange="applyFilters()"
                     class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
                     <option value="" class="text-black">Year Level</option>
-                    <option value="1st Year" class="text-black">1st Year</option>
-                    <option value="2nd Year" class="text-black">2nd Year</option>
-                    <option value="3rd Year" class="text-black">3rd Year</option>
-                    <option value="4th Year" class="text-black">4th Year</option>
+                    <option value="1st Year" class="text-black"
+                        {{ request('year_level') === '1st Year' ? 'selected' : '' }}>1st Year</option>
+                    <option value="2nd Year" class="text-black"
+                        {{ request('year_level') === '2nd Year' ? 'selected' : '' }}>2nd Year</option>
+                    <option value="3rd Year" class="text-black"
+                        {{ request('year_level') === '3rd Year' ? 'selected' : '' }}>3rd Year</option>
+                    <option value="4th Year" class="text-black"
+                        {{ request('year_level') === '4th Year' ? 'selected' : '' }}>4th Year</option>
                 </select>
                 <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white z-20">
-                    <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7"></path>
                     </svg>
                 </div>
@@ -215,25 +218,28 @@
                     <thead>
                         <tr
                             class="border-b-2 border-gray-100 bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.015)] text-left sticky top-0 z-30">
-                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Student ID</th>
+                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Student
+                                ID</th>
                             <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Name</th>
                             <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Course</th>
                             <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Year Level</th>
                             <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">First Attempt</th>
-                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Second Attempt</th>
-                            <th class="pl-6 pr-[42px] py-5 text-[15px] font-bold text-[#0c0d16] text-center">Status</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Second Attempt
+                            </th>
+                            <th class="pl-6 pr-[42px] py-5 text-[15px] font-bold text-[#0c0d16] text-center">Status
+                            </th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100/60 bg-white overflow-y-auto">
                         @forelse ($logs as $log)
                             <tr class="hover:bg-blue-50/20 transition-colors group"
                                 x-show="
-                                    (searchQuery === '' || '{{ strtolower($log->student_id ?? '') }}'.includes(searchQuery.toLowerCase()) || '{{ strtolower(($log->first_name ?? '') . ' ' . ($log->last_name ?? '')) }}'.includes(searchQuery.toLowerCase()))
-                                    && (selectedCourse === '' || '{{ $log->course ?? '' }}' === selectedCourse)
-                                    && (selectedYearLevel === '' || '{{ $log->year_level ?? '' }}' === selectedYearLevel)
+                                    (searchQuery === '' || '{{ strtolower($log->getStudentID() ?? '') }}'.includes(searchQuery.toLowerCase()) || '{{ strtolower(($log->getFirstName() ?? '') . ' ' . ($log->getLastName() ?? '')) }}'.includes(searchQuery.toLowerCase()))
+&& (selectedCourse === '' || '{{ $log->getCourse() ?? '' }}' === selectedCourse)
+                                    && (selectedYearLevel === '' || '{{ $log->getYearLevel() ?? '' }}' === selectedYearLevel)
                                 ">
                                 <td class="pl-[42px] pr-6 py-[22px] text-[14.5px] font-medium text-[#292c3a]">
-                                    {{ $log->student_id ?? 'N/A' }}
+                                    {{ $log->getStudentID() ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-[22px]">
                                     <div class="flex items-center gap-[14px]">
@@ -246,24 +252,24 @@
                                             </svg>
                                         </div>
                                         <span class="text-[14.5px] font-medium tracking-[-0.015em] text-[#292c3a]">
-                                            {{ ($log->first_name ?? '') . ' ' . ($log->last_name ?? '') }}
+                                            {{ ($log->getFirstName() ?? '') . ' ' . ($log->getLastName() ?? '') }}
                                         </span>
                                     </div>
                                 </td>
                                 <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">
-                                    {{ $log->course ?? 'N/A' }}
+                                    {{ $log->getCourse() ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">
-                                    {{ $log->year_level ?? 'N/A' }}
+                                    {{ $log->getYearLevel() ?? 'N/A' }}
                                 </td>
                                 <td class="px-6 py-[22px] text-[14px] font-medium text-[#44465b]">
-                                    {{ $log->first_attempt ? \Carbon\Carbon::parse($log->first_attempt)->format('m-d-Y g:iA') : 'N/A' }}
+                                    {{ $log->getFirstAttempt() ? \Carbon\Carbon::parse($log->getFirstAttempt())->format('m-d-Y g:iA') : 'N/A' }}
                                 </td>
                                 <td class="px-6 py-[22px] text-[14px] font-medium text-[#44465b]">
-                                    {{ $log->second_attempt ? \Carbon\Carbon::parse($log->second_attempt)->format('m-d-Y g:iA') : 'N/A' }}
+                                    {{ $log->getSecondAttempt() ? \Carbon\Carbon::parse($log->getSecondAttempt())->format('m-d-Y g:iA') : 'N/A' }}
                                 </td>
                                 <td class="pl-6 pr-[42px] py-[22px] text-center">
-                                    @php $status = strtolower($log->status ?? 'blocked'); @endphp
+                                    @php $status = strtolower($log->getStatus() ?? 'blocked'); @endphp
                                     @if ($status === 'blocked')
                                         <span
                                             class="bg-[#e53e3e] text-white text-[11px] tracking-wide font-bold px-[16px] py-[6px] rounded-full inline-flex items-center">Blocked</span>
@@ -278,7 +284,8 @@
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="7" class="text-center py-16 text-gray-400 font-medium">No security logs
+                                <td colspan="7" class="text-center py-16 text-gray-400 font-medium">No security
+                                    logs
                                     found.</td>
                             </tr>
                         @endforelse
@@ -374,13 +381,23 @@
 
     <script>
         function applyFilters() {
+            const search = document.querySelector('[x-model="searchQuery"]')?.value ?? '';
             const course = document.querySelector('[x-model="selectedCourse"]')?.value ?? '';
             const yearLevel = document.querySelector('[x-model="selectedYearLevel"]')?.value ?? '';
             const url = new URL(window.location.href);
+
+            if (search) url.searchParams.set('search', search);
+            else url.searchParams.delete('search');
+
             if (course) url.searchParams.set('course', course);
             else url.searchParams.delete('course');
+
             if (yearLevel) url.searchParams.set('year_level', yearLevel);
             else url.searchParams.delete('year_level');
+
+            // Reset to page 1 when filters change
+            url.searchParams.delete('page');
+
             window.location.href = url.toString();
         }
     </script>
