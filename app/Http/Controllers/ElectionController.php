@@ -5,16 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Domain\Election\ElectionRepository;
+use App\Application\RegisterElection\RegisterElection;
 
 class ElectionController extends Controller
 {
+    private RegisterElection $registerElection;
     public function __construct(
+        RegisterElection $registerElection,
         private ElectionRepository $electionRepository
-    ) {}
+    ) {
+        $this->registerElection = $registerElection;
+    }
 
     public function index(): View
     {
-        // Fetch active/upcoming election so modals can pre-fill existing values
         $activeElection = $this->electionRepository->getActiveElection();
 
         return view('electioncontrol', compact('activeElection'));
@@ -22,11 +26,11 @@ class ElectionController extends Controller
 
     public function indexPositionSetup(): View
     {
-        $positions      = $this->electionRepository->getAllPositions();
-        $totalPositions = $this->electionRepository->getTotalPositions();
-        $totalCandidates = $this->electionRepository->getTotalCandidates();
+        $positions      = $this->registerElection->getAllPosistion();
+        $totalPositions = $this->registerElection->getTotalPositions();
+        $totalCandidates = $this->registerElection->getTotalCandidates();
 
-        return view('positionsetup', compact('positions', 'totalPositions', 'totalCandidates'));
+        return view('posistionsetup', compact('positions', 'totalPositions', 'totalCandidates'));
     }
 
     public function indexCandidateList(): View
@@ -137,24 +141,24 @@ class ElectionController extends Controller
     public function saveCandidate(Request $request): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
-            'position_name'  => 'required|string',
-            'full_name'      => 'required|string|max:255',
-            'course'         => 'required|string',
-            'year'           => 'required|string',
+            'position_name'   => 'required|string',
+            'full_name'       => 'required|string|max:255',
+            'course'          => 'required|string',
+            'year'            => 'required|string',
             'political_party' => 'nullable|string|max:100',
             'platform_agenda' => 'nullable|string',
         ]);
 
         $this->electionRepository->saveCandidate([
             'election_id'    => $this->electionRepository->getActiveElection()?->getId() ?? '',
-            'position_name'  => $request->input('position_name'),
+            'position'       => $request->input('position_name'), // ← 'position' not 'position_name'
             'full_name'      => $request->input('full_name'),
             'course'         => $request->input('course'),
             'year'           => $request->input('year'),
             'political_party' => $request->input('political_party', ''),
-            'platform_agenda' => $request->input('platform_agenda', ''),
-            'image_url'      => '',  // handle image upload separately if needed
-            'status'         => 'active',
+            'manifesto'      => $request->input('platform_agenda', ''), // ← 'manifesto' to match Firebase
+            'image_url'      => '',
+            'status'         => 'approved',
         ]);
 
         return back()->with('success', 'Candidate added successfully.');
@@ -163,26 +167,27 @@ class ElectionController extends Controller
     public function updateCandidate(Request $request): \Illuminate\Http\RedirectResponse
     {
         $request->validate([
-            'candidate_id'   => 'required|string',
-            'position_name'  => 'required|string',
-            'full_name'      => 'required|string|max:255',
-            'course'         => 'required|string',
-            'year'           => 'required|string',
+            'candidate_id'    => 'required|string',
+            'position_name'   => 'required|string',
+            'full_name'       => 'required|string|max:255',
+            'course'          => 'required|string',
+            'year'            => 'required|string',
             'political_party' => 'nullable|string|max:100',
             'platform_agenda' => 'nullable|string',
         ]);
 
         $this->electionRepository->updateCandidate($request->input('candidate_id'), [
-            'position_name'  => $request->input('position_name'),
+            'position'       => $request->input('position_name'), // ← match Firebase field
             'full_name'      => $request->input('full_name'),
             'course'         => $request->input('course'),
             'year'           => $request->input('year'),
             'political_party' => $request->input('political_party', ''),
-            'platform_agenda' => $request->input('platform_agenda', ''),
+            'manifesto'      => $request->input('platform_agenda', ''),
         ]);
 
         return back()->with('success', 'Candidate updated successfully.');
     }
+
 
     public function deleteCandidate(Request $request): \Illuminate\Http\RedirectResponse
     {

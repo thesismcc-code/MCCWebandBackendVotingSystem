@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Domain\Election;
+namespace App\Domain\Position;
 
 class Position
 {
+    private array $candidates = [];
     public function __construct(
         private string $id,
         private string $electionId,
@@ -57,5 +58,14 @@ class Position
             'created_at'    => $this->createdAt,
             'updated_at'    => $this->updatedAt,
         ];
+    }
+    public function setCandidates(array $candidates): void
+    {
+        $this->candidates = $candidates;
+    }
+
+    public function getCandidates(): array
+    {
+        return $this->candidates;
     }
 }

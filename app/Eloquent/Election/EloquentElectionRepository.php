@@ -4,12 +4,13 @@ namespace App\Eloquent\Election;
 
 use App\Domain\Election\ElectionRepository;
 use App\Domain\Election\Election;
-use App\Domain\Election\Position;
+use App\Domain\Position\Position;
 use App\Domain\Candidates\Candidates;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Log;
+use App\Application\RegisterUser\RegisterUser;
 
 class EloquentElectionRepository implements ElectionRepository
 {
@@ -18,19 +19,21 @@ class EloquentElectionRepository implements ElectionRepository
     private Reference $electionsDB;
     private Reference $positionsDB;
     private Reference $candidatesDB;
+    private RegisterUser $registerUser;
 
     private const ELECTION_COLLECTION   = 'election_settings';
     private const ELECTIONS_COLLECTION  = 'elections';
     private const POSITIONS_COLLECTION  = 'positions';
     private const CANDIDATES_COLLECTION = 'candidates';
 
-    public function __construct(Database $database)
+    public function __construct(Database $database, RegisterUser $registerUser)
     {
         $this->db           = $database;
         $this->electionDB   = $this->db->getReference(self::ELECTION_COLLECTION);
         $this->electionsDB  = $this->db->getReference(self::ELECTIONS_COLLECTION);
         $this->positionsDB  = $this->db->getReference(self::POSITIONS_COLLECTION);
         $this->candidatesDB = $this->db->getReference(self::CANDIDATES_COLLECTION);
+        $this->registerUser = $registerUser;
     }
     public function getActiveElection(): ?Election
     {
@@ -130,15 +133,46 @@ class EloquentElectionRepository implements ElectionRepository
     public function getAllPositions(): array
     {
         try {
-            $snapshot = $this->positionsDB->getSnapshot();
+            $positionsSnapshot = $this->positionsDB->getSnapshot();
 
-            if (! $snapshot->exists() || $snapshot->getValue() === null) {
+            if (! $positionsSnapshot->exists() || $positionsSnapshot->getValue() === null) {
                 return [];
             }
 
-            return collect($snapshot->getValue())
+            // 1. Fetch all users keyed by Firebase ID
+            $usersById = collect($this->db->getReference('users')->getSnapshot()->getValue() ?? [])
+                ->filter(fn($u) => is_array($u) && empty($u['is_deleted']))
+                ->keyBy('id');
+
+            // 2. Fetch candidates, join user data, group by position name
+            $candidatesGrouped = collect($this->candidatesDB->getSnapshot()->getValue() ?? [])
                 ->filter(fn($item) => is_array($item))
-                ->map(fn($item) => Position::fromFirebase($item))
+                ->map(function ($item) use ($usersById) {
+                    $user = $usersById->get($item['user_id'] ?? '');
+
+                    // Attach user data directly into the candidate array
+                    $item['full_name']  = $user ? trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')) : 'Unknown';
+                    $item['course']     = $user['course'] ?? '';
+                    $item['year_level'] = $user['year_level'] ?? '';
+                    $item['student_id'] = $user['student_id'] ?? '';
+
+                    return $item; // return raw array so we can inspect
+                })
+                ->groupBy(fn($item) => $item['position'] ?? ''); // ← use raw 'position' key, not getPositionName()
+
+            // 3. Map positions and attach their candidates
+            return collect($positionsSnapshot->getValue())
+                ->filter(fn($item) => is_array($item))
+                ->map(function ($item) use ($candidatesGrouped) {
+                    $position = Position::fromFirebase($item);
+
+                    // Match by position name using the raw 'position' field
+                    $matched = $candidatesGrouped->get($position->getPositionName(), collect());
+
+                    $position->setCandidates($matched->values()->toArray());
+
+                    return $position;
+                })
                 ->sortBy(fn(Position $p) => $p->getCreatedAt())
                 ->values()
                 ->toArray();
@@ -192,20 +226,39 @@ class EloquentElectionRepository implements ElectionRepository
         return count($this->getAllPositions());
     }
 
-    // ─── CANDIDATES ─────────────────────────────────────────────────────────────
-
     public function getAllCandidates(): array
     {
         try {
+            $activeElection   = $this->getActiveElection();
+            $activeElectionId = $activeElection?->getId();
+
+            $usersById = collect($this->db->getReference('users')->getSnapshot()->getValue() ?? [])
+                ->filter(fn($u) => is_array($u) && empty($u['is_deleted']))
+                ->keyBy('id');
+
             $snapshot = $this->candidatesDB->getSnapshot();
 
-            if (! $snapshot->exists() || $snapshot->getValue() === null) {
+            if (!$snapshot->exists() || $snapshot->getValue() === null) {
                 return [];
             }
 
             return collect($snapshot->getValue())
                 ->filter(fn($item) => is_array($item))
-                ->map(fn($item) => Candidates::fromFirebase($item))
+                ->when($activeElectionId, fn($col) => $col->filter(
+                    fn($item) => ($item['election_id'] ?? '') === $activeElectionId
+                ))
+                ->map(function ($item) use ($usersById) {
+                    $user = $usersById->get($item['user_id'] ?? '');
+
+                    if ($user) {
+                        $item['full_name']  = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
+                        $item['course']     = $user['course'] ?? '';
+                        $item['year_level'] = $user['year_level'] ?? '';
+                        $item['student_id'] = $user['student_id'] ?? '';
+                    }
+
+                    return Candidates::fromFirebase($item);
+                })
                 ->sortBy(fn(Candidates $c) => $c->getPositionName())
                 ->values()
                 ->toArray();
@@ -214,6 +267,7 @@ class EloquentElectionRepository implements ElectionRepository
             return [];
         }
     }
+
 
     public function getCandidatesByPosition(string $positionName): array
     {

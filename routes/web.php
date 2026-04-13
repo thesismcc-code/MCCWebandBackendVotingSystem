@@ -46,7 +46,7 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/voting-logs/export-pdf',                 [VotingLogsController::class, 'exportPdf'])->name('voting-logs.export-pdf');
     Route::get('/security-logs',                          [SecurityLogsController::class, 'index'])->name('view.security-logs');
     Route::get('/election-control',                       [ElectionController::class, 'index'])->name('view.election-control');
-    Route::get('/election-control-posistion-setup',       [ElectionController::class, 'indexPosistionSetup'])->name('view.election-control-posistion-setup');
+    Route::get('/election-control-posistion-setup',       [ElectionController::class, 'indexPositionSetup'])->name('view.election-control-posistion-setup');
     Route::get('/election-control-candidate-list',        [ElectionController::class, 'indexCandidateList'])->name('view.election-control-candidate-list');
     Route::post('/election-control/save-general',         [ElectionController::class, 'saveGeneralSettings'])->name('election.save-general');
     Route::post('/election-control/save-schedule',        [ElectionController::class, 'saveScheduleSettings'])->name('election.save-schedule');

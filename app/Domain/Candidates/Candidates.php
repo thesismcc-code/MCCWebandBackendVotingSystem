@@ -23,20 +23,20 @@ class Candidates
     public static function fromFirebase(array $data): self
     {
         return new self(
-            id: $data['id']              ?? '',
-            electionId: $data['election_id']     ?? '',
-            positionId: $data['position_id']     ?? '',
+            id: $data['id']               ?? '',
+            electionId: $data['election_id']       ?? '',
+            positionId: $data['position_id']       ?? '',
             partyListID: $data['party_list_id']     ?? '',
-            positionName: $data['position_name']   ?? '',
-            fullName: $data['full_name']        ?? '',
-            course: $data['course']           ?? '',
-            year: $data['year']             ?? '',
-            politicalParty: $data['political_party']  ?? '',
-            platformAgenda: $data['platform_agenda']  ?? '',
-            imageUrl: $data['image_url']        ?? '',
-            status: $data['status']           ?? 'active',
-            createdAt: $data['created_at']      ?? '',
-            updatedAt: $data['updated_at']      ?? '',
+            positionName: $data['position']          ?? $data['position_name'] ?? '', // ← fix
+            fullName: $data['full_name']         ?? '',
+            course: $data['course']            ?? '',
+            year: $data['year_level']        ?? $data['year'] ?? '',          // ← fix
+            politicalParty: $data['political_party']   ?? '',
+            platformAgenda: $data['manifesto']         ?? $data['platform_agenda'] ?? '', // ← fix
+            imageUrl: $data['image_url']         ?? '',
+            status: $data['status']            ?? 'active',
+            createdAt: $data['created_at']        ?? '',
+            updatedAt: $data['updated_at']        ?? '',
         );
     }
     public function getId(): string
