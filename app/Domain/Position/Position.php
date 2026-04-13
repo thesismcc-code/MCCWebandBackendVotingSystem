@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Domain\Election;
+namespace App\Domain\Position;
 
 class Position
 {

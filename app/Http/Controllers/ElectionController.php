@@ -5,16 +5,20 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 use App\Domain\Election\ElectionRepository;
+use App\Application\RegisterElection\RegisterElection;
 
 class ElectionController extends Controller
 {
+    private RegisterElection $registerElection;
     public function __construct(
+        RegisterElection $registerElection,
         private ElectionRepository $electionRepository
-    ) {}
+    ) {
+        $this->registerElection = $registerElection;
+    }
 
     public function index(): View
     {
-        // Fetch active/upcoming election so modals can pre-fill existing values
         $activeElection = $this->electionRepository->getActiveElection();
 
         return view('electioncontrol', compact('activeElection'));
@@ -22,11 +26,11 @@ class ElectionController extends Controller
 
     public function indexPositionSetup(): View
     {
-        $positions      = $this->electionRepository->getAllPositions();
-        $totalPositions = $this->electionRepository->getTotalPositions();
-        $totalCandidates = $this->electionRepository->getTotalCandidates();
+        $positions      = $this->registerElection->getAllPosistion();
+        $totalPositions = $this->registerElection->getTotalPositions();
+        $totalCandidates = $this->registerElection->getTotalCandidates();
 
-        return view('positionsetup', compact('positions', 'totalPositions', 'totalCandidates'));
+        return view('posistionsetup', compact('positions', 'totalPositions', 'totalCandidates'));
     }
 
     public function indexCandidateList(): View

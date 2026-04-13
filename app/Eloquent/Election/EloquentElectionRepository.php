@@ -4,7 +4,7 @@ namespace App\Eloquent\Election;
 
 use App\Domain\Election\ElectionRepository;
 use App\Domain\Election\Election;
-use App\Domain\Election\Position;
+use App\Domain\Position\Position;
 use App\Domain\Candidates\Candidates;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
