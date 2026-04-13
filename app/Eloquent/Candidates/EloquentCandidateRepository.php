@@ -50,16 +50,22 @@ class EloquentCandidateRepository implements CandidatesRepository
 
     private function toCandidate(string $id, array $data): Candidates
     {
-        return new Candidates(
-            id:             $id,
-            party_list_id:  $data['party_list_id']  ?? null,
-            election_id:    $data['election_id']     ?? null,
-            position_id:       $data['position_id']        ?? null,
-            manifesto:      $data['manifesto']       ?? null,
-            status:         $data['status']          ?? null,
-            created_at:     $data['created_at']      ?? null,
-            updated_at:     $data['updated_at']      ?? null,
-        );
+        return Candidates::fromFirebase([
+            'id'              => $id,
+            'election_id'     => $data['election_id']     ?? '',
+            'position_id'     => $data['position_id']     ?? '',
+            'party_list_id'   => $data['party_list_id']   ?? '',
+            'position_name'   => $data['position_name']   ?? '',
+            'full_name'       => $data['full_name']        ?? '',
+            'course'          => $data['course']           ?? '',
+            'year'            => $data['year']             ?? '',
+            'political_party' => $data['political_party']  ?? '',
+            'platform_agenda' => $data['platform_agenda']  ?? '',
+            'image_url'       => $data['image_url']        ?? '',
+            'status'          => $data['status']           ?? 'active',
+            'created_at'      => $data['created_at']       ?? '',
+            'updated_at'      => $data['updated_at']       ?? '',
+        ]);
     }
 
     public function getCandidates(): array
