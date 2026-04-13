@@ -133,15 +133,46 @@ class EloquentElectionRepository implements ElectionRepository
     public function getAllPositions(): array
     {
         try {
-            $snapshot = $this->positionsDB->getSnapshot();
+            $positionsSnapshot = $this->positionsDB->getSnapshot();
 
-            if (! $snapshot->exists() || $snapshot->getValue() === null) {
+            if (! $positionsSnapshot->exists() || $positionsSnapshot->getValue() === null) {
                 return [];
             }
 
-            return collect($snapshot->getValue())
+            // 1. Fetch all users keyed by Firebase ID
+            $usersById = collect($this->db->getReference('users')->getSnapshot()->getValue() ?? [])
+                ->filter(fn($u) => is_array($u) && empty($u['is_deleted']))
+                ->keyBy('id');
+
+            // 2. Fetch candidates, join user data, group by position name
+            $candidatesGrouped = collect($this->candidatesDB->getSnapshot()->getValue() ?? [])
                 ->filter(fn($item) => is_array($item))
-                ->map(fn($item) => Position::fromFirebase($item))
+                ->map(function ($item) use ($usersById) {
+                    $user = $usersById->get($item['user_id'] ?? '');
+
+                    // Attach user data directly into the candidate array
+                    $item['full_name']  = $user ? trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? '')) : 'Unknown';
+                    $item['course']     = $user['course'] ?? '';
+                    $item['year_level'] = $user['year_level'] ?? '';
+                    $item['student_id'] = $user['student_id'] ?? '';
+
+                    return $item; // return raw array so we can inspect
+                })
+                ->groupBy(fn($item) => $item['position'] ?? ''); // ← use raw 'position' key, not getPositionName()
+
+            // 3. Map positions and attach their candidates
+            return collect($positionsSnapshot->getValue())
+                ->filter(fn($item) => is_array($item))
+                ->map(function ($item) use ($candidatesGrouped) {
+                    $position = Position::fromFirebase($item);
+
+                    // Match by position name using the raw 'position' field
+                    $matched = $candidatesGrouped->get($position->getPositionName(), collect());
+
+                    $position->setCandidates($matched->values()->toArray());
+
+                    return $position;
+                })
                 ->sortBy(fn(Position $p) => $p->getCreatedAt())
                 ->values()
                 ->toArray();

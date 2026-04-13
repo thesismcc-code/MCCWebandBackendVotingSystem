@@ -37,7 +37,7 @@ class ElectionController extends Controller
     {
         $candidates = $this->electionRepository->getAllCandidates();
         $positions  = $this->electionRepository->getAllPositions();
-
+        // dd($positions);
         return view('candidatelist', compact('candidates', 'positions'));
     }
 
