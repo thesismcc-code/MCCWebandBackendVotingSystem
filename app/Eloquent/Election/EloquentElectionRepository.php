@@ -231,27 +231,34 @@ class EloquentElectionRepository implements ElectionRepository
         try {
             $activeElection   = $this->getActiveElection();
             $activeElectionId = $activeElection?->getId();
-            $usersSnapshot = $this->db->getReference('users')->getSnapshot();
-            $usersById = collect($usersSnapshot->exists() ? $usersSnapshot->getValue() : [])
+
+            $usersById = collect($this->db->getReference('users')->getSnapshot()->getValue() ?? [])
                 ->filter(fn($u) => is_array($u) && empty($u['is_deleted']))
                 ->keyBy('id');
+
             $snapshot = $this->candidatesDB->getSnapshot();
+
             if (!$snapshot->exists() || $snapshot->getValue() === null) {
                 return [];
             }
+
             return collect($snapshot->getValue())
                 ->filter(fn($item) => is_array($item))
+                ->when($activeElectionId, fn($col) => $col->filter(
+                    fn($item) => ($item['election_id'] ?? '') === $activeElectionId
+                ))
                 ->map(function ($item) use ($usersById) {
                     $user = $usersById->get($item['user_id'] ?? '');
+
                     if ($user) {
                         $item['full_name']  = trim(($user['first_name'] ?? '') . ' ' . ($user['last_name'] ?? ''));
                         $item['course']     = $user['course'] ?? '';
                         $item['year_level'] = $user['year_level'] ?? '';
                         $item['student_id'] = $user['student_id'] ?? '';
                     }
+
                     return Candidates::fromFirebase($item);
                 })
-                ->filter(fn(Candidates $c) => $c->getElectionId() === $activeElectionId)
                 ->sortBy(fn(Candidates $c) => $c->getPositionName())
                 ->values()
                 ->toArray();
