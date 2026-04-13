@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Session;
 use App\Application\RegisterAuth\RegisterAuth;
-use Tymon\JWTAuth\Facades\JWTAuth;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -33,7 +33,7 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         $validator = Validator::make($request->all(), [
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required',
         ], $this->authValidationMessages());
 
@@ -72,22 +72,13 @@ class AuthController extends Controller
 
     public function studentLogin(Request $request)
     {
-        $isStudentID = $request->filled('student_id');
-
-        if ($isStudentID) {
-            $validator = Validator::make($request->all(), [
-                'student_id' => 'required|string',
-                'password'   => 'required',
-            ], [
-                'student_id.required' => 'Student ID is required.',
-                'password.required'   => 'Password is required.',
-            ]);
-        } else {
-            $validator = Validator::make($request->all(), [
-                'email'    => 'required|email',
-                'password' => 'required',
-            ], $this->authValidationMessages());
-        }
+        $validator = Validator::make($request->all(), [
+            'student_id' => 'required|string',
+            'password' => 'required',
+        ], [
+            'student_id.required' => 'Student ID is required.',
+            'password.required' => 'Password is required.',
+        ]);
 
         if ($validator->fails()) {
             return back()
@@ -96,23 +87,10 @@ class AuthController extends Controller
         }
 
         try {
-            if ($isStudentID) {
-                $user = $this->registerAuth->loginWithStudentID(
-                    $request->input('student_id'),
-                    $request->input('password')
-                );
-            } else {
-                $user = $this->registerAuth->login(
-                    $request->input('email'),
-                    $request->input('password')
-                );
-
-                if ($user->getRole() !== 'student') {
-                    return back()
-                        ->withInput()
-                        ->with('error', 'Access denied. This login is for students only.');
-                }
-            }
+            $user = $this->registerAuth->loginWithStudentID(
+                $request->input('student_id'),
+                $request->input('password')
+            );
 
             return $this->redirectByRole($user->getRole());
         } catch (\InvalidArgumentException $e) {
@@ -125,6 +103,7 @@ class AuthController extends Controller
                 ->with('error', 'Something went wrong. Please try again.');
         }
     }
+
     public function logout()
     {
         $userId = Session::get('auth_user.id', '');
@@ -133,6 +112,7 @@ class AuthController extends Controller
         return redirect()->route('login')
             ->with('success', 'You have been logged out successfully.');
     }
+
     public function logoutStudent()
     {
         $userId = Session::get('auth_user.id', '');
@@ -141,17 +121,18 @@ class AuthController extends Controller
         return redirect('/students')
             ->with('success', 'You have been logged out successfully.');
     }
+
     public function loginAPI(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-            'email'    => 'required|email',
+            'email' => 'required|email',
             'password' => 'required',
         ], $this->authValidationMessages());
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors'  => $validator->errors(),
+                'errors' => $validator->errors(),
             ], 422);
         }
 
@@ -162,11 +143,11 @@ class AuthController extends Controller
             );
 
             return response()->json([
-                'success'      => true,
-                'message'      => 'Login successful.',
+                'success' => true,
+                'message' => 'Login successful.',
                 'access_token' => $token,
-                'token_type'   => 'bearer',
-                'expires_in'   => config('jwt.ttl') * 60,
+                'token_type' => 'bearer',
+                'expires_in' => config('jwt.ttl') * 60,
             ], 200);
         } catch (\InvalidArgumentException $e) {
             return response()->json([
@@ -180,12 +161,13 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
     public function logoutAPI(Request $request): JsonResponse
     {
         try {
             $token = JWTAuth::getToken();
 
-            if (!$token) {
+            if (! $token) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Token not provided.',
@@ -215,6 +197,7 @@ class AuthController extends Controller
             ], 500);
         }
     }
+
     public function meAPI(Request $request): JsonResponse
     {
         try {
@@ -222,15 +205,15 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data'    => [
-                    'id'          => $payload->get('sub'),
-                    'email'       => $payload->get('email'),
-                    'role'        => $payload->get('role'),
-                    'first_name'  => $payload->get('first_name'),
-                    'last_name'   => $payload->get('last_name'),
-                    'student_id'  => $payload->get('student_id'),
-                    'teacher_id'  => $payload->get('teacher_id'),
-                    'admin_id'    => $payload->get('admin_id'),
+                'data' => [
+                    'id' => $payload->get('sub'),
+                    'email' => $payload->get('email'),
+                    'role' => $payload->get('role'),
+                    'first_name' => $payload->get('first_name'),
+                    'last_name' => $payload->get('last_name'),
+                    'student_id' => $payload->get('student_id'),
+                    'teacher_id' => $payload->get('teacher_id'),
+                    'admin_id' => $payload->get('admin_id'),
                 ],
             ], 200);
         } catch (TokenExpiredException $e) {
@@ -254,19 +237,19 @@ class AuthController extends Controller
     private function redirectByRole(string $role)
     {
         return match ($role) {
-            'admin'   => redirect()->route('view.dashboard'),
-            'sao'     => redirect()->route('view.sao-dashboard'),
+            'admin' => redirect()->route('view.dashboard'),
+            'sao' => redirect()->route('view.sao-dashboard'),
             'comelec' => redirect()->route('view.comelec-dashboard'),
             'student' => redirect()->route('view.student-dashboard'),
-            default   => redirect()->route('login'),
+            default => redirect()->route('login'),
         };
     }
 
     private function authValidationMessages(): array
     {
         return [
-            'email.required'    => 'Email is required.',
-            'email.email'       => 'That email address doesn\'t look valid.',
+            'email.required' => 'Email is required.',
+            'email.email' => 'That email address doesn\'t look valid.',
             'password.required' => 'Password is required.',
         ];
     }
