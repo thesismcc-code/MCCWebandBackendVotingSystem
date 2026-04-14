@@ -13,8 +13,16 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->alias([
-            'auth.jwt'     => \App\Http\Middleware\JwtMiddleware::class,
+            'auth.jwt' => \App\Http\Middleware\JwtMiddleware::class,
             'auth.session' => \App\Http\Middleware\SessionAuthMiddleware::class,
+        ]);
+
+        $middleware->web(append: [
+            \App\Http\Middleware\LogSystemActivity::class,
+        ]);
+
+        $middleware->api(append: [
+            \App\Http\Middleware\LogSystemActivity::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
