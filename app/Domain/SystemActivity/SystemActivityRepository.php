@@ -14,12 +14,18 @@ interface SystemActivityRepository
      *
      * @return array<int, SystemActivity>
      */
-    public function getErrorLogsSince(string $sinceIso): array;
+    public function getErrorLogsSince(string $sinceIso, string $userFilter = 'all', string $dateFilter = 'all'): array;
 
     /**
      * @param  'realtime'|'error'  $levelGroup
      */
-    public function paginateByLevelGroup(int $page, int $perPage, string $levelGroup): LengthAwarePaginator;
+    public function paginateByLevelGroup(
+        int $page,
+        int $perPage,
+        string $levelGroup,
+        string $userFilter = 'all',
+        string $dateFilter = 'all'
+    ): LengthAwarePaginator;
 
     public function getSystemActivityById(string $id): SystemActivity;
 

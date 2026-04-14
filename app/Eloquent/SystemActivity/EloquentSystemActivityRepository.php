@@ -54,14 +54,18 @@ class EloquentSystemActivityRepository implements SystemActivityRepository
         }
     }
 
-    public function getErrorLogsSince(string $sinceIso): array
+    public function getErrorLogsSince(string $sinceIso, string $userFilter = 'all', string $dateFilter = 'all'): array
     {
         try {
             $all = $this->getAllSystemActivities();
-            $filtered = collect($all)
-                ->filter(fn (SystemActivity $a) => in_array($a->getLevel(), ['warning', 'error', 'critical'], true))
-                ->sortByDesc(fn (SystemActivity $a) => $a->getCreatedAt())
-                ->values();
+            $filtered = $this->applyRoleAndDateFilters(
+                collect($all)
+                    ->filter(fn (SystemActivity $a) => in_array($a->getLevel(), ['warning', 'error', 'critical'], true))
+                    ->sortByDesc(fn (SystemActivity $a) => $a->getCreatedAt())
+                    ->values(),
+                $userFilter,
+                $dateFilter,
+            );
 
             if ($sinceIso === '') {
                 return $filtered->take(5)->all();
@@ -90,8 +94,13 @@ class EloquentSystemActivityRepository implements SystemActivityRepository
         }
     }
 
-    public function paginateByLevelGroup(int $page, int $perPage, string $levelGroup): LengthAwarePaginator
-    {
+    public function paginateByLevelGroup(
+        int $page,
+        int $perPage,
+        string $levelGroup,
+        string $userFilter = 'all',
+        string $dateFilter = 'all'
+    ): LengthAwarePaginator {
         $pageName = match ($levelGroup) {
             'realtime' => 'realtime_page',
             'error' => 'error_page',
@@ -107,6 +116,7 @@ class EloquentSystemActivityRepository implements SystemActivityRepository
                     default => false,
                 };
             })->values();
+            $filtered = $this->applyRoleAndDateFilters($filtered, $userFilter, $dateFilter);
 
             $slice = $filtered->slice(($page - 1) * $perPage, $perPage)->values();
 
@@ -189,5 +199,73 @@ class EloquentSystemActivityRepository implements SystemActivityRepository
             Log::error('EloquentSystemActivityRepository::deleteSystemActivity — '.$e->getMessage());
             throw $e;
         }
+    }
+
+    private function applyRoleAndDateFilters(
+        \Illuminate\Support\Collection $logs,
+        string $userFilter,
+        string $dateFilter
+    ): \Illuminate\Support\Collection {
+        $normalizedUserFilter = strtolower($userFilter);
+        $normalizedDateFilter = strtolower($dateFilter);
+        $allowedUserFilters = ['all', 'admin', 'student', 'comelec', 'sao'];
+        $allowedDateFilters = ['all', 'today', 'yesterday', 'last_week'];
+
+        if (! in_array($normalizedUserFilter, $allowedUserFilters, true)) {
+            $normalizedUserFilter = 'all';
+        }
+
+        if (! in_array($normalizedDateFilter, $allowedDateFilters, true)) {
+            $normalizedDateFilter = 'all';
+        }
+
+        if ($normalizedUserFilter !== 'all') {
+            $logs = $logs->filter(function (SystemActivity $activity) use ($normalizedUserFilter) {
+                return strtolower($activity->getRole()) === $normalizedUserFilter;
+            })->values();
+        }
+
+        if ($normalizedDateFilter === 'all') {
+            return $logs->values();
+        }
+
+        $dateRange = $this->resolveDateRange($normalizedDateFilter);
+        if ($dateRange === null) {
+            return $logs->values();
+        }
+
+        return $logs->filter(function (SystemActivity $activity) use ($dateRange) {
+            try {
+                $createdAt = Carbon::parse($activity->getCreatedAt());
+
+                return $createdAt->between($dateRange['start'], $dateRange['end']);
+            } catch (\Throwable) {
+                return false;
+            }
+        })->values();
+    }
+
+    /**
+     * @return array{start: Carbon, end: Carbon}|null
+     */
+    private function resolveDateRange(string $dateFilter): ?array
+    {
+        $now = now();
+
+        return match ($dateFilter) {
+            'today' => [
+                'start' => $now->copy()->startOfDay(),
+                'end' => $now->copy()->endOfDay(),
+            ],
+            'yesterday' => [
+                'start' => $now->copy()->subDay()->startOfDay(),
+                'end' => $now->copy()->subDay()->endOfDay(),
+            ],
+            'last_week' => [
+                'start' => $now->copy()->subDays(6)->startOfDay(),
+                'end' => $now->copy()->endOfDay(),
+            ],
+            default => null,
+        };
     }
 }

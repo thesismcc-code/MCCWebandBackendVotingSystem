@@ -24,29 +24,41 @@ class RegisterSystemActivity
         return $this->systemActivityRepository->getAllSystemActivities();
     }
 
-    public function paginateRealtimeLogs(int $page): LengthAwarePaginator
+    public function paginateRealtimeLogs(int $page, string $userFilter = 'all', string $dateFilter = 'all'): LengthAwarePaginator
     {
-        return $this->systemActivityRepository->paginateByLevelGroup($page, self::PER_PAGE, 'realtime');
+        return $this->systemActivityRepository->paginateByLevelGroup(
+            $page,
+            self::PER_PAGE,
+            'realtime',
+            $userFilter,
+            $dateFilter,
+        );
     }
 
-    public function paginateErrorLogs(int $page): LengthAwarePaginator
+    public function paginateErrorLogs(int $page, string $userFilter = 'all', string $dateFilter = 'all'): LengthAwarePaginator
     {
-        return $this->systemActivityRepository->paginateByLevelGroup($page, self::PER_PAGE, 'error');
+        return $this->systemActivityRepository->paginateByLevelGroup(
+            $page,
+            self::PER_PAGE,
+            'error',
+            $userFilter,
+            $dateFilter,
+        );
     }
 
     /**
      * @return array<int, SystemActivity>
      */
-    public function getErrorLogsSince(string $sinceIso): array
+    public function getErrorLogsSince(string $sinceIso, string $userFilter = 'all', string $dateFilter = 'all'): array
     {
-        return $this->systemActivityRepository->getErrorLogsSince($sinceIso);
+        return $this->systemActivityRepository->getErrorLogsSince($sinceIso, $userFilter, $dateFilter);
     }
 
     /**
      * Persist a failed login or API auth attempt to Firebase (warning / error group for the Error Logs tab).
      *
      * @param  'warning'|'error'  $level
-     * @param  'session'|'guest'  $authChannel Web form flows use session; API login failures use guest.
+     * @param  'session'|'guest'  $authChannel  Web form flows use session; API login failures use guest.
      */
     public function recordFailedLoginAttempt(
         Request $request,

@@ -4,14 +4,16 @@ use App\Application\RegisterAuth\RegisterAuth;
 use App\Domain\SystemActivity\SystemActivity;
 use App\Domain\SystemActivity\SystemActivityRepository;
 use App\Models\User;
+use Tests\TestCase;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 
 use function Pest\Laravel\mock;
 
-uses(RefreshDatabase::class);
+uses(TestCase::class, RefreshDatabase::class);
 
 it('records system activity when handling a web request', function () {
+    /** @var TestCase $this */
     $mock = mock(SystemActivityRepository::class);
     $mock->shouldReceive('createSystemActivity')
         ->once()
@@ -44,6 +46,7 @@ it('records system activity when handling a web request', function () {
 });
 
 it('attributes the api guard user to the jwt auth channel', function () {
+    /** @var TestCase $this */
     $id = DB::table('users')->insertGetId([
         'first_name' => 'Test',
         'middle_name' => '',
@@ -90,6 +93,7 @@ it('attributes the api guard user to the jwt auth channel', function () {
 });
 
 it('records a warning when staff login fails with invalid credentials', function () {
+    /** @var TestCase $this */
     $created = [];
     $mock = mock(SystemActivityRepository::class);
     $mock->shouldReceive('createSystemActivity')
@@ -135,14 +139,33 @@ it('records a warning when staff login fails with invalid credentials', function
 });
 
 it('redirects guests away from recent error logs json', function () {
+    /** @var TestCase $this */
     $response = $this->getJson(route('view.system-activity.recent-errors'));
 
     $response->assertRedirect(route('login'));
 });
 
 it('returns json for recent error logs when session is admin', function () {
+    /** @var TestCase $this */
     $mock = mock(SystemActivityRepository::class);
-    $mock->shouldReceive('getErrorLogsSince')->once()->with('')->andReturn([]);
+    $mock->shouldReceive('getErrorLogsSince')->once()->with('', 'all', 'all')->andReturn([]);
+    $mock->shouldReceive('createSystemActivity')
+        ->once()
+        ->andReturnUsing(function (SystemActivity $systemActivity) {
+            return new SystemActivity(
+                id: 'test-id',
+                userId: $systemActivity->getUserId(),
+                level: $systemActivity->getLevel(),
+                activity: $systemActivity->getActivity(),
+                createdAt: $systemActivity->getCreatedAt(),
+                updatedAt: $systemActivity->getUpdatedAt(),
+                role: $systemActivity->getRole(),
+                httpStatus: $systemActivity->getHttpStatus(),
+                routeName: $systemActivity->getRouteName(),
+                ipAddress: $systemActivity->getIpAddress(),
+                authChannel: $systemActivity->getAuthChannel(),
+            );
+        });
     $this->app->instance(SystemActivityRepository::class, $mock);
 
     $response = $this->withSession([

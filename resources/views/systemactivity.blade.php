@@ -1,6 +1,9 @@
 @php
     $errorLogIds = collect($errorLogs->items())->map(fn ($log) => $log->getId())->filter()->values()->all();
     $initialLastErrorCreatedAt = $errorLogs->isNotEmpty() ? $errorLogs->first()->getCreatedAt() : '';
+    $selectedActiveTab = in_array($activeTab ?? 'realtime', ['realtime', 'error'], true) ? $activeTab : 'realtime';
+    $selectedUserFilter = in_array($userFilter ?? 'all', ['all', 'admin', 'student', 'comelec', 'sao'], true) ? $userFilter : 'all';
+    $selectedDateFilter = in_array($dateFilter ?? 'all', ['all', 'today', 'yesterday', 'last_week'], true) ? $dateFilter : 'all';
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -29,12 +32,54 @@
         function systemActivityPage() {
             return {
                 activeTab: 'realtime',
+                userFilter: 'all',
+                dateFilter: 'all',
                 streamedErrors: [],
-                knownErrorIds: @json($errorLogIds),
-                lastErrorCreatedAt: @json($initialLastErrorCreatedAt),
-                errorPage: {{ (int) $errorLogs->currentPage() }},
+                knownErrorIds: [],
+                lastErrorCreatedAt: '',
+                errorPage: 1,
+                realtimePage: 1,
                 errorPollTimer: null,
-                recentErrorsUrl: @json(route('view.system-activity.recent-errors')),
+                recentErrorsUrl: '',
+                init() {
+                    this.activeTab = this.$root.dataset.activeTab || 'realtime';
+                    this.userFilter = this.$root.dataset.userFilter || 'all';
+                    this.dateFilter = this.$root.dataset.dateFilter || 'all';
+                    this.knownErrorIds = JSON.parse(this.$root.dataset.errorLogIds || '[]');
+                    this.lastErrorCreatedAt = this.$root.dataset.lastErrorCreatedAt || '';
+                    this.errorPage = Number.parseInt(this.$root.dataset.errorPage || '1', 10);
+                    this.realtimePage = Number.parseInt(this.$root.dataset.realtimePage || '1', 10);
+                    this.recentErrorsUrl = this.$root.dataset.recentErrorsUrl || '';
+                    if (this.activeTab === 'error') {
+                        this.startErrorPoll();
+                    }
+                    window.addEventListener('beforeunload', () => this.stopErrorPoll());
+                },
+                applyFilters() {
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('active_tab', this.activeTab);
+                    url.searchParams.set('user_filter', this.userFilter);
+                    url.searchParams.set('date_filter', this.dateFilter);
+                    url.searchParams.delete('realtime_page');
+                    url.searchParams.delete('error_page');
+                    window.location.assign(url.toString());
+                },
+                setActiveTab(tab) {
+                    if (tab === this.activeTab) {
+                        return;
+                    }
+                    this.activeTab = tab;
+                    const url = new URL(window.location.href);
+                    url.searchParams.set('active_tab', tab);
+                    url.searchParams.set('user_filter', this.userFilter);
+                    url.searchParams.set('date_filter', this.dateFilter);
+                    if (tab === 'realtime') {
+                        url.searchParams.delete('error_page');
+                    } else {
+                        url.searchParams.delete('realtime_page');
+                    }
+                    window.location.assign(url.toString());
+                },
                 roleBadgeClass(role) {
                     const key = (role || 'guest').toLowerCase();
                     const map = {
@@ -102,6 +147,8 @@
                         if (this.lastErrorCreatedAt) {
                             url.searchParams.set('since', this.lastErrorCreatedAt);
                         }
+                        url.searchParams.set('user_filter', this.userFilter);
+                        url.searchParams.set('date_filter', this.dateFilter);
                         const res = await fetch(url.toString(), {
                             credentials: 'same-origin',
                             headers: { Accept: 'application/json' },
@@ -147,7 +194,18 @@
     </script>
 </head>
 
-<body x-data="systemActivityPage()" x-init="window.addEventListener('beforeunload', () => stopErrorPoll())" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
+<body
+    x-data="systemActivityPage()"
+    x-init="init()"
+    data-active-tab="{{ $selectedActiveTab }}"
+    data-user-filter="{{ $selectedUserFilter }}"
+    data-date-filter="{{ $selectedDateFilter }}"
+    data-error-log-ids='@json($errorLogIds)'
+    data-last-error-created-at="{{ $initialLastErrorCreatedAt }}"
+    data-error-page="{{ (int) $errorLogs->currentPage() }}"
+    data-realtime-page="{{ (int) $realtimeLogs->currentPage() }}"
+    data-recent-errors-url="{{ route('view.system-activity.recent-errors') }}"
+    class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
 
     <!-- HEADER SECTION -->
     <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
@@ -171,7 +229,7 @@
         <!-- TOGGLE BUTTONS -->
         <div class="flex gap-3 mb-6">
             <button
-                @click="activeTab = 'realtime'; stopErrorPoll()"
+                @click="setActiveTab('realtime')"
                 :class="activeTab === 'realtime'
                     ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
                     : 'bg-white text-gray-900 hover:bg-gray-100'"
@@ -179,7 +237,7 @@
                 Real Time Logs
             </button>
             <button
-                @click="activeTab = 'error'; startErrorPoll()"
+                @click="setActiveTab('error')"
                 :class="activeTab === 'error'
                     ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
                     : 'bg-white text-gray-900 hover:bg-gray-100'"
@@ -207,11 +265,15 @@
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                         </svg>
                     </div>
-                    <select class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
-                        <option value="" class="text-black">All Users</option>
+                    <select
+                        x-model="userFilter"
+                        @change="applyFilters()"
+                        class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
+                        <option value="all" class="text-black">All Users</option>
                         <option value="admin" class="text-black">Admin</option>
                         <option value="student" class="text-black">Student</option>
                         <option value="comelec" class="text-black">Comelec</option>
+                        <option value="sao" class="text-black">SAO</option>
                     </select>
                     <div class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-white z-20">
                         <svg class="w-[18px] h-[18px] stroke-[2.5]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -228,8 +290,11 @@
                                 d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                         </svg>
                     </div>
-                    <select class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
-                        <option value="" class="text-black">All Dates</option>
+                    <select
+                        x-model="dateFilter"
+                        @change="applyFilters()"
+                        class="block w-full py-[10px] pl-[38px] pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none text-[13.5px] font-medium text-white shadow-sm hover:bg-white/10 transition-colors cursor-pointer">
+                        <option value="all" class="text-black">All Dates</option>
                         <option value="today" class="text-black">Today</option>
                         <option value="yesterday" class="text-black">Yesterday</option>
                         <option value="last_week" class="text-black">Last Week</option>
