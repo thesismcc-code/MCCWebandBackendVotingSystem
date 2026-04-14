@@ -136,6 +136,18 @@
             margin: 0 auto 2.5rem auto;
         }
 
+        .alert-error {
+            margin-bottom: 1rem;
+            padding: 0.85rem 1rem;
+            border-radius: 10px;
+            border: 1px solid #ef4444;
+            background: #fef2f2;
+            color: #991b1b;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-align: left;
+        }
+
         .tab-btn {
             background: transparent;
             border: none;
@@ -311,6 +323,12 @@
 
                 <div class="sign-as">Sign as</div>
 
+                @if (session('error'))
+                    <div class="alert-error" role="alert">
+                        {{ session('error') }}
+                    </div>
+                @endif
+
                 <div class="toggle-container">
                     <button class="tab-btn active" type="button" data-type="old" onclick="switchStudentType(this)">Old
                         Student</button>
@@ -326,7 +344,7 @@
                     <div class="input-group">
                         <label for="student_id_old">Student ID</label>
                         <input type="text" class="form-control" id="student_id_old" name="student_id"
-                            placeholder="STU-0**-0**">
+                            placeholder="STU-0**-0**" value="{{ old('student_id') }}">
                     </div>
 
                     <div class="input-group">
@@ -360,7 +378,7 @@
                     <div class="input-group">
                         <label for="student_id_new">Student ID</label>
                         <input type="text" class="form-control" id="student_id_new" name="student_id"
-                            placeholder="STU-0**-0**">
+                            placeholder="STU-0**-0**" value="{{ old('student_id') }}">
                     </div>
 
                     <div class="input-group">
@@ -444,6 +462,18 @@
                 formNew.style.display = 'none';
             }
         }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const previousStudentType = @json(old('student_type'));
+
+            if (previousStudentType === 'New Student') {
+                const newStudentTab = document.querySelector('.tab-btn[data-type="new"]');
+
+                if (newStudentTab) {
+                    switchStudentType(newStudentTab);
+                }
+            }
+        });
     </script>
 </body>
 

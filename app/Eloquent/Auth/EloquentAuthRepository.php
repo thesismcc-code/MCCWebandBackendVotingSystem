@@ -2,13 +2,13 @@
 
 namespace App\Eloquent\Auth;
 
-use App\Domain\User\User;
 use App\Domain\Auth\AuthRepository;
+use App\Domain\User\User;
 use App\Domain\User\UserRepository;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Session;
-use Tymon\JWTAuth\Facades\JWTAuth;
 use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EloquentAuthRepository implements AuthRepository
 {
@@ -23,20 +23,20 @@ class EloquentAuthRepository implements AuthRepository
     {
         $user = $this->userRepository->findByEmail($email);
 
-        if (!$user || !Hash::check($password, $user->getPassword())) {
+        if (! $user || ! Hash::check($password, $user->getPassword())) {
             return null;
         }
 
         Session::put('auth_user', [
-            'id'          => $user->getId(),
-            'first_name'  => $user->getFirstName(),
+            'id' => $user->getId(),
+            'first_name' => $user->getFirstName(),
             'middle_name' => $user->getMiddleName(),
-            'last_name'   => $user->getLastName(),
-            'email'       => $user->getEmail(),
-            'role'        => $user->getRole(),
-            'student_id'  => $user->getStudentId(),
-            'comelec_id'  => $user->getComelecId(),
-            'admin_id'    => $user->getAdminId(),
+            'last_name' => $user->getLastName(),
+            'email' => $user->getEmail(),
+            'role' => $user->getRole(),
+            'student_id' => $user->getStudentId(),
+            'comelec_id' => $user->getComelecId(),
+            'admin_id' => $user->getAdminId(),
         ]);
 
         Session::regenerate();
@@ -46,22 +46,22 @@ class EloquentAuthRepository implements AuthRepository
 
     public function loginWithStudentID(string $studentId, string $password): User
     {
-        if (!$this->userRepository->validateStudentID($studentId)) {
+        if (! $this->userRepository->validateStudentID($studentId)) {
             throw new \InvalidArgumentException('Student ID not found.');
         }
 
         $user = $this->userRepository->findByStudentID($studentId);
 
-        if (!$user || !Hash::check($password, $user->getPassword())) {
+        if (! $user || ! Hash::check($password, $user->getPassword())) {
             throw new \InvalidArgumentException('Invalid Student ID or password.');
         }
 
         Session::put('auth_user', [
-            'id'         => $user->getId(),
-            'email'      => $user->getEmail(),
-            'role'       => $user->getRole(),
+            'id' => $user->getId(),
+            'email' => $user->getEmail(),
+            'role' => $user->getRole(),
             'first_name' => $user->getFirstName(),
-            'last_name'  => $user->getLastName(),
+            'last_name' => $user->getLastName(),
             'student_id' => $user->getStudentId(),
         ]);
 
@@ -85,20 +85,20 @@ class EloquentAuthRepository implements AuthRepository
     {
         $user = $this->userRepository->findByEmail($email);
 
-        if (!$user || !Hash::check($password, $user->getPassword())) {
+        if (! $user || ! Hash::check($password, $user->getPassword())) {
             return null;
         }
 
         try {
             $payload = JWTAuth::factory()->customClaims([
-                'sub'         => $user->getId(),
-                'email'       => $user->getEmail(),
-                'role'        => $user->getRole(),
-                'first_name'  => $user->getFirstName(),
-                'last_name'   => $user->getLastName(),
-                'student_id'  => $user->getStudentId(),
-                'comelec_id'  => $user->getComelecId(),
-                'admin_id'    => $user->getAdminId(),
+                'sub' => $user->getId(),
+                'email' => $user->getEmail(),
+                'role' => $user->getRole(),
+                'first_name' => $user->getFirstName(),
+                'last_name' => $user->getLastName(),
+                'student_id' => $user->getStudentId(),
+                'comelec_id' => $user->getComelecId(),
+                'admin_id' => $user->getAdminId(),
             ])->make();
 
             return JWTAuth::encode($payload)->get();
@@ -111,9 +111,21 @@ class EloquentAuthRepository implements AuthRepository
     {
         try {
             JWTAuth::setToken($token)->invalidate();
+
             return true;
         } catch (JWTException $e) {
             return false;
         }
+    }
+
+    public function getCurrentLoggInUser(): ?User
+    {
+        $userID = session('auth_user.id');
+
+        if (! $userID) {
+            return null;
+        }
+
+        return $this->userRepository->findById($userID);
     }
 }
