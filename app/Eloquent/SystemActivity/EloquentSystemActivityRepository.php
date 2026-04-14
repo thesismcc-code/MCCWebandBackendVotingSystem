@@ -5,6 +5,7 @@ namespace App\Eloquent\SystemActivity;
 use App\Domain\SystemActivity\SystemActivity;
 use App\Domain\SystemActivity\SystemActivityRepository;
 use Illuminate\Pagination\LengthAwarePaginator;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Log;
 use Kreait\Firebase\Contract\Database;
 use Kreait\Firebase\Database\Reference;
@@ -48,6 +49,42 @@ class EloquentSystemActivityRepository implements SystemActivityRepository
                 ->all();
         } catch (\Throwable $e) {
             Log::error('EloquentSystemActivityRepository::getAllSystemActivities — '.$e->getMessage());
+
+            return [];
+        }
+    }
+
+    public function getErrorLogsSince(string $sinceIso): array
+    {
+        try {
+            $all = $this->getAllSystemActivities();
+            $filtered = collect($all)
+                ->filter(fn (SystemActivity $a) => in_array($a->getLevel(), ['warning', 'error', 'critical'], true))
+                ->sortByDesc(fn (SystemActivity $a) => $a->getCreatedAt())
+                ->values();
+
+            if ($sinceIso === '') {
+                return $filtered->take(5)->all();
+            }
+
+            try {
+                $since = Carbon::parse($sinceIso);
+            } catch (\Throwable) {
+                return [];
+            }
+
+            return $filtered
+                ->filter(function (SystemActivity $a) use ($since) {
+                    try {
+                        return Carbon::parse($a->getCreatedAt())->greaterThan($since);
+                    } catch (\Throwable) {
+                        return false;
+                    }
+                })
+                ->values()
+                ->all();
+        } catch (\Throwable $e) {
+            Log::error('EloquentSystemActivityRepository::getErrorLogsSince — '.$e->getMessage());
 
             return [];
         }

@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Application\SystemActivity\RegisterSystemActivity;
+use App\Domain\SystemActivity\SystemActivity;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -21,5 +23,15 @@ class SystemActivityController extends Controller
         $errorLogs = $this->registerSystemActivity->paginateErrorLogs($errorPage)->withQueryString();
 
         return view('systemactivity', compact('realtimeLogs', 'errorLogs'));
+    }
+
+    public function recentErrorsJson(Request $request): JsonResponse
+    {
+        $since = (string) $request->query('since', '');
+        $logs = $this->registerSystemActivity->getErrorLogsSince($since);
+
+        return response()->json([
+            'data' => array_map(fn (SystemActivity $log) => $log->toArray(), $logs),
+        ]);
     }
 }

@@ -1,3 +1,7 @@
+@php
+    $errorLogIds = collect($errorLogs->items())->map(fn ($log) => $log->getId())->filter()->values()->all();
+    $initialLastErrorCreatedAt = $errorLogs->isNotEmpty() ? $errorLogs->first()->getCreatedAt() : '';
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,11 +25,129 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
+    <script>
+        function systemActivityPage() {
+            return {
+                activeTab: 'realtime',
+                streamedErrors: [],
+                knownErrorIds: @json($errorLogIds),
+                lastErrorCreatedAt: @json($initialLastErrorCreatedAt),
+                errorPage: {{ (int) $errorLogs->currentPage() }},
+                errorPollTimer: null,
+                recentErrorsUrl: @json(route('view.system-activity.recent-errors')),
+                roleBadgeClass(role) {
+                    const key = (role || 'guest').toLowerCase();
+                    const map = {
+                        student: 'bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center',
+                        admin: 'bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                        comelec: 'bg-[#fee173] text-[#4f4316] text-[10px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border border-yellow-300 inline-flex items-center',
+                        sao: 'bg-purple-100 text-purple-800 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                    };
+                    return map[key] || 'bg-gray-100 text-gray-600 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center';
+                },
+                authBadge(ch) {
+                    const key = (ch || 'guest').toLowerCase();
+                    const labels = { session: 'Session', jwt: 'JWT', web: 'Web' };
+                    const classes = {
+                        session: 'bg-emerald-100 text-emerald-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                        jwt: 'bg-sky-100 text-sky-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                        web: 'bg-slate-200 text-slate-700 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                    };
+                    return {
+                        label: labels[key] || 'Guest',
+                        class: classes[key] || 'bg-gray-100 text-gray-600 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                    };
+                },
+                activityClass(level) {
+                    const l = (level || '').toLowerCase();
+                    if (l === 'error' || l === 'critical') {
+                        return 'text-red-500 font-semibold';
+                    }
+                    return 'text-amber-600 font-semibold';
+                },
+                formatDateTime(iso) {
+                    if (!iso) {
+                        return { date: '—', time: '—' };
+                    }
+                    try {
+                        const d = new Date(iso);
+                        if (Number.isNaN(d.getTime())) {
+                            return { date: '—', time: '—' };
+                        }
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        const yyyy = d.getFullYear();
+                        let h = d.getHours();
+                        const ampm = h >= 12 ? 'PM' : 'AM';
+                        let hr = h % 12;
+                        if (hr === 0) {
+                            hr = 12;
+                        }
+                        const mi = String(d.getMinutes()).padStart(2, '0');
+                        const s = String(d.getSeconds()).padStart(2, '0');
+                        return {
+                            date: `${mm}-${dd}-${yyyy}`,
+                            time: `${hr}:${mi}:${s} ${ampm}`,
+                        };
+                    } catch (e) {
+                        return { date: '—', time: '—' };
+                    }
+                },
+                async pollErrorLogs() {
+                    if (this.errorPage !== 1) {
+                        return;
+                    }
+                    try {
+                        const url = new URL(this.recentErrorsUrl, window.location.origin);
+                        if (this.lastErrorCreatedAt) {
+                            url.searchParams.set('since', this.lastErrorCreatedAt);
+                        }
+                        const res = await fetch(url.toString(), {
+                            credentials: 'same-origin',
+                            headers: { Accept: 'application/json' },
+                        });
+                        if (!res.ok) {
+                            return;
+                        }
+                        const json = await res.json();
+                        const data = json.data;
+                        if (!Array.isArray(data) || !data.length) {
+                            return;
+                        }
+                        const fresh = data.filter((log) => !this.knownErrorIds.includes(log.id));
+                        fresh.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+                        for (const log of fresh) {
+                            this.knownErrorIds.push(log.id);
+                        }
+                        this.streamedErrors = [...fresh, ...this.streamedErrors];
+                        const maxT = data.reduce((m, x) => (x.createdAt > m ? x.createdAt : m), data[0].createdAt);
+                        if (!this.lastErrorCreatedAt || maxT > this.lastErrorCreatedAt) {
+                            this.lastErrorCreatedAt = maxT;
+                        }
+                    } catch (e) {
+                        /* ignore network errors */
+                    }
+                },
+                startErrorPoll() {
+                    this.stopErrorPoll();
+                    if (this.errorPage !== 1) {
+                        return;
+                    }
+                    this.pollErrorLogs();
+                    this.errorPollTimer = setInterval(() => this.pollErrorLogs(), 4000);
+                },
+                stopErrorPoll() {
+                    if (this.errorPollTimer) {
+                        clearInterval(this.errorPollTimer);
+                        this.errorPollTimer = null;
+                    }
+                },
+            };
+        }
+    </script>
 </head>
 
-<body x-data="{
-    activeTab: 'realtime'
-}" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
+<body x-data="systemActivityPage()" x-init="window.addEventListener('beforeunload', () => stopErrorPoll())" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
 
     <!-- HEADER SECTION -->
     <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
@@ -49,7 +171,7 @@
         <!-- TOGGLE BUTTONS -->
         <div class="flex gap-3 mb-6">
             <button
-                @click="activeTab = 'realtime'"
+                @click="activeTab = 'realtime'; stopErrorPoll()"
                 :class="activeTab === 'realtime'
                     ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
                     : 'bg-white text-gray-900 hover:bg-gray-100'"
@@ -57,7 +179,7 @@
                 Real Time Logs
             </button>
             <button
-                @click="activeTab = 'error'"
+                @click="activeTab = 'error'; startErrorPoll()"
                 :class="activeTab === 'error'
                     ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
                     : 'bg-white text-gray-900 hover:bg-gray-100'"
@@ -203,6 +325,19 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100/60 bg-white">
+                        <template x-for="log in streamedErrors" :key="log.id">
+                            <tr class="hover:bg-red-50/20 transition-colors">
+                                <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]" x-text="formatDateTime(log.createdAt).date"></td>
+                                <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]" x-text="formatDateTime(log.createdAt).time"></td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="inline-flex" :class="roleBadgeClass(log.role)" x-text="(log.role || 'guest').charAt(0).toUpperCase() + (log.role || 'guest').slice(1).toLowerCase()"></span>
+                                </td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="inline-flex" :class="authBadge(log.authChannel).class" x-text="authBadge(log.authChannel).label"></span>
+                                </td>
+                                <td class="px-6 py-[22px] text-[14.5px]" :class="activityClass(log.level)" x-text="log.activity"></td>
+                            </tr>
+                        </template>
                         @forelse ($errorLogs as $log)
                             @php
                                 $roleKey = strtolower($log->getRole() !== '' ? $log->getRole() : 'guest');
@@ -250,7 +385,7 @@
                                 <td class="px-6 py-[22px] text-[14.5px] {{ $rowClass }}">{{ $log->getActivity() }}</td>
                             </tr>
                         @empty
-                            <tr>
+                            <tr x-show="streamedErrors.length === 0">
                                 <td colspan="5" class="py-16 text-center text-gray-400 font-medium text-sm">No error or warning logs found.</td>
                             </tr>
                         @endforelse

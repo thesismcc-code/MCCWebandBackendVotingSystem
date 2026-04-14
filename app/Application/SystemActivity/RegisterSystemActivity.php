@@ -34,6 +34,56 @@ class RegisterSystemActivity
         return $this->systemActivityRepository->paginateByLevelGroup($page, self::PER_PAGE, 'error');
     }
 
+    /**
+     * @return array<int, SystemActivity>
+     */
+    public function getErrorLogsSince(string $sinceIso): array
+    {
+        return $this->systemActivityRepository->getErrorLogsSince($sinceIso);
+    }
+
+    /**
+     * Persist a failed login or API auth attempt to Firebase (warning / error group for the Error Logs tab).
+     *
+     * @param  'warning'|'error'  $level
+     * @param  'session'|'guest'  $authChannel Web form flows use session; API login failures use guest.
+     */
+    public function recordFailedLoginAttempt(
+        Request $request,
+        string $summary,
+        string $level = 'warning',
+        string $authChannel = 'session',
+        string $httpStatus = '',
+    ): void {
+        if (! in_array($level, ['warning', 'error'], true)) {
+            $level = 'warning';
+        }
+
+        try {
+            $routeName = $request->route()?->getName() ?? '';
+            $now = now()->toIso8601String();
+            $entity = new SystemActivity(
+                id: '',
+                userId: 'guest',
+                level: $level,
+                activity: $summary,
+                createdAt: $now,
+                updatedAt: $now,
+                role: 'guest',
+                httpStatus: $httpStatus,
+                routeName: $routeName,
+                ipAddress: $request->ip() ?? '',
+                authChannel: $authChannel,
+            );
+
+            $this->systemActivityRepository->createSystemActivity($entity);
+        } catch (\Throwable $e) {
+            Log::error('RegisterSystemActivity::recordFailedLoginAttempt — '.$e->getMessage(), [
+                'exception' => $e,
+            ]);
+        }
+    }
+
     public function recordHttpActivity(Request $request, SymfonyResponse $response): void
     {
         try {

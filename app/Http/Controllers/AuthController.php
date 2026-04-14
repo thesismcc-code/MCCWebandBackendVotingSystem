@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Application\RegisterAuth\RegisterAuth;
+use App\Application\SystemActivity\RegisterSystemActivity;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
@@ -14,12 +15,10 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    private RegisterAuth $registerAuth;
-
-    public function __construct(RegisterAuth $registerAuth)
-    {
-        $this->registerAuth = $registerAuth;
-    }
+    public function __construct(
+        private RegisterAuth $registerAuth,
+        private RegisterSystemActivity $registerSystemActivity,
+    ) {}
 
     public function index()
     {
@@ -38,6 +37,14 @@ class AuthController extends Controller
         ], $this->authValidationMessages());
 
         if ($validator->fails()) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'Staff login failed: validation error',
+                'warning',
+                'session',
+                '422',
+            );
+
             return back()
                 ->withInput()
                 ->with('error', $validator->errors()->first());
@@ -51,10 +58,26 @@ class AuthController extends Controller
 
             return $this->redirectByRole($user->getRole());
         } catch (\InvalidArgumentException $e) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'Staff login failed: invalid credentials',
+                'warning',
+                'session',
+                '401',
+            );
+
             return back()
                 ->withInput()
                 ->with('error', $e->getMessage());
         } catch (\Exception $e) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'Staff login failed: unexpected error',
+                'error',
+                'session',
+                '500',
+            );
+
             return back()
                 ->withInput()
                 ->with('error', 'Something went wrong. Please try again.');
@@ -81,6 +104,14 @@ class AuthController extends Controller
         ]);
 
         if ($validator->fails()) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'Student portal login failed: validation error',
+                'warning',
+                'session',
+                '422',
+            );
+
             return back()
                 ->withInput()
                 ->with('error', $validator->errors()->first());
@@ -94,10 +125,26 @@ class AuthController extends Controller
 
             return $this->redirectByRole($user->getRole());
         } catch (\InvalidArgumentException $e) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'Student portal login failed: invalid credentials',
+                'warning',
+                'session',
+                '401',
+            );
+
             return back()
                 ->withInput()
                 ->with('error', $e->getMessage());
         } catch (\Exception $e) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'Student portal login failed: unexpected error',
+                'error',
+                'session',
+                '500',
+            );
+
             return back()
                 ->withInput()
                 ->with('error', 'Something went wrong. Please try again.');
@@ -130,6 +177,14 @@ class AuthController extends Controller
         ], $this->authValidationMessages());
 
         if ($validator->fails()) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'API login failed: validation error',
+                'warning',
+                'guest',
+                '422',
+            );
+
             return response()->json([
                 'success' => false,
                 'errors' => $validator->errors(),
@@ -150,11 +205,27 @@ class AuthController extends Controller
                 'expires_in' => config('jwt.ttl') * 60,
             ], 200);
         } catch (\InvalidArgumentException $e) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'API login failed: invalid credentials',
+                'warning',
+                'guest',
+                '401',
+            );
+
             return response()->json([
                 'success' => false,
                 'message' => $e->getMessage(),
             ], 401);
         } catch (\Exception $e) {
+            $this->registerSystemActivity->recordFailedLoginAttempt(
+                $request,
+                'API login failed: unexpected error',
+                'error',
+                'guest',
+                '500',
+            );
+
             return response()->json([
                 'success' => false,
                 'message' => 'Something went wrong. Please try again.',
