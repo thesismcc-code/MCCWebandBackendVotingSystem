@@ -2,8 +2,8 @@
 
 namespace App\Application\RegisterAuth;
 
-use App\Domain\User\User;
 use App\Domain\Auth\AuthRepository;
+use App\Domain\User\User;
 
 class RegisterAuth
 {
@@ -22,16 +22,18 @@ class RegisterAuth
 
         $user = $this->authRepository->login($email, $password);
 
-        if (!$user) {
+        if (! $user) {
             throw new \InvalidArgumentException('Invalid email or password.');
         }
 
         return $user;
     }
+
     public function logout(string $user_id): bool
     {
         return $this->authRepository->logout($user_id);
     }
+
     public function loginJwt(string $email, string $password): string
     {
         if (empty($email) || empty($password)) {
@@ -40,7 +42,7 @@ class RegisterAuth
 
         $token = $this->authRepository->loginJwt($email, $password);
 
-        if (!$token) {
+        if (! $token) {
             throw new \InvalidArgumentException('Invalid email or password.');
         }
 
@@ -59,5 +61,10 @@ class RegisterAuth
     public function loginWithStudentID(string $studentId, string $password): User
     {
         return $this->authRepository->loginWithStudentID($studentId, $password);
+    }
+
+    public function getCurrentLoggInUser()
+    {
+        return $this->authRepository->getCurrentLoggInUser();
     }
 }
