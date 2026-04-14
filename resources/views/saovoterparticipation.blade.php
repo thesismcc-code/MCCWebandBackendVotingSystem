@@ -68,10 +68,12 @@
                     </span>
                     <select name="course_filter" onchange="this.form.submit()"
                         class="w-full py-[10px] pl-10 pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] text-[13.5px] font-medium text-white focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
-                        <option value="" class="text-black" selected>All Courses</option>
-                        <option value="BSCS" {{ request('course_filter') == 'BSCS' ? 'selected' : '' }}>BSCS</option>
-                        <option value="BSIT" {{ request('course_filter') == 'BSIT' ? 'selected' : '' }}>BSIT</option>
-                        <option value="BSBA" {{ request('course_filter') == 'BSBA' ? 'selected' : '' }}>BSBA</option>
+                        <option value="" class="text-black">All Courses</option>
+                        @foreach (($courses ?? []) as $course)
+                            <option value="{{ $course }}" {{ request('course_filter') === $course ? 'selected' : '' }}>
+                                {{ $course }}
+                            </option>
+                        @endforeach
                     </select>
                     <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -92,7 +94,7 @@
                     </span>
                     <select name="year_filter" onchange="this.form.submit()"
                         class="w-full py-[10px] pl-10 pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] text-[13.5px] font-medium text-white focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
-                        <option value="" class="text-black" selected>Year Level</option>
+                        <option value="" class="text-black">Year Level</option>
                         <option value="1" {{ request('year_filter') == '1' ? 'selected' : '' }}>1st Year</option>
                         <option value="2" {{ request('year_filter') == '2' ? 'selected' : '' }}>2nd Year</option>
                         <option value="3" {{ request('year_filter') == '3' ? 'selected' : '' }}>3rd Year</option>
@@ -128,7 +130,9 @@
                                     <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">{{ $voter->name }}</td>
                                     <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">{{ $voter->course_name }}</td>
                                     <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">{{ $voter->year_level }}</td>
-                                    <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">{{ \Carbon\Carbon::parse($voter->voted_at)->format('d-m-Y g:iA') }}</td>
+                                    <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">
+                                        {{ $voter->voted_at ? \Carbon\Carbon::parse($voter->voted_at)->format('d-m-Y g:iA') : 'N/A' }}
+                                    </td>
                                     <td class="pl-6 pr-[32px] py-[20px] text-center">
                                         <span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">
                                             {{ $voter->status ?? 'Voted' }}
@@ -138,108 +142,9 @@
                             @endforeach
                         @else
                             <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-001</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Jose Perolino</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">4th Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">12-12-2025 10:43AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-035</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Myles Macrohon</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">2nd Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">13-12-2025 1:30PM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-141</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Honey Malang</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">3rd Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 8:41AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-225</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Jahaira Ampaso</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 10:43AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-005</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">James Cortes</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 1:30PM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-110</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Carl Cobarde</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">3rd Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">12-12-2025 10:43AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-365</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Joshua Bacolod</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">2nd Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">13-12-2025 1:30PM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-002</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Breant Cortes</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">4th Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 8:41AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-451</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Joseph Cadenas</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">4th Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 10:43AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-120</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Arley Flores</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">2nd Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 1:30PM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-420</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Ivhan Cuizon</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">12-12-2025 10:43AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-053</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Zyra Pepito</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">13-12-2025 1:30PM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
-                            </tr>
-                            <tr>
-                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-114</td>
-                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Mark Berdon</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">3rd Year</td>
-                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 8:41AM</td>
-                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
+                                <td colspan="6" class="px-6 py-10 text-center text-[14px] font-medium text-slate-500">
+                                    No voter participation records found.
+                                </td>
                             </tr>
                         @endif
                     </tbody>
