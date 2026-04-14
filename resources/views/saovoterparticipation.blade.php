@@ -6,376 +6,240 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAO Voter Participation Report</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
-    <!-- Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <style>
-        /* General Page Styling */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0b2361;
-            /* Deep background blue */
-            color: white;
-            min-height: 100vh;
+            background-color: #102864;
         }
 
-        /* Back Button */
-        .btn-back {
-            width: 40px;
-            height: 40px;
-            background-color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0b2361;
-            text-decoration: none;
-            transition: transform 0.2s;
+        .bg-main-panel {
+            background-color: #0C3189;
         }
 
-        .btn-back:hover {
-            transform: scale(1.1);
-            color: #0b2361;
-        }
-
-        /* Main Container Panel */
-        .main-panel {
-            background-color: #0b2b88;
-            /* Lighter royal blue panel */
-            border-radius: 20px;
-            padding: 30px;
-            min-height: 80vh;
-            margin-top: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        /* Search & Filter Inputs */
-        .custom-input {
-            background-color: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            color: white;
-            border-radius: 5px;
-            padding: 10px 15px;
-        }
-
-        .custom-input::placeholder {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.9rem;
-        }
-
-        .custom-input:focus {
-            background-color: rgba(255, 255, 255, 0.1);
-            color: white;
-            border-color: white;
-            box-shadow: none;
-        }
-
-        .input-group-text-custom {
-            background: transparent;
-            border: 1px solid rgba(255, 255, 255, 0.7);
-            border-right: none;
-            color: white;
-            padding-left: 15px;
-        }
-
-        .input-group .custom-input {
-            border-left: none;
-        }
-
-        /* Select Chevron styling hack for white color */
-        select.custom-input {
-            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='white' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
-            background-position: right 0.75rem center;
-            background-size: 16px 12px;
-            background-repeat: no-repeat;
-            appearance: none;
-        }
-
-        select.custom-input option {
-            background-color: #0b2361;
-            /* Option background to match theme */
-        }
-
-        /* Table Card Styling */
-        .table-card {
-            background-color: white;
-            border-radius: 12px;
-            overflow: hidden;
-            margin-top: 20px;
-        }
-
-        /* Custom Table */
-        .table-voter thead th {
-            font-weight: 700;
-            text-transform: capitalize;
-            border-bottom: 2px solid #289bf5;
-            /* Blue line under header */
-            padding: 15px;
-            font-size: 0.95rem;
-        }
-
-        .table-voter tbody td {
-            padding: 12px 15px;
-            border-bottom: 1px solid #cce1fa;
-            /* Light blue grid lines */
-            font-size: 0.9rem;
-            vertical-align: middle;
-            color: #000;
-        }
-
-        /* Auto remove last border natively avoiding structural repetitive static style declarations */
-        .table-voter tbody tr:last-child td {
-            border-bottom: none !important;
-        }
-
-        /* Highlight Row Style (as seen in image blue outline box) */
-        .table-row-highlight {
-            border: 2px solid #289bf5;
-        }
-
-        /* Status Badge */
-        .badge-voted {
-            background-color: #bbf7d0;
-            /* Light Green */
-            color: #166534;
-            /* Dark Green Text */
-            border-radius: 50px;
-            padding: 5px 15px;
-            font-size: 0.75rem;
-            font-weight: 600;
-            display: inline-block;
-        }
-
-        /* Pagination Styles */
-        .pagination-container .page-box {
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 5px;
-            font-weight: 600;
-            margin: 0 4px;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .pagination-container .page-active {
-            background-color: white;
-            color: #0b2b88;
-        }
-
-        .pagination-container .page-inactive {
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            color: white;
-        }
-
-        .pagination-container .page-inactive:hover {
-            background-color: rgba(255, 255, 255, 0.1);
+        .highlight-row {
+            box-shadow: inset 0 0 0 2px #289bf5;
         }
     </style>
 </head>
 
-<body class="p-3 p-md-4">
-
-    <!-- Header Section with Back Button -->
-    <div class="container-fluid mb-3 px-0">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{{ route('view.sao-dashboard') }}" class="btn-back" title="Go Back">
-                <i class="bi bi-arrow-left fs-5"></i>
+<body class="p-4 md:p-6 min-h-screen text-white flex flex-col">
+    <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('view.sao-dashboard') }}"
+                class="bg-white text-[#113285] rounded-full w-10 h-10 flex items-center justify-center hover:scale-110 transition-transform shadow-md"
+                title="Go Back">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
             </a>
-            <h4 class="mb-0 fw-bold">Voter Participation</h4>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white leading-tight">Voter Participation</h1>
+                <p class="text-blue-200 text-[11px] font-medium mt-0.5">Voting Attendance Report</p>
+            </div>
         </div>
     </div>
 
-    <!-- Main Content Panel -->
-    <div class="main-panel">
-
-        <!-- Search and Filter Bar Form Container Added For Production Queries -->
-        <form action="{{ request()->url() }}" method="GET" class="row g-3 mb-4">
-            <!-- Search Bar -->
-            <div class="col-lg-5 col-md-12">
-                <div class="input-group">
-                    <span class="input-group-text input-group-text-custom" id="search-addon">
-                        <i class="bi bi-search text-white"></i>
+    <div class="max-w-7xl mx-auto w-full bg-main-panel rounded-3xl p-6 md:p-10 shadow-2xl flex-1 flex flex-col mb-4">
+        <form action="{{ request()->url() }}" method="GET" class="grid grid-cols-1 lg:grid-cols-12 gap-3 mb-4">
+            <div class="lg:col-span-5">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/90">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 21l-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
                     </span>
-                    <input type="text" name="search" class="form-control custom-input"
-                        placeholder="Search by Student ID or Name" aria-label="Search parameters"
-                        value="{{ request('search') }}" oninput="this.form.submit()">
+                    <input type="text" name="search" value="{{ request('search') }}" oninput="this.form.submit()"
+                        placeholder="Search by Student ID or Name"
+                        class="w-full py-[10px] pl-10 pr-4 rounded-[10px] border border-white/80 bg-[#163fa9] text-[13.5px] font-medium text-white placeholder:text-white/70 focus:outline-none focus:ring-2 focus:ring-white/40">
                 </div>
             </div>
 
-            <!-- Course Filter -->
-            <div class="col-lg-3 col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text input-group-text-custom">
-                        <i class="bi bi-mortarboard text-white"></i>
+            <div class="lg:col-span-3">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/90">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422M12 14v7"></path>
+                        </svg>
                     </span>
-                    <select name="course_filter" class="form-select custom-input" onchange="this.form.submit()">
-                        <option value="" selected>All Courses</option>
+                    <select name="course_filter" onchange="this.form.submit()"
+                        class="w-full py-[10px] pl-10 pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] text-[13.5px] font-medium text-white focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
+                        <option value="" class="text-black" selected>All Courses</option>
                         <option value="BSCS" {{ request('course_filter') == 'BSCS' ? 'selected' : '' }}>BSCS</option>
                         <option value="BSIT" {{ request('course_filter') == 'BSIT' ? 'selected' : '' }}>BSIT</option>
                         <option value="BSBA" {{ request('course_filter') == 'BSBA' ? 'selected' : '' }}>BSBA</option>
                     </select>
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </span>
                 </div>
             </div>
 
-            <!-- Year Level Filter -->
-            <div class="col-lg-4 col-md-6">
-                <div class="input-group">
-                    <span class="input-group-text input-group-text-custom">
-                        <i class="bi bi-calendar-event text-white"></i>
+            <div class="lg:col-span-4">
+                <div class="relative">
+                    <span class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none text-white/90">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                            </path>
+                        </svg>
                     </span>
-                    <select name="year_filter" class="form-select custom-input" onchange="this.form.submit()">
-                        <option value="" selected>Year Level</option>
+                    <select name="year_filter" onchange="this.form.submit()"
+                        class="w-full py-[10px] pl-10 pr-10 rounded-[10px] border border-white/80 bg-[#163fa9] text-[13.5px] font-medium text-white focus:outline-none focus:ring-2 focus:ring-white/40 appearance-none">
+                        <option value="" class="text-black" selected>Year Level</option>
                         <option value="1" {{ request('year_filter') == '1' ? 'selected' : '' }}>1st Year</option>
                         <option value="2" {{ request('year_filter') == '2' ? 'selected' : '' }}>2nd Year</option>
                         <option value="3" {{ request('year_filter') == '3' ? 'selected' : '' }}>3rd Year</option>
                         <option value="4" {{ request('year_filter') == '4' ? 'selected' : '' }}>4th Year</option>
                     </select>
+                    <span class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"></path>
+                        </svg>
+                    </span>
                 </div>
             </div>
         </form>
 
-        <!-- Table Card -->
-        <div class="table-card">
-            <div class="table-responsive">
-                <table class="table table-voter mb-0 w-100">
+        <div class="bg-white rounded-2xl overflow-hidden shadow-xl flex-1 relative z-10 flex flex-col mb-4">
+            <div class="overflow-x-auto w-full max-h-full pb-[20px]">
+                <table class="w-full text-left border-collapse min-w-[960px]">
                     <thead>
-                        <tr>
-                            <th scope="col">Student ID</th>
-                            <th scope="col">Name</th>
-                            <th scope="col">Course</th>
-                            <th scope="col">Year Level</th>
-                            <th scope="col">Date & Time</th>
-                            <th scope="col" class="text-center">Status</th>
+                        <tr class="border-b-2 border-gray-100 bg-white text-left sticky top-0 z-30">
+                            <th class="pl-[32px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Student ID</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Name</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Course</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Year Level</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] leading-tight">Date & Time</th>
+                            <th class="pl-6 pr-[32px] py-5 text-[15px] font-bold text-[#0c0d16] text-center leading-tight">Status</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- Implemented Graceful Data Check Fallback -->
+                    <tbody class="divide-y divide-gray-100/70 bg-white">
                         @if (isset($voters) && count($voters) > 0)
                             @foreach ($voters as $voter)
-                                <tr
-                                    class="{{ isset($voter->is_highlighted) && $voter->is_highlighted ? 'table-row-highlight' : '' }}">
-                                    <td>{{ $voter->student_id }}</td>
-                                    <td>{{ $voter->name }}</td>
-                                    <td>{{ $voter->course_name }}</td>
-                                    <td>{{ $voter->year_level }}</td>
-                                    <td>{{ \Carbon\Carbon::parse($voter->voted_at)->format('d-m-Y g:iA') }}</td>
-                                    <td class="text-center"><span
-                                            class="badge-voted">{{ $voter->status ?? 'Voted' }}</span></td>
+                                <tr class="hover:bg-blue-50/30 transition-colors {{ isset($voter->is_highlighted) && $voter->is_highlighted ? 'highlight-row' : '' }}">
+                                    <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">{{ $voter->student_id }}</td>
+                                    <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">{{ $voter->name }}</td>
+                                    <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">{{ $voter->course_name }}</td>
+                                    <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">{{ $voter->year_level }}</td>
+                                    <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">{{ \Carbon\Carbon::parse($voter->voted_at)->format('d-m-Y g:iA') }}</td>
+                                    <td class="pl-6 pr-[32px] py-[20px] text-center">
+                                        <span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">
+                                            {{ $voter->status ?? 'Voted' }}
+                                        </span>
+                                    </td>
                                 </tr>
                             @endforeach
                         @else
-                            <!-- Preserving provided mock logic in fallback view specifically matching default expectations-->
                             <tr>
-                                <td>CS-2025-001</td>
-                                <td>Jose Perolino</td>
-                                <td>Computer Science</td>
-                                <td>4th Year</td>
-                                <td>12-12-2025 10:43AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-001</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Jose Perolino</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">4th Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">12-12-2025 10:43AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>IT-2025-035</td>
-                                <td>Myles Macrohon</td>
-                                <td>Information Technology</td>
-                                <td>2nd Year</td>
-                                <td>13-12-2025 1:30PM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-035</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Myles Macrohon</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">2nd Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">13-12-2025 1:30PM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>BA-2025-141</td>
-                                <td>Honey Malang</td>
-                                <td>Business Administration</td>
-                                <td>3rd Year</td>
-                                <td>14-12-2025 8:41AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-141</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Honey Malang</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">3rd Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 8:41AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>CS-2025-225</td>
-                                <td>Jahaira Ampaso</td>
-                                <td>Business Administration</td>
-                                <td>1st Year</td>
-                                <td>14-12-2025 10:43AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-225</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Jahaira Ampaso</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 10:43AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>IT-2025-005</td>
-                                <td>James Cortes</td>
-                                <td>Information Technology</td>
-                                <td>1st Year</td>
-                                <td>14-12-2025 1:30PM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-005</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">James Cortes</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 1:30PM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>BA-2025-110</td>
-                                <td>Carl Cobarde</td>
-                                <td>Computer Science</td>
-                                <td>3rd Year</td>
-                                <td>12-12-2025 10:43AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-110</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Carl Cobarde</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">3rd Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">12-12-2025 10:43AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>CS-2025-365</td>
-                                <td>Joshua Bacolod</td>
-                                <td>Computer Science</td>
-                                <td>2nd Year</td>
-                                <td>13-12-2025 1:30PM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-365</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Joshua Bacolod</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">2nd Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">13-12-2025 1:30PM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>IT-2025-002</td>
-                                <td>Breant Cortes</td>
-                                <td>Information Technology</td>
-                                <td>4th Year</td>
-                                <td>14-12-2025 8:41AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-002</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Breant Cortes</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">4th Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 8:41AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>BA-2025-451</td>
-                                <td>Joseph Cadenas</td>
-                                <td>Business Administration</td>
-                                <td>4th Year</td>
-                                <td>14-12-2025 10:43AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-451</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Joseph Cadenas</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">4th Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 10:43AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>BA-2025-120</td>
-                                <td>Arley Flores</td>
-                                <td>Information Technology</td>
-                                <td>2nd Year</td>
-                                <td>14-12-2025 1:30PM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-120</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Arley Flores</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">2nd Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 1:30PM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>CS-2025-420</td>
-                                <td>Ivhan Cuizon</td>
-                                <td>Computer Science</td>
-                                <td>1st Year</td>
-                                <td>12-12-2025 10:43AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">CS-2025-420</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Ivhan Cuizon</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Computer Science</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">12-12-2025 10:43AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>IT-2025-053</td>
-                                <td>Zyra Pepito</td>
-                                <td>Information Technology</td>
-                                <td>1st Year</td>
-                                <td>13-12-2025 1:30PM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">IT-2025-053</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Zyra Pepito</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Information Technology</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">1st Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">13-12-2025 1:30PM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                             <tr>
-                                <td>BA-2025-114</td>
-                                <td>Mark Berdon</td>
-                                <td>Business Administration</td>
-                                <td>3rd Year</td>
-                                <td>14-12-2025 8:41AM</td>
-                                <td class="text-center"><span class="badge-voted">Voted</span></td>
+                                <td class="pl-[32px] pr-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">BA-2025-114</td>
+                                <td class="px-6 py-[20px] text-[14.5px] font-medium text-[#2d3043]">Mark Berdon</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">Business Administration</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">3rd Year</td>
+                                <td class="px-6 py-[20px] text-[14.5px] text-[#2d3043]">14-12-2025 8:41AM</td>
+                                <td class="pl-6 pr-[32px] py-[20px] text-center"><span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-[11px] font-bold px-4 py-1.5 tracking-wide">Voted</span></td>
                             </tr>
                         @endif
                     </tbody>
@@ -383,25 +247,65 @@
             </div>
         </div>
 
-        <!-- Pagination Section Abstracted -->
-        <div class="d-flex justify-content-center mt-4 pagination-container">
+        <div class="flex justify-center items-center mt-1">
             @if (isset($voters) && $voters instanceof \Illuminate\Pagination\LengthAwarePaginator && $voters->hasPages())
-                {{-- Dynamically outputs Laravel specific UI overrides matched to provided CSS rules above once connected backend triggers. --}}
-                {{ $voters->withQueryString()->links('pagination::bootstrap-5') }}
+                <div class="flex items-center gap-2">
+                    @if ($voters->onFirstPage())
+                        <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white/50 cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </span>
+                    @else
+                        <a href="{{ $voters->previousPageUrl() }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/15 text-white hover:bg-white hover:text-[#0C3189] transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+                            </svg>
+                        </a>
+                    @endif
+
+                    @php
+                        $current = $voters->currentPage();
+                        $last = $voters->lastPage();
+                        $start = max(1, min($current - 2, $last - 4));
+                        $end = min($last, $start + 4);
+                    @endphp
+
+                    @for ($page = $start; $page <= $end; $page++)
+                        @if ($page === $current)
+                            <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-[#0C3189] text-[13px] font-bold">{{ $page }}</span>
+                        @else
+                            <a href="{{ $voters->url($page) }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/15 text-white text-[13px] font-medium hover:bg-white hover:text-[#0C3189] transition-colors">{{ $page }}</a>
+                        @endif
+                    @endfor
+
+                    @if ($voters->hasMorePages())
+                        <a href="{{ $voters->nextPageUrl() }}" class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/15 text-white hover:bg-white hover:text-[#0C3189] transition-colors">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </a>
+                    @else
+                        <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/10 text-white/50 cursor-not-allowed">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                            </svg>
+                        </span>
+                    @endif
+                </div>
             @else
-                <!-- Static Placeholder Matches Direct Initial Structure -->
-                <a href="#" class="page-box page-active">1</a>
-                <a href="#" class="page-box page-inactive">2</a>
-                <a href="#" class="page-box page-inactive" aria-label="Next">
-                    <i class="bi bi-arrow-right"></i>
-                </a>
+                <div class="flex items-center gap-2">
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-white text-[#0C3189] text-[13px] font-bold">1</span>
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/15 text-white text-[13px] font-medium">2</span>
+                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-white/15 text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
+                        </svg>
+                    </span>
+                </div>
             @endif
         </div>
-
     </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
