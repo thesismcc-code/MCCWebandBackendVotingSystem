@@ -6,501 +6,249 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SAO Final Results - Published</title>
 
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Bootstrap Icons -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
-
-    <!-- Google Fonts -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
-        /* --- General Page Styling --- */
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #0b2361;
-            color: white;
-            min-height: 100vh;
+            background-color: #102864;
         }
 
-        .btn-back {
-            width: 40px;
-            height: 40px;
-            background-color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: #0b2361;
-            text-decoration: none;
-            transition: transform 0.2s;
+        .bg-main-panel {
+            background-color: #0C3189;
         }
 
-        .btn-back:hover {
-            transform: scale(1.1);
-            color: #0b2361;
-        }
-
-        .main-panel {
-            background-color: #0b2b88;
-            border-radius: 20px;
-            padding: 30px;
-            min-height: 80vh;
-            margin-top: 10px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
-        }
-
-        .btn-publish {
-            background-color: #1bd810;
-            color: white;
-            font-weight: 700;
-            text-transform: uppercase;
-            border: none;
-            padding: 12px 28px;
-            border-radius: 6px;
-            font-size: 0.95rem;
-            letter-spacing: 0.5px;
-            transition: background-color 0.2s;
-        }
-
-        .btn-publish:hover {
-            background-color: #16bc0b;
-            color: white;
-        }
-
-        /* --- Updated Layout Structure Rules --- */
-        .results-board {
-            background-color: #ffffff;
-            border-radius: 12px;
-            color: #111827;
-            padding: 35px 0;
-        }
-
-        .divider-col {
-            border-right: 1.5px solid #d1d5db;
-        }
-
-        @media (max-width: 991px) {
-            .divider-col {
-                border-right: none;
-                border-bottom: 1.5px solid #d1d5db;
-                padding-bottom: 25px;
-                margin-bottom: 25px;
-            }
-        }
-
-        .col-pad-lg {
-            padding: 0 45px;
-        }
-
-        /* --- Section Badges --- */
-        .role-badge {
-            background-color: #C0D8FA;
-            color: #0f172a;
-            font-weight: 800;
-            font-size: 1.15rem;
-            text-transform: uppercase;
-            padding: 8px 18px;
-            border-radius: 5px;
-            display: inline-block;
-        }
-
-        /* --- Container for Box Contents --- */
-        .election-box {
-            border: 1px solid #d4d4d8;
-            border-radius: 6px;
-            overflow: hidden;
-            /* Contains cleanly to inner bounds for winner segments bottom wrapper tracking identically cleanly nested smoothly dynamically!. */
-            font-size: 1.05rem;
-            margin-bottom: 2rem;
-        }
-
-        /* List Candidate specifics! */
-        .candidates-list {
-            background-color: #ffffff;
-            padding: 25px 30px;
-        }
-
-        .candidate-entry {
-            margin-bottom: 18px;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .candidate-entry:last-child {
-            margin-bottom: 0;
-        }
-
-        .candidate-name {
-            color: #1e293b;
-        }
-
-        /* Highlight specific bolding logic */
-        .txt-strong-bold {
-            font-weight: 800;
-        }
-
-        .text-count-regular {
-            color: #1e293b;
-            font-weight: 400;
-            font-size: 1rem;
-        }
-
-        /* Winner panels exact rules targets! */
-        .winner-panel-bg {
-            background-color: #C1F8BB;
-            padding: 20px 30px;
-        }
-
-        /* Typography Helper correctly aligned exactly strictly */
-        .winner-txt {
-            font-weight: 800;
-            text-transform: uppercase;
-            color: #000;
-            letter-spacing: 0.3px;
-        }
-
-        /* --- MODAL STYLES --- */
-        .custom-modal-content {
-            border-radius: 20px;
-            border: none;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            text-align: center;
-            padding: 40px 30px;
-            position: relative;
-            /* For absolute close button */
-        }
-
-        /* Custom absolute Close Button (Top Right) */
-        .btn-close-absolute {
-            position: absolute;
-            top: 15px;
-            right: 15px;
-            opacity: 0.5;
-            font-size: 1.2rem;
-        }
-
-        .btn-close-absolute:hover {
-            opacity: 1;
-        }
-
-        /* Typography */
-        .modal-title-custom {
-            font-weight: 800;
-            font-size: 1.8rem;
-            color: #000;
-            margin-bottom: 15px;
-        }
-
-        .modal-text-custom {
-            color: #333;
-            font-size: 1rem;
-            line-height: 1.5;
-            margin-bottom: 0;
-            font-weight: 500;
-        }
-
-        /* Modal Actions */
-        .modal-actions {
-            display: flex;
-            justify-content: center;
-            gap: 15px;
-            margin-top: 25px;
-        }
-
-        .btn-modal-cancel {
-            background-color: #dc2626;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        .btn-modal-submit {
-            background-color: #1bd810;
-            color: white;
-            border: none;
-            padding: 10px 30px;
-            border-radius: 6px;
-            font-weight: 600;
+        [x-cloak] {
+            display: none !important;
         }
     </style>
 </head>
 
-<body class="p-3 p-md-4">
-
-    <!-- Header Section -->
-    <div class="container-fluid mb-2 px-0">
-        <div class="d-flex align-items-center gap-3">
-            <a href="{{ route('view.sao-dashboard') }}" class="btn-back">
-                <i class="bi bi-arrow-left fs-5"></i>
+<body x-data="finalResultsPage({{ \Illuminate\Support\Js::from($finalResults) }}, '{{ route('sao-final-results.live-data') }}', {{ session()->has('success') ? 'true' : 'false' }})"
+    x-init="startPolling()" class="p-4 md:p-6 min-h-screen text-white flex flex-col">
+    <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
+        <div class="flex items-center gap-4">
+            <a href="{{ route('view.sao-dashboard') }}"
+                class="bg-white text-[#113285] rounded-full w-10 h-10 flex items-center justify-center hover:scale-110 transition-transform shadow-md">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                        d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+                </svg>
             </a>
-            <h4 class="mb-0 fw-bold">Final Results</h4>
+            <div>
+                <h1 class="text-2xl font-bold tracking-tight text-white leading-tight">Final Results</h1>
+                <p class="text-blue-200 text-[11px] font-medium mt-0.5">Election Outcome Summary</p>
+            </div>
         </div>
     </div>
 
-    <!-- Main Content Panel -->
-    <div class="main-panel">
-
-        <!-- Action Button -->
-        <div class="d-flex justify-content-end mb-4 pe-2">
-            <button class="btn-publish" id="triggerConfirmBtn">
-                PUBLISH OFFICIAL RESULTS
+    <div class="max-w-7xl mx-auto w-full bg-main-panel rounded-3xl p-6 md:p-10 shadow-2xl flex-1 flex flex-col mb-4">
+        <div class="flex justify-end mb-4">
+            <button @click="showConfirm = true" :disabled="data.publish.is_published"
+                class="bg-[#1ccb14] hover:bg-green-600 disabled:bg-green-800 disabled:cursor-not-allowed text-white text-xs md:text-sm font-bold py-3 px-6 md:px-8 rounded-lg shadow-md uppercase tracking-wide transition-colors">
+                <span x-text="data.publish.is_published ? 'OFFICIAL RESULTS PUBLISHED' : 'PUBLISH OFFICIAL RESULTS'"></span>
             </button>
         </div>
 
-        <!-- NEW VISUALS STRUCTURE exactly strictly replacing inner UI native structurally specific mappings logic explicitly -->
-        <div class="results-board shadow-sm w-100 mx-auto">
-            <div class="row m-0 w-100">
-                <!-- ============================ -->
-                <!-- LEFT PANEL (President & VP) -->
-                <!-- ============================ -->
-                <div class="col-lg-6 divider-col col-pad-lg pe-lg-4 pb-0">
-
-                    <!-- President Box Layout-->
-                    <div class="mb-2">
-                        <div class="role-badge mb-3">PRESIDENT</div>
-
-                        <div class="election-box">
-                            <!-- Inner Candidate listing top identical section-->
-                            <div class="candidates-list">
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Honey Malang</span>
-                                    <span><span class="txt-strong-bold fs-6">53</span> <span
-                                            class="text-count-regular">votes</span></span>
+        <div class="bg-white rounded-2xl overflow-hidden shadow-xl w-full">
+            <div class="grid grid-cols-1 lg:grid-cols-2">
+                <div class="p-5 md:p-8 border-b lg:border-b-0 lg:border-r border-gray-300/70 space-y-6">
+                    <template x-for="section in leftSections" :key="section.position">
+                        <section>
+                            <span
+                                class="inline-block bg-[#C0D8FA] text-[#0f172a] text-[13px] md:text-[14px] font-extrabold tracking-wide uppercase px-4 py-1.5 rounded-md"
+                                x-text="section.position"></span>
+                            <div class="mt-3 border border-gray-300 rounded-lg overflow-hidden">
+                                <div class="px-6 py-5 space-y-4">
+                                    <template x-for="candidate in section.candidates"
+                                        :key="`${section.position}-${candidate.name}`">
+                                        <div class="flex items-center justify-between text-[15px] text-slate-800">
+                                            <span x-text="candidate.name"></span>
+                                            <span><span class="font-extrabold" x-text="candidate.votes"></span> votes</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="section.candidates.length === 0">
+                                        <div class="text-[15px] text-slate-500">No candidates available.</div>
+                                    </template>
                                 </div>
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Myles Macrohon</span>
-                                    <span><span class="txt-strong-bold fs-6">33</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Jahaira Ampaso</span>
-                                    <span><span class="txt-strong-bold fs-6">25</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                            </div>
-                            <!-- Inline specific matched perfectly single combined WINNER structure panel layout specific rules accurately nested  -->
-                            <div class="winner-panel-bg d-flex justify-content-between align-items-center py-3">
-                                <div class="candidate-name">
-                                    <span class="winner-txt me-3">WINNER:</span><span
-                                        class="txt-strong-bold text-black fs-6">Honey Malang</span>
-                                </div>
-                                <span><span class="txt-strong-bold text-black fs-6">53</span> <span
-                                        class="text-count-regular text-black">votes</span></span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- VP Box Layout exactly logically identical structured specifically -->
-                    <div class="mb-2 mt-4">
-                        <div class="role-badge mb-3">VICE PRESIDENT</div>
-
-                        <div class="election-box mb-1">
-                            <!-- Standard inner listing VP candidate records precisely specific mock matching -->
-                            <div class="candidates-list">
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Honey Malang</span>
-                                    <span><span class="txt-strong-bold fs-6">53</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Myles Macrohon</span>
-                                    <span><span class="txt-strong-bold fs-6">33</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Jahaira Ampaso</span>
-                                    <span><span class="txt-strong-bold fs-6">25</span> <span
-                                            class="text-count-regular">votes</span></span>
+                                <div class="bg-[#C1F8BB] px-6 py-4 text-[15px] text-black"
+                                    :class="section.max_votes > 1 ? 'space-y-3' : ''">
+                                    <template x-if="section.max_votes === 1">
+                                        <div class="flex items-center justify-between">
+                                            <div>
+                                                <span class="font-extrabold uppercase mr-2">Winner:</span>
+                                                <span class="font-extrabold"
+                                                    x-text="section.winners[0] ? section.winners[0].name : 'N/A'"></span>
+                                            </div>
+                                            <span><span class="font-extrabold"
+                                                    x-text="section.winners[0] ? section.winners[0].votes : 0"></span> votes</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="section.max_votes > 1">
+                                        <div>
+                                            <div class="font-extrabold uppercase">Winner:</div>
+                                            <template x-for="winner in section.winners"
+                                                :key="`${section.position}-left-winner-${winner.name}`">
+                                                <div class="flex items-center justify-between">
+                                                    <span x-text="winner.name"></span>
+                                                    <span><span class="font-extrabold" x-text="winner.votes"></span> votes</span>
+                                                </div>
+                                            </template>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
-                            <!-- Matched structurally accurate target WINNER nested bounded structurally cleanly wrapped ! -->
-                            <div class="winner-panel-bg d-flex justify-content-between align-items-center py-3">
-                                <div class="candidate-name">
-                                    <span class="winner-txt me-3">WINNER:</span><span
-                                        class="txt-strong-bold text-black fs-6">Honey Malang</span>
-                                </div>
-                                <span><span class="txt-strong-bold text-black fs-6">53</span> <span
-                                        class="text-count-regular text-black">votes</span></span>
-                            </div>
-                        </div>
-                    </div>
-
+                        </section>
+                    </template>
                 </div>
 
-                <!-- ============================ -->
-                <!-- RIGHT PANEL (Senators Target matched precisely mappings identically specifically specifically !!)-->
-                <!-- ============================ -->
-                <div class="col-lg-6 col-pad-lg ps-lg-4">
-                    <!-- Senator Structurals mappings logic accurately targeting correctly dynamically mapped cleanly wrapped specifically accurately!-->
-                    <div class="mb-0">
-                        <div class="role-badge mb-3">SENATORS</div>
+                <div class="p-5 md:p-8">
+                    <template x-if="rightSections.length === 0">
+                        <div class="text-slate-600 font-semibold">No candidate results available yet.</div>
+                    </template>
 
-                        <div class="election-box mb-1">
-                            <div class="candidates-list pb-4">
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Honey Malang</span>
-                                    <span><span class="txt-strong-bold fs-6">53</span> <span
-                                            class="text-count-regular">votes</span></span>
+                    <template x-for="section in rightSections" :key="section.position">
+                        <section class="mb-6 last:mb-0">
+                            <span
+                                class="inline-block bg-[#C0D8FA] text-[#0f172a] text-[13px] md:text-[14px] font-extrabold tracking-wide uppercase px-4 py-1.5 rounded-md"
+                                x-text="section.position"></span>
+                            <div class="mt-3 border border-gray-300 rounded-lg overflow-hidden">
+                                <div class="px-6 py-5 space-y-4">
+                                    <template x-for="candidate in section.candidates"
+                                        :key="`${section.position}-${candidate.name}`">
+                                        <div class="flex items-center justify-between text-[15px] text-slate-800">
+                                            <span x-text="candidate.name"></span>
+                                            <span><span class="font-extrabold" x-text="candidate.votes"></span> votes</span>
+                                        </div>
+                                    </template>
+                                    <template x-if="section.candidates.length === 0">
+                                        <div class="text-[15px] text-slate-500">No candidates available.</div>
+                                    </template>
                                 </div>
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Myles Macrohon</span>
-                                    <span><span class="txt-strong-bold fs-6">33</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Jahaira Ampaso</span>
-                                    <span><span class="txt-strong-bold fs-6">25</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry">
-                                    <span class="candidate-name">Honey Malang</span>
-                                    <span><span class="txt-strong-bold fs-6">53</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry mb-0">
-                                    <span class="candidate-name">Myles Macrohon</span>
-                                    <span><span class="txt-strong-bold fs-6">33</span> <span
-                                            class="text-count-regular">votes</span></span>
+                                <div class="bg-[#C1F8BB] px-6 py-4 space-y-3 text-[15px] text-black">
+                                    <div class="font-extrabold uppercase">Winner:</div>
+                                    <template x-if="section.winners.length === 0">
+                                        <div class="flex items-center justify-between">
+                                            <span>N/A</span>
+                                            <span><span class="font-extrabold">0</span> votes</span>
+                                        </div>
+                                    </template>
+                                    <template x-for="winner in section.winners"
+                                        :key="`${section.position}-right-winner-${winner.name}`">
+                                        <div class="flex items-center justify-between">
+                                            <span x-text="winner.name"></span>
+                                            <span><span class="font-extrabold" x-text="winner.votes"></span> votes</span>
+                                        </div>
+                                    </template>
                                 </div>
                             </div>
-
-                            <!-- Target arrays perfectly bounded lists specific matching Senator visually separated dynamically strictly structural exactly matching exactly matching!! -->
-                            <div class="winner-panel-bg pb-4">
-                                <div class="winner-txt mb-4 mt-1 fs-6">WINNER:</div>
-
-                                <div class="candidate-entry ms-4 me-0 mb-3">
-                                    <span class="candidate-name">Jahaira Ampaso</span>
-                                    <span><span class="txt-strong-bold fs-6">25</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry ms-4 me-0 mb-3">
-                                    <span class="candidate-name">Honey Malang</span>
-                                    <span><span class="txt-strong-bold fs-6">53</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry ms-4 me-0 mb-3">
-                                    <span class="candidate-name">Myles Macrohon</span>
-                                    <span><span class="txt-strong-bold fs-6">33</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry ms-4 me-0 mb-3">
-                                    <span class="candidate-name">Jahaira Ampaso</span>
-                                    <span><span class="txt-strong-bold fs-6">25</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                                <div class="candidate-entry ms-4 me-0 mb-1">
-                                    <span class="candidate-name">Myles Macrohon</span>
-                                    <span><span class="txt-strong-bold fs-6">33</span> <span
-                                            class="text-count-regular">votes</span></span>
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
+                        </section>
+                    </template>
                 </div>
             </div>
         </div>
-
     </div>
 
-    <!-- ========================== -->
-    <!--  1. CONFIRMATION MODAL     -->
-    <!-- ========================== -->
-    <div class="modal fade" id="confirmPublishModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal-content">
-                <div class="d-flex justify-content-center mb-3">
+    <div x-show="showConfirm && !data.publish.is_published" x-cloak class="fixed inset-0 z-[120] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showConfirm = false"></div>
+        <div class="relative z-10 bg-white rounded-3xl p-8 w-full max-w-[420px] shadow-2xl text-center">
+            <div class="flex justify-center mb-3">
+                <div class="w-20 h-20">
                     <svg width="80" height="80" viewBox="0 0 80 80" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <circle cx="40" cy="40" r="38" fill="#FEE2E2" />
-                        <circle cx="40" cy="40" r="30" stroke="#DC2626" stroke-width="2.5"
-                            fill="#FEF2F2" />
+                        <circle cx="40" cy="40" r="30" stroke="#DC2626" stroke-width="2.5" fill="#FEF2F2" />
                         <rect x="37" y="25" width="6" height="20" rx="3" fill="#DC2626" />
                         <circle cx="40" cy="53" r="3.5" fill="#DC2626" />
                     </svg>
                 </div>
-                <h3 class="modal-title-custom">Are you sure?</h3>
-                <p class="modal-text-custom mb-3">You want to publish the official results?</p>
-                <div class="modal-actions">
-                    <button type="button" class="btn btn-modal-cancel" data-bs-dismiss="modal">Cancel</button>
-                    <!-- Clicking Submit Triggers the Success Modal -->
-                    <button type="button" class="btn btn-modal-submit" id="confirmSubmitBtn">Submit</button>
-                </div>
+            </div>
+            <h3 class="text-2xl font-extrabold text-gray-900 mb-2">Are you sure?</h3>
+            <p class="text-sm text-gray-600 font-medium">You want to publish the official results?</p>
+            <div class="flex gap-3 mt-7 justify-center">
+                <button @click="showConfirm = false"
+                    class="bg-[#ce1b26] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-red-700 transition-colors">
+                    Cancel
+                </button>
+                <form method="POST" action="{{ route('sao-final-results.publish') }}">
+                    @csrf
+                    <button type="submit"
+                        class="bg-[#1ccb14] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                        Submit
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- ========================== -->
-    <!--  2. SUCCESS MODAL          -->
-    <!-- ========================== -->
-    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content custom-modal-content">
-
-                <!-- Close Button X -->
-                <button type="button" class="btn-close btn-close-absolute" data-bs-dismiss="modal"
-                    aria-label="Close"></button>
-
-                <!-- Green Check Icon -->
-                <div class="d-flex justify-content-center mb-3">
+    <div x-show="showSuccess" x-cloak class="fixed inset-0 z-[130] flex items-center justify-center p-4">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" @click="showSuccess = false"></div>
+        <div class="relative z-10 bg-white rounded-3xl p-8 w-full max-w-[420px] shadow-2xl text-center">
+            <button @click="showSuccess = false" class="absolute right-4 top-4 text-gray-400 hover:text-gray-700">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <div class="flex justify-center mb-3">
+                <div class="w-20 h-20">
                     <svg width="80" height="80" viewBox="0 0 80 80" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
-                        <!-- Outer faint ring -->
                         <circle cx="40" cy="40" r="38" fill="#dcfce7" />
-                        <!-- Inner stroke -->
-                        <circle cx="40" cy="40" r="30" stroke="#00D12E" stroke-width="3"
-                            fill="white" />
-                        <!-- Checkmark -->
+                        <circle cx="40" cy="40" r="30" stroke="#00D12E" stroke-width="3" fill="white" />
                         <path d="M28 42L36 50L52 30" stroke="#00D12E" stroke-width="5" stroke-linecap="round"
                             stroke-linejoin="round" />
                     </svg>
                 </div>
-
-                <!-- Text Content -->
-                <h3 class="modal-title-custom">Success!</h3>
-                <p class="modal-text-custom">
-                    Official results have been published.<br>
-                    The election results are now visible on<br>
-                    all student dashboards.
-                </p>
-                <!-- No buttons at bottom for success modal, just close X -->
             </div>
+            <h3 class="text-2xl font-extrabold text-gray-900 mb-2">Success!</h3>
+            <p class="text-sm text-gray-600 font-medium">
+                Official results have been published.
+                The election results are now visible on
+                all student dashboards.
+            </p>
         </div>
     </div>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Script to simulate the flow: Publish -> Confirm -> Success -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            // Get Elements
-            var triggerBtn = document.getElementById('triggerConfirmBtn');
-            var submitBtn = document.getElementById('confirmSubmitBtn');
+        function finalResultsPage(initialData, liveDataUrl, initialShowSuccess) {
+            return {
+                data: initialData,
+                liveDataUrl,
+                showConfirm: false,
+                showSuccess: initialShowSuccess,
+                poller: null,
+                get leftSections() {
+                    return this.data.sections.slice(0, 2);
+                },
+                get rightSections() {
+                    return this.data.sections.slice(2);
+                },
+                startPolling() {
+                    this.poller = setInterval(async () => {
+                        if (this.data.publish.is_published) {
+                            return;
+                        }
 
-            // Initialize Modals
-            var confirmModal = new bootstrap.Modal(document.getElementById('confirmPublishModal'));
-            var successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                        try {
+                            const response = await fetch(this.liveDataUrl, {
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            });
 
-            // Open Confirmation on Publish Click
-            triggerBtn.addEventListener('click', function() {
-                confirmModal.show();
-            });
+                            if (!response.ok) {
+                                return;
+                            }
 
-            // Open Success on Submit Click (and hide confirmation)
-            submitBtn.addEventListener('click', function() {
-                confirmModal.hide();
-                // Short timeout to allow previous modal animation to clear nicely (optional but smoother)
-                setTimeout(function() {
-                    successModal.show();
-                }, 150);
-            });
-        });
+                            this.data = await response.json();
+                        } catch (error) {
+                            console.error(error);
+                        }
+                    }, 10000);
+                }
+            };
+        }
     </script>
-
 </body>
 
 </html>

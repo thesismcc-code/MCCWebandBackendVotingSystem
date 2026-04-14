@@ -73,6 +73,9 @@ Route::middleware('auth.session')->group(function () {
     Route::get('/sao-candidate-list', [SAOCandidateList::class, 'index'])->name('view.sao-candidate-list');
     Route::get('/sao-voter-participation', [SAOVoterParticipationController::class, 'index'])->name('view.sao-voter-participation');
     Route::get('/sao-final-results', [SAOFinalResult::class, 'index'])->name('view.sao-final-results');
+    Route::get('/sao-final-results/live-data', [SAOFinalResult::class, 'liveData'])->name('sao-final-results.live-data');
+    Route::post('/sao-final-results/publish', [SAOFinalResult::class, 'publish'])->name('sao-final-results.publish');
+    Route::get('/sao-final-results/export-pdf', [SAOFinalResult::class, 'exportPdf'])->name('sao-final-results.export-pdf');
     Route::get('/student-eligibility', [StudentEligibilityController::class, 'index'])->name('view.student-eligibility');
 });
 
