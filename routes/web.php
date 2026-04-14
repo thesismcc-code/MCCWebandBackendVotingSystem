@@ -60,7 +60,9 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/election-control/candidate/delete', [ElectionController::class, 'deleteCandidate'])->name('election.candidate.delete');
     Route::get('/system-activity', [SystemActivityController::class, 'index'])->name('view.system-activity');
     Route::get('/reports-and-analytics', [ReportAndAnalyticsController::class, 'index'])->name('view.reports-and-analytics');
+    Route::get('/reports-and-analytics/live-data', [ReportAndAnalyticsController::class, 'liveData'])->name('reports.live-data');
     Route::get('/reports-and-analytics-end-of-election', [ReportAndAnalyticsController::class, 'indexEndOfElection'])->name('view.reports-and-analytics-end-of-election');
+    Route::get('/reports-and-analytics/end-of-election/pdf', [ReportAndAnalyticsController::class, 'exportEndOfElectionPdf'])->name('reports.end-of-election-pdf');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
