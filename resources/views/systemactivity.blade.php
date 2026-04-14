@@ -1,3 +1,7 @@
+@php
+    $errorLogIds = collect($errorLogs->items())->map(fn ($log) => $log->getId())->filter()->values()->all();
+    $initialLastErrorCreatedAt = $errorLogs->isNotEmpty() ? $errorLogs->first()->getCreatedAt() : '';
+@endphp
 <!DOCTYPE html>
 <html lang="en">
 
@@ -21,11 +25,129 @@
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
+    <script>
+        function systemActivityPage() {
+            return {
+                activeTab: 'realtime',
+                streamedErrors: [],
+                knownErrorIds: @json($errorLogIds),
+                lastErrorCreatedAt: @json($initialLastErrorCreatedAt),
+                errorPage: {{ (int) $errorLogs->currentPage() }},
+                errorPollTimer: null,
+                recentErrorsUrl: @json(route('view.system-activity.recent-errors')),
+                roleBadgeClass(role) {
+                    const key = (role || 'guest').toLowerCase();
+                    const map = {
+                        student: 'bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center',
+                        admin: 'bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                        comelec: 'bg-[#fee173] text-[#4f4316] text-[10px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border border-yellow-300 inline-flex items-center',
+                        sao: 'bg-purple-100 text-purple-800 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                    };
+                    return map[key] || 'bg-gray-100 text-gray-600 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center';
+                },
+                authBadge(ch) {
+                    const key = (ch || 'guest').toLowerCase();
+                    const labels = { session: 'Session', jwt: 'JWT', web: 'Web' };
+                    const classes = {
+                        session: 'bg-emerald-100 text-emerald-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                        jwt: 'bg-sky-100 text-sky-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                        web: 'bg-slate-200 text-slate-700 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                    };
+                    return {
+                        label: labels[key] || 'Guest',
+                        class: classes[key] || 'bg-gray-100 text-gray-600 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                    };
+                },
+                activityClass(level) {
+                    const l = (level || '').toLowerCase();
+                    if (l === 'error' || l === 'critical') {
+                        return 'text-red-500 font-semibold';
+                    }
+                    return 'text-amber-600 font-semibold';
+                },
+                formatDateTime(iso) {
+                    if (!iso) {
+                        return { date: '—', time: '—' };
+                    }
+                    try {
+                        const d = new Date(iso);
+                        if (Number.isNaN(d.getTime())) {
+                            return { date: '—', time: '—' };
+                        }
+                        const mm = String(d.getMonth() + 1).padStart(2, '0');
+                        const dd = String(d.getDate()).padStart(2, '0');
+                        const yyyy = d.getFullYear();
+                        let h = d.getHours();
+                        const ampm = h >= 12 ? 'PM' : 'AM';
+                        let hr = h % 12;
+                        if (hr === 0) {
+                            hr = 12;
+                        }
+                        const mi = String(d.getMinutes()).padStart(2, '0');
+                        const s = String(d.getSeconds()).padStart(2, '0');
+                        return {
+                            date: `${mm}-${dd}-${yyyy}`,
+                            time: `${hr}:${mi}:${s} ${ampm}`,
+                        };
+                    } catch (e) {
+                        return { date: '—', time: '—' };
+                    }
+                },
+                async pollErrorLogs() {
+                    if (this.errorPage !== 1) {
+                        return;
+                    }
+                    try {
+                        const url = new URL(this.recentErrorsUrl, window.location.origin);
+                        if (this.lastErrorCreatedAt) {
+                            url.searchParams.set('since', this.lastErrorCreatedAt);
+                        }
+                        const res = await fetch(url.toString(), {
+                            credentials: 'same-origin',
+                            headers: { Accept: 'application/json' },
+                        });
+                        if (!res.ok) {
+                            return;
+                        }
+                        const json = await res.json();
+                        const data = json.data;
+                        if (!Array.isArray(data) || !data.length) {
+                            return;
+                        }
+                        const fresh = data.filter((log) => !this.knownErrorIds.includes(log.id));
+                        fresh.sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+                        for (const log of fresh) {
+                            this.knownErrorIds.push(log.id);
+                        }
+                        this.streamedErrors = [...fresh, ...this.streamedErrors];
+                        const maxT = data.reduce((m, x) => (x.createdAt > m ? x.createdAt : m), data[0].createdAt);
+                        if (!this.lastErrorCreatedAt || maxT > this.lastErrorCreatedAt) {
+                            this.lastErrorCreatedAt = maxT;
+                        }
+                    } catch (e) {
+                        /* ignore network errors */
+                    }
+                },
+                startErrorPoll() {
+                    this.stopErrorPoll();
+                    if (this.errorPage !== 1) {
+                        return;
+                    }
+                    this.pollErrorLogs();
+                    this.errorPollTimer = setInterval(() => this.pollErrorLogs(), 4000);
+                },
+                stopErrorPoll() {
+                    if (this.errorPollTimer) {
+                        clearInterval(this.errorPollTimer);
+                        this.errorPollTimer = null;
+                    }
+                },
+            };
+        }
+    </script>
 </head>
 
-<body x-data="{
-    activeTab: 'realtime'
-}" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
+<body x-data="systemActivityPage()" x-init="window.addEventListener('beforeunload', () => stopErrorPoll())" class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
 
     <!-- HEADER SECTION -->
     <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
@@ -49,7 +171,7 @@
         <!-- TOGGLE BUTTONS -->
         <div class="flex gap-3 mb-6">
             <button
-                @click="activeTab = 'realtime'"
+                @click="activeTab = 'realtime'; stopErrorPoll()"
                 :class="activeTab === 'realtime'
                     ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
                     : 'bg-white text-gray-900 hover:bg-gray-100'"
@@ -57,7 +179,7 @@
                 Real Time Logs
             </button>
             <button
-                @click="activeTab = 'error'"
+                @click="activeTab = 'error'; startErrorPoll()"
                 :class="activeTab === 'error'
                     ? 'bg-[#0066FF] text-white shadow-lg shadow-blue-900/40'
                     : 'bg-white text-gray-900 hover:bg-gray-100'"
@@ -126,119 +248,252 @@
             <div class="overflow-x-auto w-full flex-1 rounded-b-2xl" style="overflow-y: auto; min-height: 0;">
 
                 <!-- REAL TIME LOGS TABLE -->
-                <table x-show="activeTab === 'realtime'" class="w-full text-left border-collapse min-w-[700px] mb-8">
+                <div x-show="activeTab === 'realtime'">
+                <table class="w-full text-left border-collapse min-w-[880px] mb-0">
                     <thead>
                         <tr class="border-b-2 border-gray-100 bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.015)] sticky top-0 z-30">
-                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] text-center w-[15%]">Date</th>
-                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">Time</th>
-                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">User</th>
+                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] text-center w-[12%]">Date</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[12%]">Time</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[12%]">User</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[10%]">Auth</th>
                             <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16]">Activity</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100/60 bg-white">
-                        <tr class="hover:bg-blue-50/20 transition-colors">
-                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
-                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:23 AM</td>
-                            <td class="px-6 py-[22px]">
-                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
-                            </td>
-                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Fingerprint scan successful</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20 transition-colors">
-                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
-                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:30 AM</td>
-                            <td class="px-6 py-[22px]">
-                                <span class="bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center">Admin</span>
-                            </td>
-                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Admin logged in</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20 transition-colors">
-                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
-                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:02:15 AM</td>
-                            <td class="px-6 py-[22px]">
-                                <span class="bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center">Admin</span>
-                            </td>
-                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Added new position</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20 transition-colors">
-                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
-                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:02:34 AM</td>
-                            <td class="px-6 py-[22px]">
-                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
-                            </td>
-                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">User logged in</td>
-                        </tr>
-                        <tr class="hover:bg-blue-50/20 transition-colors">
-                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
-                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:03:00 AM</td>
-                            <td class="px-6 py-[22px]">
-                                <span class="bg-[#fee173] text-[#4f4316] text-[10px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border border-yellow-300 inline-flex items-center">Comelec</span>
-                            </td>
-                            <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">Added candidate</td>
-                        </tr>
+                        @forelse ($realtimeLogs as $log)
+                            @php
+                                $roleKey = strtolower($log->getRole() !== '' ? $log->getRole() : 'guest');
+                                $roleClass = match ($roleKey) {
+                                    'student' => 'bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center',
+                                    'admin' => 'bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                                    'comelec' => 'bg-[#fee173] text-[#4f4316] text-[10px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border border-yellow-300 inline-flex items-center',
+                                    'sao' => 'bg-purple-100 text-purple-800 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                                    default => 'bg-gray-100 text-gray-600 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                                };
+                                try {
+                                    $dt = \Illuminate\Support\Carbon::parse($log->getCreatedAt());
+                                    $dateStr = $dt->format('m-d-Y');
+                                    $timeStr = $dt->format('h:i:s A');
+                                } catch (\Throwable) {
+                                    $dateStr = '—';
+                                    $timeStr = '—';
+                                }
+                                $authCh = strtolower($log->getAuthChannel() !== '' ? $log->getAuthChannel() : 'guest');
+                                $authLabel = match ($authCh) {
+                                    'session' => 'Session',
+                                    'jwt' => 'JWT',
+                                    'web' => 'Web',
+                                    default => 'Guest',
+                                };
+                                $authClass = match ($authCh) {
+                                    'session' => 'bg-emerald-100 text-emerald-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                    'jwt' => 'bg-sky-100 text-sky-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                    'web' => 'bg-slate-200 text-slate-700 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                    default => 'bg-gray-100 text-gray-600 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                };
+                            @endphp
+                            <tr class="hover:bg-blue-50/20 transition-colors">
+                                <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">{{ $dateStr }}</td>
+                                <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">{{ $timeStr }}</td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="{{ $roleClass }}">{{ ucfirst($roleKey) }}</span>
+                                </td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="{{ $authClass }}">{{ $authLabel }}</span>
+                                </td>
+                                <td class="px-6 py-[22px] text-[14.5px] text-[#2d3043]">{{ $log->getActivity() }}</td>
+                            </tr>
+                        @empty
+                            <tr>
+                                <td colspan="5" class="py-16 text-center text-gray-400 font-medium text-sm">No real-time logs yet.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
+                </div>
 
                 <!-- ERROR LOGS TABLE -->
-                <table x-show="activeTab === 'error'" x-cloak class="w-full text-left border-collapse min-w-[700px] mb-8">
+                <div x-show="activeTab === 'error'" x-cloak>
+                <table class="w-full text-left border-collapse min-w-[880px] mb-0">
                     <thead>
                         <tr class="border-b-2 border-gray-100 bg-white shadow-[0px_2px_8px_rgba(0,0,0,0.015)] sticky top-0 z-30">
-                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] text-center w-[15%]">Date</th>
-                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">Time</th>
-                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[15%]">User</th>
+                            <th class="pl-[42px] pr-6 py-5 text-[15px] font-bold text-[#0c0d16] text-center w-[12%]">Date</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[12%]">Time</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[12%]">User</th>
+                            <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16] w-[10%]">Auth</th>
                             <th class="px-6 py-5 text-[15px] font-bold text-[#0c0d16]">Activity</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-gray-100/60 bg-white">
-                        <tr class="hover:bg-red-50/20 transition-colors">
-                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
-                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:23 AM</td>
-                            <td class="px-6 py-[22px]">
-                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
-                            </td>
-                            <td class="px-6 py-[22px] text-[14.5px] text-red-500 font-semibold">Failed fingerprint scan</td>
-                        </tr>
-                        <tr class="hover:bg-red-50/20 transition-colors">
-                            <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">12-12-2025</td>
-                            <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">10:01:30 AM</td>
-                            <td class="px-6 py-[22px]">
-                                <span class="bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center">Student</span>
-                            </td>
-                            <td class="px-6 py-[22px] text-[14.5px] text-red-500 font-semibold">Login attempt blocked</td>
-                        </tr>
-                        <tr>
-                            <td colspan="4" class="py-16 text-center text-gray-400 font-medium text-sm">
-                                No more error logs found.
-                            </td>
-                        </tr>
+                        <template x-for="log in streamedErrors" :key="log.id">
+                            <tr class="hover:bg-red-50/20 transition-colors">
+                                <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]" x-text="formatDateTime(log.createdAt).date"></td>
+                                <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]" x-text="formatDateTime(log.createdAt).time"></td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="inline-flex" :class="roleBadgeClass(log.role)" x-text="(log.role || 'guest').charAt(0).toUpperCase() + (log.role || 'guest').slice(1).toLowerCase()"></span>
+                                </td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="inline-flex" :class="authBadge(log.authChannel).class" x-text="authBadge(log.authChannel).label"></span>
+                                </td>
+                                <td class="px-6 py-[22px] text-[14.5px]" :class="activityClass(log.level)" x-text="log.activity"></td>
+                            </tr>
+                        </template>
+                        @forelse ($errorLogs as $log)
+                            @php
+                                $roleKey = strtolower($log->getRole() !== '' ? $log->getRole() : 'guest');
+                                $roleClass = match ($roleKey) {
+                                    'student' => 'bg-[#d2e2fa] text-[#4f6492] text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border-[0.5px] border-[#adc7f6]/40 inline-flex items-center',
+                                    'admin' => 'bg-gray-100 text-gray-500 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                                    'comelec' => 'bg-[#fee173] text-[#4f4316] text-[10px] tracking-wide font-bold px-[18px] py-[6px] rounded-full border border-yellow-300 inline-flex items-center',
+                                    'sao' => 'bg-purple-100 text-purple-800 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                                    default => 'bg-gray-100 text-gray-600 text-[11px] tracking-wide font-bold px-[18px] py-[6px] rounded-full inline-flex items-center',
+                                };
+                                try {
+                                    $dt = \Illuminate\Support\Carbon::parse($log->getCreatedAt());
+                                    $dateStr = $dt->format('m-d-Y');
+                                    $timeStr = $dt->format('h:i:s A');
+                                } catch (\Throwable) {
+                                    $dateStr = '—';
+                                    $timeStr = '—';
+                                }
+                                $rowClass = $log->getLevel() === 'error' || $log->getLevel() === 'critical'
+                                    ? 'text-red-500 font-semibold'
+                                    : 'text-amber-600 font-semibold';
+                                $authCh = strtolower($log->getAuthChannel() !== '' ? $log->getAuthChannel() : 'guest');
+                                $authLabel = match ($authCh) {
+                                    'session' => 'Session',
+                                    'jwt' => 'JWT',
+                                    'web' => 'Web',
+                                    default => 'Guest',
+                                };
+                                $authClass = match ($authCh) {
+                                    'session' => 'bg-emerald-100 text-emerald-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                    'jwt' => 'bg-sky-100 text-sky-800 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                    'web' => 'bg-slate-200 text-slate-700 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                    default => 'bg-gray-100 text-gray-600 text-[10px] tracking-wide font-bold px-[12px] py-[6px] rounded-full inline-flex items-center',
+                                };
+                            @endphp
+                            <tr class="hover:bg-red-50/20 transition-colors">
+                                <td class="pl-[42px] pr-6 py-[22px] text-center text-[14.5px] font-medium text-[#44465b]">{{ $dateStr }}</td>
+                                <td class="px-6 py-[22px] text-[14.5px] font-medium text-[#44465b]">{{ $timeStr }}</td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="{{ $roleClass }}">{{ ucfirst($roleKey) }}</span>
+                                </td>
+                                <td class="px-6 py-[22px]">
+                                    <span class="{{ $authClass }}">{{ $authLabel }}</span>
+                                </td>
+                                <td class="px-6 py-[22px] text-[14.5px] {{ $rowClass }}">{{ $log->getActivity() }}</td>
+                            </tr>
+                        @empty
+                            <tr x-show="streamedErrors.length === 0">
+                                <td colspan="5" class="py-16 text-center text-gray-400 font-medium text-sm">No error or warning logs found.</td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
+                </div>
 
             </div>
 
-            <!-- PAGINATION -->
+            <!-- SUMMARY -->
             <div class="flex items-center justify-between px-[42px] py-4 border-t border-gray-100 bg-white sticky bottom-0">
-                <p class="text-[13px] text-gray-400 font-medium">Showing 1–5 of 10 logs</p>
-                <div class="flex items-center gap-2">
-                    {{-- Previous --}}
-                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-50 text-gray-300 cursor-not-allowed">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/>
-                        </svg>
-                    </span>
-
-                    <span class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#1853fc] text-white text-[13px] font-bold shadow">1</span>
-                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-500 text-[13px] font-medium hover:bg-blue-50 hover:text-blue-600 transition-all">2</a>
-
-                    {{-- Next --}}
-                    <a href="#" class="w-8 h-8 flex items-center justify-center rounded-lg bg-gray-100 text-gray-600 hover:bg-blue-600 hover:text-white transition-all">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
-                </div>
+                <p class="text-[13px] text-gray-400 font-medium">
+                    Real-time (2xx): {{ $realtimeLogs->total() }} total
+                    · Warnings / errors (4xx/5xx): {{ $errorLogs->total() }} total
+                    <span class="text-gray-300">· {{ $realtimeLogs->perPage() }} per page · Up to 500 most recent stored</span>
+                </p>
             </div>
         </div>
+
+        <!-- PAGINATION (Real Time) — same pattern as votinglogs.blade.php -->
+        @if ($realtimeLogs->lastPage() > 1)
+        <div x-show="activeTab === 'realtime'" class="mt-4 flex justify-center items-center gap-2">
+                @if ($realtimeLogs->onFirstPage())
+                    <span class="w-8 h-8 rounded border border-white/20 text-white/30 flex items-center justify-center cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </span>
+                @else
+                    <a href="{{ $realtimeLogs->previousPageUrl() }}" class="w-8 h-8 rounded border border-white/30 text-white flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </a>
+                @endif
+                @php
+                    $rtCurrent = $realtimeLogs->currentPage();
+                    $rtLast = $realtimeLogs->lastPage();
+                    $rtStart = max(1, min($rtCurrent - 2, $rtLast - 4));
+                    $rtEnd = min($rtLast, $rtStart + 4);
+                @endphp
+                @for ($page = $rtStart; $page <= $rtEnd; $page++)
+                    @if ($page == $rtCurrent)
+                        <span class="w-8 h-8 rounded bg-white text-[#0C3189] font-bold text-sm shadow flex items-center justify-center">{{ $page }}</span>
+                    @else
+                        <a href="{{ $realtimeLogs->url($page) }}" class="w-8 h-8 rounded border border-white/30 text-white font-medium text-sm flex items-center justify-center hover:bg-white/10 transition-colors">{{ $page }}</a>
+                    @endif
+                @endfor
+                @if ($realtimeLogs->hasMorePages())
+                    <a href="{{ $realtimeLogs->nextPageUrl() }}" class="w-8 h-8 rounded border border-white/30 text-white flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+                @else
+                    <span class="w-8 h-8 rounded border border-white/20 text-white/30 flex items-center justify-center cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </span>
+                @endif
+        </div>
+        @endif
+
+        <!-- PAGINATION (Error logs) -->
+        @if ($errorLogs->lastPage() > 1)
+        <div x-show="activeTab === 'error'" x-cloak class="mt-4 flex justify-center items-center gap-2">
+                @if ($errorLogs->onFirstPage())
+                    <span class="w-8 h-8 rounded border border-white/20 text-white/30 flex items-center justify-center cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </span>
+                @else
+                    <a href="{{ $errorLogs->previousPageUrl() }}" class="w-8 h-8 rounded border border-white/30 text-white flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                        </svg>
+                    </a>
+                @endif
+                @php
+                    $errCurrent = $errorLogs->currentPage();
+                    $errLast = $errorLogs->lastPage();
+                    $errStart = max(1, min($errCurrent - 2, $errLast - 4));
+                    $errEnd = min($errLast, $errStart + 4);
+                @endphp
+                @for ($page = $errStart; $page <= $errEnd; $page++)
+                    @if ($page == $errCurrent)
+                        <span class="w-8 h-8 rounded bg-white text-[#0C3189] font-bold text-sm shadow flex items-center justify-center">{{ $page }}</span>
+                    @else
+                        <a href="{{ $errorLogs->url($page) }}" class="w-8 h-8 rounded border border-white/30 text-white font-medium text-sm flex items-center justify-center hover:bg-white/10 transition-colors">{{ $page }}</a>
+                    @endif
+                @endfor
+                @if ($errorLogs->hasMorePages())
+                    <a href="{{ $errorLogs->nextPageUrl() }}" class="w-8 h-8 rounded border border-white/30 text-white flex items-center justify-center hover:bg-white/10 transition-colors">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </a>
+                @else
+                    <span class="w-8 h-8 rounded border border-white/20 text-white/30 flex items-center justify-center cursor-not-allowed">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                    </span>
+                @endif
+        </div>
+        @endif
 
     </div>
 

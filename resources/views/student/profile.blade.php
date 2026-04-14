@@ -358,28 +358,33 @@
 
                 <div class="form-control-block">
                     <label>First Name</label>
-                    <input type="text" class="exact-card-input" value="Myles Macrohon">
+                    <input type="text" name="first_name" class="exact-card-input"
+                        value="{{ old('first_name', $profile['first_name'] ?? '') }}">
                 </div>
 
                 <div class="form-control-block">
                     <label>Last Name</label>
-                    <input type="text" class="exact-card-input" value="Myles Macrohon">
+                    <input type="text" name="last_name" class="exact-card-input"
+                        value="{{ old('last_name', $profile['last_name'] ?? '') }}">
                 </div>
 
                 <div class="form-control-block">
                     <label>Email Address</label>
-                    <input type="email" class="exact-card-input placeholder-mimic" placeholder="example@gmail.com"
-                        value="">
+                    <input type="email" name="email" class="exact-card-input placeholder-mimic"
+                        placeholder="example@gmail.com" value="{{ old('email', $profile['email'] ?? '') }}">
 
-                    <div class="warning-text-note">
-                        <span class="exclam-indicator">!</span>
-                        Enter your email to activate your account
-                    </div>
+                    @if (blank(old('email', $profile['email'] ?? '')))
+                        <div class="warning-text-note">
+                            <span class="exclam-indicator">!</span>
+                            Enter your email to activate your account
+                        </div>
+                    @endif
                 </div>
 
                 <div class="form-control-block">
                     <label>Degree</label>
-                    <input type="text" class="exact-card-input" value="BS in Information Technology">
+                    <input type="text" name="course" class="exact-card-input"
+                        value="{{ old('course', $profile['course'] ?? '') }}">
                 </div>
 
             </div>
