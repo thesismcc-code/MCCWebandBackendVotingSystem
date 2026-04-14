@@ -210,4 +210,12 @@ class RegisterUser
     {
         return $this->userRepository->getUniqueCourses();
     }
+
+    /**
+     * @return array{total: int, eligible: int, not_eligible: int}
+     */
+    public function getStudentEligibilityCounts(): array
+    {
+        return $this->userRepository->getStudentEligibilityCounts();
+    }
 }
