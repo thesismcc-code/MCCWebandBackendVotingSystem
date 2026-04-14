@@ -79,39 +79,128 @@
             border-bottom: none;
         }
     </style>
+
+    @php
+        $courseChoices = collect($data['courses'] ?? []);
+        if (old('course')) {
+            $courseChoices = $courseChoices->push(old('course'));
+        }
+        $courseChoices = $courseChoices->filter()->unique()->values()->all();
+
+        $fingerprintAlpineInit = [
+            'openEditModal' => (bool) session('show_edit_modal'),
+            'courseOptions' => $courseChoices,
+            'editForm' => [
+                'user_id' => old('user_id', ''),
+                'first_name' => old('first_name', ''),
+                'middle_name' => old('middle_name', ''),
+                'last_name' => old('last_name', ''),
+                'email' => old('email', ''),
+                'password' => '',
+                'student_id' => old('student_id', ''),
+                'course' => old('course', ''),
+                'year_level' => old('year_level', ''),
+            ],
+        ];
+    @endphp
+
+    {{-- Server state as JSON (Blade only here). Pure JS below avoids IDE "invalid JS" on {{ }} / @json in script bodies. --}}
+    <script id="fingerprint-alpine-init" type="application/json">
+        @json($fingerprintAlpineInit)
+    </script>
+    <script>
+        function fingerprintPageData() {
+            const el = document.getElementById('fingerprint-alpine-init');
+            const init = el ? JSON.parse(el.textContent) : {
+                openEditModal: false,
+                courseOptions: [],
+                editForm: {
+                    user_id: '',
+                    first_name: '',
+                    middle_name: '',
+                    last_name: '',
+                    email: '',
+                    password: '',
+                    student_id: '',
+                    course: '',
+                    year_level: '',
+                },
+            };
+
+            return {
+                openModal: false,
+                step: 1,
+                isScanning: false,
+
+                openEditModal: init.openEditModal,
+                showDeleteModal: false,
+                deleteUserId: '',
+                courseOptions: init.courseOptions,
+                editForm: { ...init.editForm },
+
+                notify: {
+                    show: false,
+                    type: 'success',
+                    title: '',
+                    message: '',
+                },
+
+                triggerNotification(type, title, message) {
+                    this.notify.type = type;
+                    this.notify.title = title;
+                    this.notify.message = message;
+                    this.notify.show = true;
+                    setTimeout(() => {
+                        this.notify.show = false;
+                    }, 4000);
+                },
+
+                openEdit(row) {
+                    const c = row.dataset.course || '';
+                    if (c && !this.courseOptions.includes(c)) {
+                        this.courseOptions = [...this.courseOptions, c];
+                    }
+                    this.editForm = {
+                        user_id: row.dataset.userId,
+                        first_name: row.dataset.firstName,
+                        middle_name: row.dataset.middleName || '',
+                        last_name: row.dataset.lastName,
+                        email: row.dataset.email,
+                        password: '',
+                        student_id: row.dataset.studentId,
+                        course: c,
+                        year_level: row.dataset.yearLevel || '',
+                    };
+                    this.openEditModal = true;
+                },
+
+                prepareDelete(userId) {
+                    this.deleteUserId = userId;
+                    this.showDeleteModal = true;
+                },
+
+                handleScan() {
+                    this.isScanning = true;
+                    setTimeout(() => {
+                        this.isScanning = false;
+                        this.openModal = false;
+                        const success = true;
+                        if (success) {
+                            this.triggerNotification('success', 'Success!', 'Fingerprint has been successfully registered.');
+                        } else {
+                            this.triggerNotification('error', 'Failed!', 'Unable to capture fingerprint. Please try again.');
+                        }
+                        setTimeout(() => {
+                            this.step = 1;
+                        }, 500);
+                    }, 2000);
+                },
+            };
+        }
+    </script>
 </head>
 
-<body x-data="{
-    openModal: false,
-    step: 1,
-    isScanning: false,
-
-    // Notification State
-    notify: { show: false, type: 'success', title: '', message: '' },
-
-    triggerNotification(type, title, message) {
-        this.notify.type = type;
-        this.notify.title = title;
-        this.notify.message = message;
-        this.notify.show = true;
-        setTimeout(() => { this.notify.show = false; }, 4000);
-    },
-
-    handleScan() {
-        this.isScanning = true;
-        setTimeout(() => {
-            this.isScanning = false;
-            this.openModal = false;
-            const success = true;
-            if (success) {
-                this.triggerNotification('success', 'Success!', 'Fingerprint has been successfully registered.');
-            } else {
-                this.triggerNotification('error', 'Failed!', 'Unable to capture fingerprint. Please try again.');
-            }
-            setTimeout(() => { this.step = 1; }, 500);
-        }, 2000);
-    }
-}"
+<body x-data="fingerprintPageData()"
     class="p-4 md:p-6 lg:p-8 min-h-screen flex flex-col antialiased text-white relative font-sans overflow-y-auto">
 
     <!-- CENTERED SUCCESS/ERROR MODAL (Untouched core mechanics styling exactly directly as was existing structure logically) -->
@@ -190,6 +279,69 @@
                     Enrollment</h1>
                 <p class="text-blue-200/90 text-[13px] tracking-wide mt-[-2px]">Register new students and capture
                     biometric data</p>
+            </div>
+        </div>
+    </div>
+
+    @if (session('success'))
+        <div class="w-full max-w-[1240px] mx-auto mb-4 px-1">
+            <div
+                class="rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm font-semibold text-green-800 shadow-sm">
+                {{ session('success') }}
+            </div>
+        </div>
+    @endif
+
+    @if ($errors->has('general'))
+        <div class="w-full max-w-[1240px] mx-auto mb-4 px-1">
+            <div class="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-800 shadow-sm">
+                {{ $errors->first('general') }}
+            </div>
+        </div>
+    @endif
+
+    <!-- DELETE CONFIRMATION -->
+    <div x-show="showDeleteModal" x-cloak class="fixed inset-0 z-[150] flex items-center justify-center p-4">
+        <div x-show="showDeleteModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0" x-transition:enter-end="opacity-100"
+            x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100"
+            x-transition:leave-end="opacity-0" class="absolute inset-0 bg-black/60 backdrop-blur-sm"></div>
+
+        <div x-show="showDeleteModal" x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="opacity-0 scale-90 translate-y-4"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-90 translate-y-4" @click.away="showDeleteModal = false"
+            class="bg-white rounded-2xl p-8 w-full max-w-[400px] shadow-2xl relative z-10 flex flex-col items-center text-center text-gray-800">
+
+            <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-5">
+                <svg class="w-8 h-8 text-[#c81e1e]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16">
+                    </path>
+                </svg>
+            </div>
+
+            <h3 class="text-2xl font-bold text-gray-900 mb-2">Are you sure?</h3>
+            <p class="text-sm text-gray-600 font-medium mb-8">This student account will be removed from the list.</p>
+
+            <div class="flex gap-4 w-full justify-center">
+                <button type="button" @click="showDeleteModal = false"
+                    class="bg-[#ce1b26] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-red-700 transition-colors">
+                    Cancel
+                </button>
+                <form action="{{ route('finger-print.student.delete') }}" method="POST">
+                    @csrf
+                    <input type="hidden" name="user_id" :value="deleteUserId">
+                    <input type="hidden" name="list_student_id" value="{{ $student_id }}">
+                    <input type="hidden" name="list_course" value="{{ $course }}">
+                    <input type="hidden" name="list_year_level" value="{{ $year_level }}">
+                    <button type="submit"
+                        class="bg-[#1ccb14] text-white text-sm font-bold py-2.5 px-8 rounded-lg shadow-md hover:bg-green-600 transition-colors">
+                        Delete
+                    </button>
+                </form>
             </div>
         </div>
     </div>
@@ -324,7 +476,7 @@
         <!-- COMPLETELY OVERHAULED & REWRITTEN TABLE DATA BOUNDARY CONTAINMENT STRUCTURE ALIGNED APPROPRIATELY CSS STANDARDS NATIVELY TAILWINDS STANDARD UI FORMS MATCHER -> DIRECT MATCH PIXEL STYLES PROVIDED SHOTS NATIVELY PROPER NO BLOCK WIDTH GLITCHY LAYOUT OVERRIDING ISSUES FOUND IN PAST DRAFT AT ALL NO BUGS NATIVE -> -> COMPLETELY REDESIGNED ACCURATELY ! -->
         <div class="bg-white rounded-[14px] shadow-xl w-full flex-1 overflow-x-auto z-10 p-[1px] text-gray-800">
             <table
-                class="w-full text-left bg-white overflow-hidden text-[#22273e] table-auto align-top min-w-[850px] w-full rounded-[14px] border-hidden">
+                class="w-full text-left bg-white overflow-hidden text-[#22273e] table-auto align-top min-w-[980px] w-full rounded-[14px] border-hidden">
                 <thead>
                     <tr
                         class="text-[13px] border-b-[2px] border-gray-100 bg-white h-[60px] text-gray-900 border-separate">
@@ -335,12 +487,21 @@
                         <th class="px-7 py-3 font-bold whitespace-nowrap">Created</th>
                         <th class="px-7 py-3 font-bold whitespace-nowrap pr-8 text-center max-w-[145px] w-[110px]">
                             Status</th>
+                        <th class="px-5 py-3 font-bold whitespace-nowrap text-center min-w-[140px]">Action</th>
                     </tr>
                 </thead>
                 <tbody class="text-[13.5px] font-[500] align-middle">
                     {{-- {{ dd($data) }} --}}
                     @forelse ($data['students'] as $student)
-                        <tr class="hover:bg-blue-50/50 transition-colors h-[76px] ease-in-out font-medium">
+                        <tr class="hover:bg-blue-50/50 transition-colors h-[76px] ease-in-out font-medium"
+                            data-user-id="{{ $student->getId() }}"
+                            data-first-name="{{ e($student->getFirstName()) }}"
+                            data-middle-name="{{ e($student->getMiddleName()) }}"
+                            data-last-name="{{ e($student->getLastName()) }}"
+                            data-email="{{ e($student->getEmail()) }}"
+                            data-student-id="{{ e($student->getStudentId() ?? '') }}"
+                            data-course="{{ e($student->getCourse() ?? '') }}"
+                            data-year-level="{{ e($student->getYearLevel() ?? '') }}">
                             <td class="px-7 text-gray-800 tracking-wide font-normal">
                                 {{ $student->getStudentId() ?? '—' }}
                             </td>
@@ -359,10 +520,33 @@
                             <td class="px-7 py-3 align-middle">
                                 <span class="badge-enrolled">Enrolled</span>
                             </td>
+                            <td class="px-4 py-3 align-middle whitespace-nowrap">
+                                <div class="flex items-center justify-center gap-3">
+                                    <button type="button"
+                                        @click="prepareDelete($el.closest('tr').dataset.userId)"
+                                        class="group flex h-8 w-8 items-center justify-center rounded-md border border-gray-100 bg-gray-100 transition-all hover:border-red-100 hover:bg-red-50"
+                                        aria-label="Delete student">
+                                        <svg class="h-[16px] w-[16px] text-[#ced0db] transition-colors group-hover:text-red-500"
+                                            fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                    </button>
+                                    <button type="button" @click="openEdit($el.closest('tr'))"
+                                        class="flex h-8 w-8 items-center justify-center rounded-md bg-[#1853fc] text-white shadow-[0_2px_8px_rgba(24,83,252,0.4)] transition-all hover:-translate-y-px hover:bg-[#123ebd]"
+                                        aria-label="Edit student">
+                                        <svg class="h-4 w-4" fill="none" stroke="currentColor" stroke-width="2.2"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round"
+                                                d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="6" class="px-7 py-10 text-center text-gray-400 font-medium">
+                            <td colspan="7" class="px-7 py-10 text-center text-gray-400 font-medium">
                                 No students found.
                             </td>
                         </tr>
@@ -630,6 +814,195 @@
                             </button>
                             <br class="m-[4] clear box">
                         </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- EDIT STUDENT MODAL -->
+    <div x-cloak x-show="openEditModal" class="relative z-[220]" aria-modal="true" role="dialog">
+        <div x-show="openEditModal" x-transition:enter="ease-out duration-300" x-transition:enter-start="opacity-0"
+            x-transition:enter-end="opacity-100" x-transition:leave="ease-in duration-200"
+            x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"
+            class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm"></div>
+
+        <div class="fixed inset-0 z-10 overflow-y-auto">
+            <div class="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+                <div x-show="openEditModal" x-transition:enter="ease-out duration-300"
+                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave="ease-in duration-200"
+                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                    @click.outside="openEditModal = false"
+                    class="relative transform rounded-[20px] bg-white text-left shadow-2xl transition-all sm:my-8 sm:w-full sm:max-w-[550px]">
+                    <div class="absolute right-4 top-4 z-10">
+                        <button type="button" @click="openEditModal = false"
+                            class="text-gray-400 hover:text-gray-500 focus:outline-none" aria-label="Close">
+                            <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="2"
+                                stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+
+                    <div class="px-8 py-8 text-gray-800">
+                        <h3 class="text-xl font-extrabold text-[#111624] mb-2">Edit student</h3>
+                        <p class="text-sm text-gray-500 mb-6">Update account details and save changes.</p>
+
+                        @if (session('show_edit_modal') && $errors->any())
+                            <div
+                                class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-left text-[13px] font-medium text-red-700">
+                                Please fix the errors below.
+                            </div>
+                        @endif
+
+                        @if ($errors->has('general'))
+                            <div
+                                class="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-left text-[13px] font-medium text-red-700">
+                                {{ $errors->first('general') }}
+                            </div>
+                        @endif
+
+                        <form class="space-y-5" method="POST" action="{{ route('finger-print.student.update') }}">
+                            @csrf
+                            <input type="hidden" name="user_id" :value="editForm.user_id">
+                            <input type="hidden" name="role" value="student">
+                            <input type="hidden" name="list_student_id" value="{{ $student_id }}">
+                            <input type="hidden" name="list_course" value="{{ $course }}">
+                            <input type="hidden" name="list_year_level" value="{{ $year_level }}">
+
+                            <div>
+                                <label
+                                    class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">Student
+                                    ID <span class="text-red-500">*</span></label>
+                                <input type="text" name="student_id" x-model="editForm.student_id" required
+                                    class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-sm text-[#0e1732] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-[#fcfdff]">
+                                @error('student_id')
+                                    <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-[14px]">
+                                <div>
+                                    <label
+                                        class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">First
+                                        Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="first_name" x-model="editForm.first_name" required
+                                        class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-sm text-[#0e1732] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-[#fcfdff]">
+                                    @error('first_name')
+                                        <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label
+                                        class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">Last
+                                        Name <span class="text-red-500">*</span></label>
+                                    <input type="text" name="last_name" x-model="editForm.last_name" required
+                                        class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-sm text-[#0e1732] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-[#fcfdff]">
+                                    @error('last_name')
+                                        <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">Middle
+                                    Name <span class="text-red-500">*</span></label>
+                                <input type="text" name="middle_name" x-model="editForm.middle_name" required
+                                    class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-sm text-[#0e1732] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-[#fcfdff]">
+                                @error('middle_name')
+                                    <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">Email
+                                    <span class="text-red-500">*</span></label>
+                                <input type="email" name="email" x-model="editForm.email" required
+                                    class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-sm text-[#0e1732] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-[#fcfdff]">
+                                @error('email')
+                                    <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">New
+                                    password</label>
+                                <input type="password" name="password" x-model="editForm.password" autocomplete="new-password"
+                                    placeholder="Leave blank to keep current"
+                                    class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-sm text-[#0e1732] focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-[#fcfdff]">
+                                @error('password')
+                                    <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">Course/Degree
+                                    <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <select name="course" x-model="editForm.course" required
+                                        class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-[14px] text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-white appearance-none cursor-pointer">
+                                        <template x-for="opt in courseOptions" :key="opt">
+                                            <option :value="opt" x-text="opt"></option>
+                                        </template>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-gray-400">
+                                        <svg class="h-[18px] w-[18px] stroke-[2.5]" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                @error('course')
+                                    <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div>
+                                <label
+                                    class="block text-[11.5px] uppercase tracking-wider font-extrabold text-gray-400 mb-[5px] pl-[5px]">Year
+                                    Level <span class="text-red-500">*</span></label>
+                                <div class="relative">
+                                    <select name="year_level" x-model="editForm.year_level" required
+                                        class="w-full rounded-[14px] border-gray-200 border-[1.5px] px-[18px] py-[13.5px] text-[14px] text-gray-600 focus:border-blue-500 focus:ring-1 focus:ring-blue-500 font-semibold outline-none transition bg-white appearance-none cursor-pointer">
+                                        <option value="1st Year">1st Year</option>
+                                        <option value="2nd Year">2nd Year</option>
+                                        <option value="3rd Year">3rd Year</option>
+                                        <option value="4th Year">4th Year</option>
+                                    </select>
+                                    <div
+                                        class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-5 text-gray-400">
+                                        <svg class="h-[18px] w-[18px] stroke-[2.5]" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7">
+                                            </path>
+                                        </svg>
+                                    </div>
+                                </div>
+                                @error('year_level')
+                                    <p class="mt-1 pl-1 text-[11px] font-medium text-red-600">{{ $message }}</p>
+                                @enderror
+                            </div>
+
+                            <div class="flex gap-[12px] pt-2">
+                                <button type="button" @click="openEditModal = false"
+                                    class="flex-1 rounded-[14px] border-[2px] border-[#e1e5ee] bg-gray-50/50 py-[14px] text-center text-[12px] font-[800] uppercase tracking-widest text-[#8692a8] transition hover:border-[#ccd2df] hover:bg-gray-100 hover:text-gray-600 focus:outline-none">
+                                    Cancel
+                                </button>
+                                <button type="submit"
+                                    class="flex-1 rounded-[14px] bg-[#1e52df] py-[14px] text-center text-[12px] font-[800] uppercase tracking-widest text-white shadow-[0_4px_10px_rgba(20,80,210,0.18)] transition hover:bg-blue-600 focus:outline-none">
+                                    Save changes
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             </div>

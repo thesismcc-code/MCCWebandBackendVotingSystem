@@ -8,22 +8,40 @@
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Alpine.js -->
-    <script defer src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js"></script>
     <!-- Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #102864; }
         .bg-main-panel { background-color: #0C3189; }
-        [x-cloak] { display: none !important; }
+        .report-progress-track { min-width: 0; }
+        .report-progress-fill {
+            height: 100%;
+            min-width: 0;
+            max-width: 100%;
+            border-radius: 9999px;
+            transition: width 0.7s ease;
+        }
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
     </style>
 </head>
 
-<body class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans">
+<body
+    class="p-4 md:p-6 min-h-screen text-white flex flex-col font-sans"
+    data-report-live-url="{{ route('reports.live-data') }}"
+    data-report-poll-ms="5000"
+>
+
+    @php
+        $stats = $data['stats_card_data'];
+        $rt = $data['realtime_turnout'];
+        $totalStudents = (int) ($rt['total_students'] ?? 0);
+        $turnoutPct = (float) ($rt['turnout_percent'] ?? 0);
+        $barWidth = $totalStudents > 0 ? min(100, max(0, $turnoutPct)) : 0;
+        $yearBarColors = ['#0b64f9', '#24b93b', '#f59e0b', '#ef4444'];
+    @endphp
 
     <!-- HEADER SECTION -->
     <div class="max-w-7xl mx-auto w-full mb-5 flex items-center justify-between px-2 mt-4 md:mt-2">
@@ -37,6 +55,13 @@
             <div>
                 <h1 class="text-2xl font-bold tracking-tight text-white leading-tight">Reports & Analytics</h1>
                 <p class="text-blue-200 text-[11px] font-medium mt-0.5">Real-time summary, statistics, and results</p>
+                <p id="report-election-line" class="text-blue-100/90 text-[11px] font-semibold mt-1 {{ empty($data['election']['name'] ?? null) ? 'hidden' : '' }}">
+                    Active election: <span id="report-election-name">{{ $data['election']['name'] ?? '' }}</span>
+                </p>
+                <p id="report-live-status" class="text-emerald-300/90 text-[10px] font-medium mt-1 flex items-center gap-1.5">
+                    <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" aria-hidden="true"></span>
+                    <span id="report-live-updated">Live — updating every few seconds</span>
+                </p>
             </div>
         </div>
 
@@ -53,7 +78,7 @@
         <!-- STATS CARDS ROW -->
         <div class="flex flex-wrap gap-4 mb-8 relative z-10">
 
-            <!-- Total Registered Voters -->
+            <!-- Eligible students (electorate) -->
             <div class="bg-white rounded-[20px] p-5 py-4 flex items-center gap-4 shadow-sm flex-1 min-w-[180px]">
                 <div class="bg-blue-600 w-[52px] h-[52px] rounded-[16px] flex items-center justify-center text-white shrink-0 shadow-md">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -62,8 +87,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[28px] font-bold text-gray-900 leading-tight">150</div>
-                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Registered Voters</div>
+                    <div id="report-stat-eligible" class="text-[28px] font-bold text-gray-900 leading-tight">{{ number_format($stats['eligible_students']) }}</div>
+                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Eligible students</div>
                 </div>
             </div>
 
@@ -76,8 +101,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[28px] font-bold text-gray-900 leading-tight">150</div>
-                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Votes Cast</div>
+                    <div id="report-stat-votes-cast" class="text-[28px] font-bold text-gray-900 leading-tight">{{ number_format($stats['live_vote_cast']) }}</div>
+                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Votes cast</div>
                 </div>
             </div>
 
@@ -90,8 +115,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[28px] font-bold text-gray-900 leading-tight">3</div>
-                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Total Positions</div>
+                    <div id="report-stat-positions" class="text-[28px] font-bold text-gray-900 leading-tight">{{ number_format($stats['total_positions']) }}</div>
+                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Total positions</div>
                 </div>
             </div>
 
@@ -104,8 +129,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[28px] font-bold text-gray-900 leading-tight">19</div>
-                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Total Candidates</div>
+                    <div id="report-stat-candidates" class="text-[28px] font-bold text-gray-900 leading-tight">{{ number_format($stats['running_candidates']) }}</div>
+                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Running candidates</div>
                 </div>
             </div>
 
@@ -118,8 +143,8 @@
                     </svg>
                 </div>
                 <div>
-                    <div class="text-[28px] font-bold text-gray-900 leading-tight">80%</div>
-                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Voter Turnout</div>
+                    <div id="report-stat-turnout" class="text-[28px] font-bold text-gray-900 leading-tight">{{ number_format($stats['turnout_percent'], 1) }}%</div>
+                    <div class="text-[11px] text-gray-500 font-semibold tracking-wide">Voter turnout</div>
                 </div>
             </div>
 
@@ -135,34 +160,34 @@
                 <div class="grid grid-cols-2 gap-x-6 gap-y-6">
                     <!-- Total Voters -->
                     <div>
-                        <p class="text-[12px] text-gray-400 font-semibold mb-1">Total Voters</p>
-                        <p class="text-[30px] font-bold text-gray-900 leading-none">100</p>
+                        <p class="text-[12px] text-gray-400 font-semibold mb-1">Total students</p>
+                        <p id="report-rt-total-students" class="text-[30px] font-bold text-gray-900 leading-none">{{ number_format($totalStudents) }}</p>
                     </div>
                     <!-- Turnout -->
                     <div>
                         <p class="text-[12px] text-gray-400 font-semibold mb-1">Turnout</p>
-                        <p class="text-[30px] font-bold text-[#0b64f9] leading-none">10%</p>
+                        <p id="report-rt-turnout-pct" class="text-[30px] font-bold text-[#0b64f9] leading-none">{{ number_format($turnoutPct, 1) }}%</p>
                     </div>
                     <!-- Voted -->
                     <div>
                         <p class="text-[12px] text-gray-400 font-semibold mb-1">Voted</p>
-                        <p class="text-[30px] font-bold text-[#24b93b] leading-none">53</p>
+                        <p id="report-rt-voted" class="text-[30px] font-bold text-[#24b93b] leading-none">{{ number_format((int) ($rt['voted_count'] ?? 0)) }}</p>
                     </div>
                     <!-- Not Yet -->
                     <div>
-                        <p class="text-[12px] text-gray-400 font-semibold mb-1">Not Yet Voted</p>
-                        <p class="text-[30px] font-bold text-gray-400 leading-none">47</p>
+                        <p class="text-[12px] text-gray-400 font-semibold mb-1">Not yet voted</p>
+                        <p id="report-rt-not-yet" class="text-[30px] font-bold text-gray-400 leading-none">{{ number_format((int) ($rt['not_yet_voted'] ?? 0)) }}</p>
                     </div>
                 </div>
 
                 <!-- Visual donut-style indicator -->
                 <div class="mt-6 pt-5 border-t border-gray-100">
                     <div class="flex items-center justify-between mb-2">
-                        <span class="text-[12px] text-gray-400 font-semibold">Overall Progress</span>
-                        <span class="text-[12px] font-bold text-gray-700">53 / 100</span>
+                        <span class="text-[12px] text-gray-400 font-semibold">Overall progress</span>
+                        <span id="report-rt-progress-ratio" class="text-[12px] font-bold text-gray-700">{{ number_format((int) ($rt['voted_count'] ?? 0)) }} / {{ number_format($totalStudents) }}</span>
                     </div>
-                    <div class="w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">
-                        <div class="bg-[#0b64f9] h-full rounded-full transition-all duration-700" style="width: 53%"></div>
+                    <div class="report-progress-track w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">
+                        <div id="report-overall-fill" class="report-progress-fill bg-[#0b64f9] max-w-full w-[{{ number_format($barWidth, 4, '.', '') }}%]"></div>
                     </div>
                 </div>
             </div>
@@ -171,58 +196,162 @@
             <div class="md:col-span-3 bg-white rounded-2xl p-6 shadow-sm">
                 <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-5">Per Year Level Turnout</p>
 
-                <div class="flex flex-col gap-5">
-
-                    <!-- 1st Year -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[13.5px] font-semibold text-gray-700">1st Year</span>
-                            <span class="text-[13px] font-bold text-gray-900">80%</span>
+                <div id="report-year-level-rows" class="flex flex-col gap-5">
+                    @forelse($data['per_year_level_turnout'] as $index => $row)
+                        @php
+                            $yp = (float) ($row['turnout_percent'] ?? 0);
+                            $yw = min(100, max(0, $yp));
+                            $color = $yearBarColors[$index % count($yearBarColors)];
+                        @endphp
+                        <div>
+                            <div class="flex items-center justify-between mb-2">
+                                <span class="text-[13.5px] font-semibold text-gray-700">{{ $row['year_level'] }}</span>
+                                <span class="text-[13px] font-bold text-gray-900">{{ number_format($yp, 1) }}%</span>
+                            </div>
+                            <div class="report-progress-track w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">
+                                <div class="report-year-fill report-progress-fill max-w-full bg-[{{ $color }}] w-[{{ number_format($yw, 4, '.', '') }}%]"></div>
+                            </div>
                         </div>
-                        <div class="w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">
-                            <div class="bg-[#0b64f9] h-full rounded-full" style="width: 80%"></div>
-                        </div>
-                    </div>
-
-                    <!-- 2nd Year -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[13.5px] font-semibold text-gray-700">2nd Year</span>
-                            <span class="text-[13px] font-bold text-gray-900">67%</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">
-                            <div class="bg-[#24b93b] h-full rounded-full" style="width: 67%"></div>
-                        </div>
-                    </div>
-
-                    <!-- 3rd Year -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[13.5px] font-semibold text-gray-700">3rd Year</span>
-                            <span class="text-[13px] font-bold text-gray-900">43%</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">
-                            <div class="bg-[#f59e0b] h-full rounded-full" style="width: 43%"></div>
-                        </div>
-                    </div>
-
-                    <!-- 4th Year -->
-                    <div>
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-[13.5px] font-semibold text-gray-700">4th Year</span>
-                            <span class="text-[13px] font-bold text-gray-900">31%</span>
-                        </div>
-                        <div class="w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">
-                            <div class="bg-[#ef4444] h-full rounded-full" style="width: 31%"></div>
-                        </div>
-                    </div>
-
+                    @empty
+                        <p class="text-sm text-gray-500 italic">No year-level data yet.</p>
+                    @endforelse
                 </div>
             </div>
 
         </div>
 
     </div>
+
+    <script>
+        (function () {
+            const url = document.body.dataset.reportLiveUrl;
+            const pollMs = parseInt(document.body.dataset.reportPollMs || '5000', 10) || 5000;
+            if (!url) {
+                return;
+            }
+
+            const YEAR_COLORS = ['#0b64f9', '#24b93b', '#f59e0b', '#ef4444'];
+
+            function fmtInt(n) {
+                return new Intl.NumberFormat().format(Number(n) || 0);
+            }
+
+            function el(id) {
+                return document.getElementById(id);
+            }
+
+            function applyReportData(data) {
+                const s = data.stats_card_data || {};
+                const rt = data.realtime_turnout || {};
+                const election = data.election;
+
+                const setText = (id, text) => {
+                    const node = el(id);
+                    if (node) {
+                        node.textContent = text;
+                    }
+                };
+
+                setText('report-stat-eligible', fmtInt(s.eligible_students ?? 0));
+                setText('report-stat-votes-cast', fmtInt(s.live_vote_cast ?? 0));
+                setText('report-stat-positions', fmtInt(s.total_positions ?? 0));
+                setText('report-stat-candidates', fmtInt(s.running_candidates ?? 0));
+                setText('report-stat-turnout', Number(s.turnout_percent ?? 0).toFixed(1) + '%');
+
+                const totalStudents = Number(rt.total_students ?? 0);
+                const turnoutPct = Number(rt.turnout_percent ?? 0);
+                const votedCount = Number(rt.voted_count ?? 0);
+                const notYet = Number(rt.not_yet_voted ?? 0);
+                const barWidth = totalStudents > 0 ? Math.min(100, Math.max(0, turnoutPct)) : 0;
+
+                setText('report-rt-total-students', fmtInt(totalStudents));
+                setText('report-rt-turnout-pct', turnoutPct.toFixed(1) + '%');
+                setText('report-rt-voted', fmtInt(votedCount));
+                setText('report-rt-not-yet', fmtInt(notYet));
+                setText('report-rt-progress-ratio', fmtInt(votedCount) + ' / ' + fmtInt(totalStudents));
+
+                const overallFill = el('report-overall-fill');
+                if (overallFill) {
+                    overallFill.style.width = barWidth.toFixed(4) + '%';
+                }
+
+                const electionLine = el('report-election-line');
+                const electionName = el('report-election-name');
+                if (election && election.name) {
+                    if (electionLine) {
+                        electionLine.classList.remove('hidden');
+                    }
+                    if (electionName) {
+                        electionName.textContent = election.name;
+                    }
+                } else {
+                    if (electionLine) {
+                        electionLine.classList.add('hidden');
+                    }
+                }
+
+                const yearRows = data.per_year_level_turnout || [];
+                const container = el('report-year-level-rows');
+                if (container) {
+                    if (yearRows.length === 0) {
+                        container.innerHTML = '<p class="text-sm text-gray-500 italic">No year-level data yet.</p>';
+                    } else {
+                        container.innerHTML = yearRows.map(function (row, i) {
+                            const yp = Number(row.turnout_percent ?? 0);
+                            const yw = Math.min(100, Math.max(0, yp));
+                            const color = YEAR_COLORS[i % YEAR_COLORS.length];
+                            const label = String(row.year_level ?? '');
+                            const div = document.createElement('div');
+                            div.textContent = label;
+                            const safeLabel = div.innerHTML;
+                            return (
+                                '<div>' +
+                                '<div class="flex items-center justify-between mb-2">' +
+                                '<span class="text-[13.5px] font-semibold text-gray-700">' + safeLabel + '</span>' +
+                                '<span class="text-[13px] font-bold text-gray-900">' + yp.toFixed(1) + '%</span>' +
+                                '</div>' +
+                                '<div class="report-progress-track w-full bg-gray-100 rounded-full h-[10px] overflow-hidden">' +
+                                '<div class="report-progress-fill max-w-full" style="width:' + yw.toFixed(4) + '%;background-color:' + color + '"></div>' +
+                                '</div>' +
+                                '</div>'
+                            );
+                        }).join('');
+                    }
+                }
+
+                const liveUpdated = el('report-live-updated');
+                if (liveUpdated) {
+                    liveUpdated.textContent = 'Last updated ' + new Date().toLocaleTimeString();
+                }
+            }
+
+            async function refresh() {
+                try {
+                    const res = await fetch(url, {
+                        credentials: 'same-origin',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-Requested-With': 'XMLHttpRequest',
+                        },
+                    });
+                    if (!res.ok) {
+                        return;
+                    }
+                    applyReportData(await res.json());
+                } catch (e) {
+                    /* keep last good snapshot */
+                }
+            }
+
+            setInterval(refresh, pollMs);
+            document.addEventListener('visibilitychange', function () {
+                if (document.visibilityState === 'visible') {
+                    refresh();
+                }
+            });
+            refresh();
+        })();
+    </script>
 
 </body>
 </html>

@@ -42,6 +42,8 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/delete-user', [ManageAccountController::class, 'deleteUser'])->name('delete-user');
     Route::post('/update-user', [ManageAccountController::class, 'updateUser'])->name('update-user');
     Route::get('/finger-print', [FingerPrintController::class, 'index'])->name('view.finger-print');
+    Route::post('/finger-print/student/update', [FingerPrintController::class, 'updateStudent'])->name('finger-print.student.update');
+    Route::post('/finger-print/student/delete', [FingerPrintController::class, 'deleteStudent'])->name('finger-print.student.delete');
     Route::get('/voting-logs', [VotingLogsController::class, 'index'])->name('view.voting-logs');
     Route::get('/voting-logs/export-pdf', [VotingLogsController::class, 'exportPdf'])->name('voting-logs.export-pdf');
     Route::get('/security-logs', [SecurityLogsController::class, 'index'])->name('view.security-logs');
@@ -57,9 +59,10 @@ Route::middleware('auth.session')->group(function () {
     Route::post('/election-control/candidate/update', [ElectionController::class, 'updateCandidate'])->name('election.candidate.update');
     Route::post('/election-control/candidate/delete', [ElectionController::class, 'deleteCandidate'])->name('election.candidate.delete');
     Route::get('/system-activity', [SystemActivityController::class, 'index'])->name('view.system-activity');
-    Route::get('/system-activity/recent-errors', [SystemActivityController::class, 'recentErrorsJson'])->name('view.system-activity.recent-errors');
     Route::get('/reports-and-analytics', [ReportAndAnalyticsController::class, 'index'])->name('view.reports-and-analytics');
+    Route::get('/reports-and-analytics/live-data', [ReportAndAnalyticsController::class, 'liveData'])->name('reports.live-data');
     Route::get('/reports-and-analytics-end-of-election', [ReportAndAnalyticsController::class, 'indexEndOfElection'])->name('view.reports-and-analytics-end-of-election');
+    Route::get('/reports-and-analytics/end-of-election/pdf', [ReportAndAnalyticsController::class, 'exportEndOfElectionPdf'])->name('reports.end-of-election-pdf');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
