@@ -86,6 +86,33 @@ it('renders empty year-level message when no breakdown data', function (): void 
     $response->assertSee('No year level turnout data available.');
 });
 
+it('recomputes turnout metrics when realtime voted_count falls back', function (): void {
+    mock(RegisterUser::class, function ($mock): void {
+        $mock->shouldReceive('realtimeVoterTurnout')
+            ->once()
+            ->andReturn([
+                'total_students' => 100,
+            ]);
+
+        $mock->shouldReceive('voterTurnoutByYearLevel')
+            ->once()
+            ->andReturn([]);
+    });
+
+    mock(RegisterVotes::class, function ($mock): void {
+        $mock->shouldReceive('liveVoteCast')
+            ->once()
+            ->andReturn(45);
+    });
+
+    $response = get(route('view.comelec-dashboard'));
+
+    $response->assertSuccessful();
+    $response->assertSee('45');
+    $response->assertSee('55');
+    $response->assertSee('45.00%');
+});
+
 it('redirects guests from comelec dashboard', function (): void {
     Session::flush();
 

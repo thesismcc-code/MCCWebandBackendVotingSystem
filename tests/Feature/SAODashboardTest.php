@@ -115,6 +115,39 @@ it('renders fallback values when there is no active election', function (): void
     $response->assertSee('No year level turnout data available.');
 });
 
+it('recomputes turnout metrics when realtime voted_count falls back', function (): void {
+    mock(RegisterUser::class, function ($mock): void {
+        $mock->shouldReceive('realtimeVoterTurnout')
+            ->once()
+            ->andReturn([
+                'total_students' => 100,
+            ]);
+
+        $mock->shouldReceive('voterTurnoutByYearLevel')
+            ->once()
+            ->andReturn([]);
+    });
+
+    mock(RegisterVotes::class, function ($mock): void {
+        $mock->shouldReceive('liveVoteCast')
+            ->once()
+            ->andReturn(35);
+    });
+
+    mock(ElectionRepository::class, function ($mock): void {
+        $mock->shouldReceive('getActiveElection')
+            ->once()
+            ->andReturnNull();
+    });
+
+    $response = get(route('view.sao-dashboard'));
+
+    $response->assertSuccessful();
+    $response->assertSee('35');
+    $response->assertSee('65');
+    $response->assertSee('35.00%');
+});
+
 it('redirects guests from sao dashboard', function (): void {
     Session::flush();
 
