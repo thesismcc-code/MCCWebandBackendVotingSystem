@@ -110,12 +110,23 @@
             background-color: #DDE0E5;
         }
 
-        .header-avatar {
-            height: 44px;
-            width: 44px;
+        .avatar-placeholder {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             border-radius: 50%;
-            object-fit: cover;
+            background: linear-gradient(135deg, #E6EBF5, #DDE4F0);
+            color: #5A6785;
             border: 3px solid var(--mcc-blue);
+            font-weight: 700;
+            line-height: 1;
+            user-select: none;
+        }
+
+        .avatar-placeholder--header {
+            width: 44px;
+            height: 44px;
+            font-size: 1rem;
         }
 
         main {
@@ -173,11 +184,10 @@
             gap: 1.5rem;
         }
 
-        .main-avatar {
+        .avatar-placeholder--main {
             width: 130px;
             height: 130px;
-            border-radius: 50%;
-            object-fit: cover;
+            font-size: 2rem;
         }
 
         .controls-flex {
@@ -322,7 +332,7 @@
                         d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.63-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.64 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2zm-2 1H8v-6c0-2.48 1.51-4.5 4-4.5s4 2.02 4 4.5v6z" />
                 </svg>
             </button>
-            <img class="header-avatar" src="{{ asset('images/person_image.png') }}" alt="profile-picture">
+            <div class="avatar-placeholder avatar-placeholder--header" aria-label="profile-placeholder">U</div>
         </div>
     </header>
 
@@ -337,7 +347,7 @@
         <section class="profile-row-editor">
 
             <div class="profile-avatar-block">
-                <img class="main-avatar" src="{{ asset('images/person_image.png') }}" alt="Main Profile Photo">
+                <div class="avatar-placeholder avatar-placeholder--main" aria-label="main-profile-placeholder">U</div>
                 <div class="controls-flex">
                     <button type="button" class="btn-outline-normal">Upload new picture</button>
                     <button type="button" class="btn-outline-danger">Delete</button>
