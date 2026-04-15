@@ -336,9 +336,7 @@ class EloquentUserRepository implements UserRepository
         return [
             'voters' => $voters,
             'total_students' => $totalStudents,
-            'turnout_percent' => $totalStudents > 0
-                ? round(($voters / $totalStudents) * 100, 2)
-                : 0.0,
+            'turnout_percent' => $this->calculateTurnoutPercent($voters, $totalStudents),
         ];
     }
 
@@ -361,15 +359,14 @@ class EloquentUserRepository implements UserRepository
         return [
             'total_students' => $totalStudents,
             'voted_count' => $votedCount,
-            'not_yet_voted' => $totalStudents - $votedCount,
-            'turnout_percent' => round(($votedCount / $totalStudents) * 100, 2),
+            'not_yet_voted' => max($totalStudents - $votedCount, 0),
+            'turnout_percent' => $this->calculateTurnoutPercent($votedCount, $totalStudents),
         ];
     }
 
     public function voterTurnoutByYearLevel(): array
     {
         $activeElectionIds = $this->getActiveElectionIds();
-        $currentYear = (int) date('Y');
 
         $votedByStudent = [];
 
@@ -397,58 +394,107 @@ class EloquentUserRepository implements UserRepository
         $yearGroups = [];
 
         foreach ($allUsers as $userId => $user) {
-            if (! isset($user['role'], $user['student_id']) || $user['role'] !== 'student') {
+            if (! isset($user['role']) || $user['role'] !== 'student') {
                 continue;
             }
 
-            $parts = explode('-', $user['student_id']);
-            $enrollYear = isset($parts[1]) && is_numeric($parts[1]) ? (int) $parts[1] : null;
+            $yearLevelLabel = $this->normalizeYearLevelLabel($user['year_level'] ?? null);
 
-            if ($enrollYear === null) {
+            if ($yearLevelLabel === null) {
                 continue;
             }
 
-            if (! isset($yearGroups[$enrollYear])) {
-                $yearGroups[$enrollYear] = ['total' => 0, 'voted' => 0];
+            if (! isset($yearGroups[$yearLevelLabel])) {
+                $yearGroups[$yearLevelLabel] = ['total' => 0, 'voted' => 0];
             }
 
-            $yearGroups[$enrollYear]['total']++;
+            $yearGroups[$yearLevelLabel]['total']++;
 
             if (isset($votedByStudent[$userId])) {
-                $yearGroups[$enrollYear]['voted']++;
+                $yearGroups[$yearLevelLabel]['voted']++;
             }
         }
 
-        // Sort ascending by enrollment year so 1st Year appears first
-        ksort($yearGroups);
+        uksort($yearGroups, fn (string $left, string $right) => $this->yearLevelSortWeight($left) <=> $this->yearLevelSortWeight($right));
 
         $result = [];
 
-        foreach ($yearGroups as $enrollYear => $counts) {
+        foreach ($yearGroups as $yearLevelLabel => $counts) {
             $total = $counts['total'];
             $voted = $counts['voted'];
-            $yearLevel = $currentYear - $enrollYear + 1;
-
-            $label = match (true) {
-                $yearLevel === 1 => '1st Year',
-                $yearLevel === 2 => '2nd Year',
-                $yearLevel === 3 => '3rd Year',
-                $yearLevel === 4 => '4th Year',
-                $yearLevel > 4 => "{$yearLevel}th Year",
-                default => "Year {$yearLevel}",
-            };
 
             $result[] = [
-                'year_level' => $label,
-                'enroll_year' => $enrollYear,
+                'year_level' => $yearLevelLabel,
                 'total_students' => $total,
                 'voted' => $voted,
                 'not_yet_voted' => $total - $voted,
-                'turnout_percent' => $total > 0 ? round(($voted / $total) * 100, 2) : 0.0,
+                'turnout_percent' => $this->calculateTurnoutPercent($voted, $total),
             ];
         }
 
         return $result;
+    }
+
+    private function normalizeYearLevelLabel(mixed $value): ?string
+    {
+        if (! is_string($value)) {
+            return null;
+        }
+
+        $normalized = strtolower(trim($value));
+
+        if ($normalized === '') {
+            return null;
+        }
+
+        if (preg_match('/^([1-4])(?:st|nd|rd|th)?\s*year$/', $normalized, $matches) === 1) {
+            return match ((int) $matches[1]) {
+                1 => '1st Year',
+                2 => '2nd Year',
+                3 => '3rd Year',
+                4 => '4th Year',
+            };
+        }
+
+        if (preg_match('/^([1-4])$/', $normalized, $matches) === 1) {
+            return match ((int) $matches[1]) {
+                1 => '1st Year',
+                2 => '2nd Year',
+                3 => '3rd Year',
+                4 => '4th Year',
+            };
+        }
+
+        if (preg_match('/^year\s*([1-4])$/', $normalized, $matches) === 1) {
+            return match ((int) $matches[1]) {
+                1 => '1st Year',
+                2 => '2nd Year',
+                3 => '3rd Year',
+                4 => '4th Year',
+            };
+        }
+
+        return null;
+    }
+
+    private function yearLevelSortWeight(string $label): int
+    {
+        return match ($label) {
+            '1st Year' => 1,
+            '2nd Year' => 2,
+            '3rd Year' => 3,
+            '4th Year' => 4,
+            default => 99,
+        };
+    }
+
+    private function calculateTurnoutPercent(int $votedCount, int $totalStudents): float
+    {
+        if ($totalStudents <= 0) {
+            return 0.0;
+        }
+
+        return round(($votedCount / $totalStudents) * 100, 2);
     }
 
     private function toUser(mixed $id, array $data): User
