@@ -83,6 +83,9 @@ Route::middleware('auth.session')->group(function () {
 Route::middleware('auth.session')->group(function () {
     Route::get('/comelec-dashboard', [ComelecDashboarController::class, 'index'])->name('view.comelec-dashboard');
     Route::get('/comelec-manage-candidates', [ComelectManageCandidate::class, 'index'])->name('view.comelec-manage-candidates');
+    Route::post('/comelec-manage-candidates/candidate/save', [ComelectManageCandidate::class, 'store'])->name('comelec.candidate.save');
+    Route::post('/comelec-manage-candidates/candidate/update', [ComelectManageCandidate::class, 'update'])->name('comelec.candidate.update');
+    Route::post('/comelec-manage-candidates/candidate/delete', [ComelectManageCandidate::class, 'destroy'])->name('comelec.candidate.delete');
 });
 
 // ── Student routes ────────────────────────────────────────────
