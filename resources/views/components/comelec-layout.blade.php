@@ -40,6 +40,10 @@
             background: #cbd5e1;
             border-radius: 10px;
         }
+
+        [x-cloak] {
+            display: none !important;
+        }
     </style>
 </head>
 
@@ -107,6 +111,7 @@
         setInterval(updateTime, 1000);
         updateTime();
     </script>
+    @stack('scripts')
 </body>
 
 </html>
